@@ -1,0 +1,8 @@
+test/
+node_modules/
+files/
+dist/
+.git/
+screenshots/
+cli/
+favicon.png

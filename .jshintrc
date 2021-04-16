@@ -1,0 +1,8 @@
+{
+	"node": true,
+	"browser": true,
+	"unused": true,
+	"esversion": 6,
+	"globalstrict": false,
+	"predef": [ "angular", "$", "describe", "it", "before", "after" ]
+}

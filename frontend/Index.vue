@@ -1,0 +1,172 @@
+<template>
+  <input type="file" ref="upload" style="display: none" multiple/>
+  <input type="file" ref="uploadFolder" style="display: none" multiple webkitdirectory directory/>
+  <input type="file" ref="uploadFavicon" style="display: none"/>
+
+  <!-- This is re-used and thus global -->
+  <ConfirmDialog></ConfirmDialog>
+  <Toast position="top-center" />
+
+  <Login v-show="ready && !profile.username" @success="onLoggedIn"/>
+
+  <div class="container" v-show="ready && profile.username">
+    <div class="sidebar">
+      <h1 style="margin-bottom: 50px;">Cubby</h1>
+      <Button icon="pi pi-folder-open" class="" label="All Files"/>
+      <Button icon="pi pi-clock" class="" label="Recent"/>
+      <Button icon="pi pi-share-alt" class="" label="Shared"/>
+    </div>
+    <div class="content">
+      <MainToolbar @logout="onLogout"/>
+      <div class="container">
+        <div class="main-container-content">
+          <EntryList :entries="entries" sort-folders-first="true" @selection-changed="onSelectionChanged" editable/>
+        </div>
+        <Preview :entry="activeEntry" @close="onPreviewClose"/>
+      </div>
+      <div class="upload">
+        <ProgressBar :value="uploadPercent">
+          Uploading: {{uploadPercent}}%
+        </ProgressBar>
+      </div>
+    </div>
+  </div>
+
+</template>
+
+<script>
+
+import { encode, getPreviewUrl, getExtension } from './utils.js';
+
+export default {
+    name: 'Index',
+    data() {
+        return {
+            ready: false,
+            token: '',
+            profile: {
+                username: '',
+                displayName: ''
+            },
+            uploadPercent: 23,
+            entries: [],
+            activeEntry: {}
+        };
+    },
+    methods: {
+        onLogout: function () {
+            this.token = '';
+            this.profile.username = '';
+            this.profile.displayName = '';
+        },
+        onLoggedIn: function (token, profile) {
+            this.token = token;
+            this.profile.username = profile.username;
+            this.profile.displayName = profile.displayName;
+        },
+        onSelectionChanged: function (selectedEntries) {
+            this.activeEntry = selectedEntries[0];
+        },
+        onPreviewClose: function () {
+            this.activeEntry = {};
+        }
+    },
+    mounted() {
+        this.ready = true;
+
+        var dummy = [
+          {
+            "isDirectory": true,
+            "isFile": false,
+            "atime": "2021-04-15T23:31:42.516Z",
+            "mtime": "2020-11-18T19:49:55.439Z",
+            "ctime": "2021-04-13T14:21:09.436Z",
+            "birthtime": "2020-11-18T19:49:48.347Z",
+            "size": 4096,
+            "fileName": "fotos",
+            "filePath": "/fotos"
+          },
+          {
+            "isDirectory": false,
+            "isFile": true,
+            "atime": "2021-04-16T07:01:09.553Z",
+            "mtime": "2021-03-15T12:43:50.230Z",
+            "ctime": "2021-04-13T14:21:09.436Z",
+            "birthtime": "2021-03-15T12:43:50.230Z",
+            "size": 9,
+            "fileName": "index.html",
+            "filePath": "/index.html"
+          },
+          {
+            "isDirectory": false,
+            "isFile": true,
+            "atime": "2021-04-16T17:26:19.780Z",
+            "mtime": "2020-05-26T20:22:59.086Z",
+            "ctime": "2021-04-13T14:21:09.436Z",
+            "birthtime": "2020-05-26T20:22:59.078Z",
+            "size": 220600,
+            "fileName": "orange.jpg",
+            "filePath": "/orange.jpg"
+          },
+        ];
+
+        this.entries = dummy.map(function (entry) {
+            entry.previewUrl = getPreviewUrl(entry, '/');
+            entry.extension = getExtension(entry);
+            entry.rename = false;
+            entry.filePathNew = entry.fileName;
+            entry.filePath = encode(entry.filePath);
+            return entry;
+        });
+    }
+};
+
+</script>
+
+<style>
+
+hr {
+    border: none;
+    border-top: 1px solid #d0d0d0;
+}
+
+label {
+    font-weight: bold;
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.sidebar {
+    display: flex;
+    height: 100%;
+    width: 200px;
+    background-color: #2196f3;
+    color: white;
+    padding: 10px;
+    flex-direction: column;
+}
+
+.content {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    flex-direction: column;
+}
+
+.upload {
+    display: flex;
+    height: 50px;
+    width: 100%;
+    padding: 10px;
+    flex-direction: column;
+}
+
+.p-toast {
+    z-index: 2000 !important;
+}
+
+</style>

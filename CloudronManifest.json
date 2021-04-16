@@ -1,0 +1,13 @@
+{
+  "id": "io.cloudron.cubby",
+  "title": "Cubby",
+  "author": "Cloudron Team",
+  "tagline": "Collaborative filemanager",
+  "version": "0.1.0",
+  "healthCheckPath": "/",
+  "httpPort": 3000,
+  "addons": {
+    "localstorage": {}
+  },
+  "manifestVersion": 2
+}
