@@ -9,10 +9,16 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "async": "^3.2.0",
     "body-parser": "^1.19.0",
     "connect-lastmile": "^2.0.0",
-    "core-js": "^3.6.5",
+    "core-js": "^3.10.1",
+    "db-migrate": "^0.11.12",
+    "db-migrate-mysql": "^2.1.2",
+    "debug": "^4.3.1",
     "express": "^4.17.1",
+    "mysql": "^2.18.1",
+    "once": "^1.4.0",
     "primeflex": "^2.0.0",
     "primeicons": "^4.1.0",
     "primevue": "^3.4.0",
@@ -20,13 +26,13 @@
     "vue": "^3.0.0"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "~4.5.0",
-    "@vue/cli-plugin-eslint": "~4.5.0",
+    "@vue/cli-plugin-babel": "~4.5.12",
+    "@vue/cli-plugin-eslint": "~4.5.12",
     "@vue/cli-service": "^4.5.12",
-    "@vue/compiler-sfc": "^3.0.0",
+    "@vue/compiler-sfc": "^3.0.11",
     "babel-eslint": "^10.1.0",
-    "eslint": "^6.7.2",
-    "eslint-plugin-vue": "^7.0.0"
+    "eslint": "^7.24.0",
+    "eslint-plugin-vue": "^7.9.0"
   },
   "eslintConfig": {
     "root": true,

@@ -2,13 +2,20 @@
 
 'use strict';
 
-var server = require('./backend/server.js');
+var database = require('./backend/database.js'),
+    server = require('./backend/server.js');
 
-server.init(function (error) {
-    if (error) {
-        console.error(error);
-        process.exit(1);
-    }
+function exit(error) {
+    if (error) console.error(error);
+    process.exit(error ? 1 : 0);
+}
 
-    console.log('Cubby server running.');
+database.init(function (error) {
+    if (error) exit(error);
+
+    server.init(function (error) {
+        if (error) exit(error);
+
+        console.log('Cubby running.');
+    });
 });

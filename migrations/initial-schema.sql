@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS users(
+    id VARCHAR(128) NOT NULL UNIQUE,
+    username VARCHAR(512) NOT NULL,
+    email VARCHAR(512) NOT NULL,
+    password VARCHAR(1024) NOT NULL,
+    salt VARCHAR(512) NOT NULL,
+    createdAt VARCHAR(512) NOT NULL,
+    modifiedAt VARCHAR(512) NOT NULL,
+    admin INTEGER NOT NULL,
+    PRIMARY KEY(id));
