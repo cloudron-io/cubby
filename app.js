@@ -2,7 +2,8 @@
 
 'use strict';
 
-var database = require('./backend/database.js'),
+var constants = require('./backend/constants.js'),
+    database = require('./backend/database.js'),
     server = require('./backend/server.js');
 
 function exit(error) {
@@ -16,6 +17,7 @@ database.init(function (error) {
     server.init(function (error) {
         if (error) exit(error);
 
+        console.log(`Using data folder at: ${constants.DATA_ROOT}`);
         console.log('Cubby running.');
     });
 });

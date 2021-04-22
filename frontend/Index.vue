@@ -20,7 +20,7 @@
       <MainToolbar @logout="onLogout"/>
       <div class="container">
         <div class="main-container-content">
-          <EntryList :entries="entries" sort-folders-first="true" @selection-changed="onSelectionChanged" editable/>
+          <EntryList :entries="entry.files" sort-folders-first="true" @selection-changed="onSelectionChanged" editable/>
         </div>
         <Preview :entry="activeEntry" @close="onPreviewClose"/>
       </div>
@@ -51,7 +51,11 @@ export default {
                 email: ''
             },
             uploadPercent: 23,
-            entries: [],
+            error: '',
+            entry: {
+                files: []
+            },
+            entryPath: '/',
             activeEntry: {}
         };
     },
@@ -79,55 +83,86 @@ export default {
         },
         onPreviewClose: function () {
             this.activeEntry = {};
+        },
+        openEntry: function (filePath) {
+            var that = this;
+
+            superagent.get('/api/v1/files').query({ path: filePath, access_token: that.accessToken }).end(function (error, result) {
+                if (error) {
+                    that.entries = [];
+
+                    if (error.status === 401) that.onLogout();
+                    else if (error.status === 404) that.error = 'Does not exist';
+                    else console.error(error);
+
+                    return;
+                }
+
+                that.entryPath = filePath;
+
+                if (result.body.isDirectory) {
+                    result.body.files.forEach(function (entry) {
+                        entry.previewUrl = getPreviewUrl(entry, '/');
+                        entry.extension = getExtension(entry);
+                        entry.rename = false;
+                        entry.filePathNew = entry.fileName;
+                        entry.filePath = encode(entry.filePath);
+                    });
+                } else {
+                    result.body.files = [];
+                }
+
+                that.entry = result.body;
+            });
         }
     },
     mounted() {
         var that = this;
 
-        var dummy = [
-          {
-            "isDirectory": true,
-            "isFile": false,
-            "atime": "2021-04-15T23:31:42.516Z",
-            "mtime": "2020-11-18T19:49:55.439Z",
-            "ctime": "2021-04-13T14:21:09.436Z",
-            "birthtime": "2020-11-18T19:49:48.347Z",
-            "size": 4096,
-            "fileName": "fotos",
-            "filePath": "/fotos"
-          },
-          {
-            "isDirectory": false,
-            "isFile": true,
-            "atime": "2021-04-16T07:01:09.553Z",
-            "mtime": "2021-03-15T12:43:50.230Z",
-            "ctime": "2021-04-13T14:21:09.436Z",
-            "birthtime": "2021-03-15T12:43:50.230Z",
-            "size": 9,
-            "fileName": "index.html",
-            "filePath": "/index.html"
-          },
-          {
-            "isDirectory": false,
-            "isFile": true,
-            "atime": "2021-04-16T17:26:19.780Z",
-            "mtime": "2020-05-26T20:22:59.086Z",
-            "ctime": "2021-04-13T14:21:09.436Z",
-            "birthtime": "2020-05-26T20:22:59.078Z",
-            "size": 220600,
-            "fileName": "orange.jpg",
-            "filePath": "/orange.jpg"
-          },
-        ];
+        // var dummy = [
+        //   {
+        //     "isDirectory": true,
+        //     "isFile": false,
+        //     "atime": "2021-04-15T23:31:42.516Z",
+        //     "mtime": "2020-11-18T19:49:55.439Z",
+        //     "ctime": "2021-04-13T14:21:09.436Z",
+        //     "birthtime": "2020-11-18T19:49:48.347Z",
+        //     "size": 4096,
+        //     "fileName": "fotos",
+        //     "filePath": "/fotos"
+        //   },
+        //   {
+        //     "isDirectory": false,
+        //     "isFile": true,
+        //     "atime": "2021-04-16T07:01:09.553Z",
+        //     "mtime": "2021-03-15T12:43:50.230Z",
+        //     "ctime": "2021-04-13T14:21:09.436Z",
+        //     "birthtime": "2021-03-15T12:43:50.230Z",
+        //     "size": 9,
+        //     "fileName": "index.html",
+        //     "filePath": "/index.html"
+        //   },
+        //   {
+        //     "isDirectory": false,
+        //     "isFile": true,
+        //     "atime": "2021-04-16T17:26:19.780Z",
+        //     "mtime": "2020-05-26T20:22:59.086Z",
+        //     "ctime": "2021-04-13T14:21:09.436Z",
+        //     "birthtime": "2020-05-26T20:22:59.078Z",
+        //     "size": 220600,
+        //     "fileName": "orange.jpg",
+        //     "filePath": "/orange.jpg"
+        //   },
+        // ];
 
-        this.entries = dummy.map(function (entry) {
-            entry.previewUrl = getPreviewUrl(entry, '/');
-            entry.extension = getExtension(entry);
-            entry.rename = false;
-            entry.filePathNew = entry.fileName;
-            entry.filePath = encode(entry.filePath);
-            return entry;
-        });
+        // this.entries = dummy.map(function (entry) {
+        //     entry.previewUrl = getPreviewUrl(entry, '/');
+        //     entry.extension = getExtension(entry);
+        //     entry.rename = false;
+        //     entry.filePathNew = entry.fileName;
+        //     entry.filePath = encode(entry.filePath);
+        //     return entry;
+        // });
 
         if (!localStorage.accessToken) {
             this.ready = true;
@@ -148,6 +183,8 @@ export default {
             that.profile.displayName = result.body.displayName;
 
             that.ready = true;
+
+            that.openEntry('/');
         });
     }
 };

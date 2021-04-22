@@ -3,6 +3,7 @@ node_modules/
 files/
 dist/
 .git/
+.data/
 screenshots/
 cli/
 favicon.png

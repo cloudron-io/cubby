@@ -5,6 +5,8 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     lastMile = require('connect-lastmile'),
     users = require('./routes/users.js'),
+    files = require('./routes/files.js'),
+    multipart = require('./routes/multipart.js'),
     morgan = require('morgan'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
@@ -46,16 +48,13 @@ function init(callback) {
 
     router.del = router.delete; // amend router.del for readability further on
 
-    // var multipart = multipart({ maxFieldsSize: 2 * 1024, limit: '512mb', timeout: 3 * 60 * 1000 });
-
     router.post('/api/v1/login', users.login);
     router.get ('/api/v1/profile', users.tokenAuth, users.profile);
 
-    // router.get   ('/api/profile', tokenAuth, auth.getProfile);
-    // router.get   ('/api/files/*', tokenAuth);
-    // router.post  ('/api/files/*', tokenAuth, multipart, files.post);
-    // router.put   ('/api/files/*', tokenAuth, files.put);
-    // router.delete('/api/files/*', tokenAuth, files.del);
+    router.get ('/api/v1/files', users.tokenAuth, files.get);
+    router.post('/api/v1/files', users.tokenAuth, multipart({ maxFieldsSize: 2 * 1024, limit: '512mb', timeout: 3 * 60 * 1000 }), files.add);
+    router.put ('/api/v1/files', users.tokenAuth, files.update);
+    router.del ('/api/v1/files', users.tokenAuth, files.remove);
 
     app.use('/api/healthcheck', function (req, res) { res.status(200).send(); });
     app.use('/api', bodyParser.json());

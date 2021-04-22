@@ -41,6 +41,7 @@ MainError.EXTERNAL_ERROR = 'External Error'; // use this for external API errors
 MainError.FS_ERROR = 'FileSystem Error';
 MainError.INTERNAL_ERROR = 'Internal Error';
 MainError.INVALID_CREDENTIALS = 'Invalid Credentials';
+MainError.INVALID_PATH = 'Invalid Path';
 MainError.LDAP_ERROR = 'LDAP Error';
 MainError.MAIL_ERROR = 'Mail Error';
 MainError.NETWORK_ERROR = 'Network Error';
