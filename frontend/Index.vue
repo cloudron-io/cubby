@@ -36,6 +36,7 @@
 
 <script>
 
+import superagent from 'superagent';
 import { encode, getPreviewUrl, getExtension } from './utils.js';
 
 export default {
@@ -43,10 +44,11 @@ export default {
     data() {
         return {
             ready: false,
-            token: '',
+            accessToken: '',
             profile: {
                 username: '',
-                displayName: ''
+                displayName: '',
+                email: ''
             },
             uploadPercent: 23,
             entries: [],
@@ -55,14 +57,20 @@ export default {
     },
     methods: {
         onLogout: function () {
-            this.token = '';
+            this.accessToken = '';
             this.profile.username = '';
+            this.profile.email = '';
             this.profile.displayName = '';
         },
-        onLoggedIn: function (token, profile) {
-            this.token = token;
+        onLoggedIn: function (accessToken, profile) {
+            this.accessToken = accessToken;
+
             this.profile.username = profile.username;
             this.profile.displayName = profile.displayName;
+            this.profile.email = profile.email;
+
+            // stash locally
+            localStorage.accessToken = accessToken;
         },
         onSelectionChanged: function (selectedEntries) {
             this.activeEntry = selectedEntries[0];
@@ -72,7 +80,7 @@ export default {
         }
     },
     mounted() {
-        this.ready = true;
+        var that = this;
 
         var dummy = [
           {
@@ -117,6 +125,27 @@ export default {
             entry.filePathNew = entry.fileName;
             entry.filePath = encode(entry.filePath);
             return entry;
+        });
+
+        if (!localStorage.accessToken) {
+            this.ready = true;
+            return;
+        }
+
+        that.accessToken = localStorage.accessToken;
+
+        superagent.get('/api/v1/profile').query({ access_token: that.accessToken }).end(function (error, result) {
+            if (error) {
+                if (error.status !== 401) console.error(error);
+                that.ready = true;
+                return;
+            }
+
+            that.profile.username = result.body.username;
+            that.profile.email = result.body.email;
+            that.profile.displayName = result.body.displayName;
+
+            that.ready = true;
         });
     }
 };

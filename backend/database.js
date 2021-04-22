@@ -17,7 +17,7 @@ var assert = require('assert'),
 var gConnectionPool = null;
 
 const gDatabase = {
-    hostname: process.env.CLOUDRON_MYSQL_HOST || '127.0.0.1',
+    hostname: process.env.CLOUDRON_MYSQL_HOST || process.env.MYSQL_IP || '127.0.0.1',
     username: process.env.CLOUDRON_MYSQL_USERNAME || 'root',
     password: process.env.CLOUDRON_MYSQL_PASSWORD || 'password',
     port: process.env.CLOUDRON_MYSQL_PORT || 3306,
@@ -60,7 +60,7 @@ function query() {
     const callback = args[args.length - 1];
     assert.strictEqual(typeof callback, 'function');
 
-    if (constants.TEST && !gConnectionPool) return callback(new MainError(MainError.DATABASE_ERROR, 'database.js not initialized'));
+    if (!gConnectionPool) return callback(new MainError(MainError.DATABASE_ERROR, 'database.js not initialized'));
 
     gConnectionPool.query.apply(gConnectionPool, args); // this is same as getConnection/query/release
 }

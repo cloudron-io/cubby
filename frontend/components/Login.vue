@@ -5,7 +5,7 @@
             <div class="p-fluid">
                 <div class="p-field">
                     <label for="usernameInput">Username</label>
-                    <InputText id="usernameInput" type="text" v-model="username" autofocus/>
+                    <InputText id="usernameInput" type="text" v-model="username" :class="{ 'p-invalid': error }" autofocus/>
                 </div>
                 <div class="p-field">
                     <label for="passwordInput">Password</label>
@@ -13,12 +13,14 @@
                     <small v-show="error" :class="{ 'p-invalid': error }">Wrong username or password.</small>
                 </div>
             </div>
-            <Button type="submit" label="Login" id="loginButton" @click="onLogin"/>
+            <Button type="submit" label="Login" id="loginButton"/>
         </form>
     </div>
 </template>
 
 <script>
+
+import superagent from 'superagent';
 
 export default {
     name: 'Login',
@@ -27,19 +29,29 @@ export default {
         return {
             username: '',
             password: '',
-            error: ''
+            error: '',
+            busy: false
         };
     },
     methods: {
         onLogin() {
-            // TODO do login
-            var token = 'sometoken';
-            var profile = {
-                username: 'username',
-                displayName: 'Display Name'
-            };
+            var that = this;
 
-            this.$emit('success', token, profile);
+            that.error = true;
+            that.busy = true;
+
+            superagent.post('/api/v1/login', { username: this.username, password: this.password }).end(function (error, result) {
+                that.busy = false;
+
+                if (error && error.status === 403) {
+                    that.error = 'Invalid username or password';
+                    that.password = '';
+                    return;
+                }
+                if (error) return console.error(error);
+
+                that.$emit('success', result.body.accessToken, result.body.user);
+            });
         }
     },
     mounted() {

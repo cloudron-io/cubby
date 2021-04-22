@@ -4,6 +4,8 @@ var express = require('express'),
     path = require('path'),
     bodyParser = require('body-parser'),
     lastMile = require('connect-lastmile'),
+    users = require('./routes/users.js'),
+    morgan = require('morgan'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
 
@@ -15,11 +17,39 @@ exports = module.exports = {
 //     next();
 // }
 
+
 function init(callback) {
     var app = express();
     var router = new express.Router();
 
+    app.set('json spaces', 2); // pretty json
+
+    // for rate limiting
+    app.enable('trust proxy');
+
+    app.use(morgan(function (tokens, req, res) {
+        return [
+            'Cubby',
+            tokens.method(req, res),
+            tokens.url(req, res).replace(/(access_token=)[^&]+/, '$1' + '<redacted>'),
+            tokens.status(req, res),
+            res.errorBody ? res.errorBody.status : '',  // attached by connect-lastmile. can be missing when router errors like 404
+            res.errorBody ? res.errorBody.message : '', // attached by connect-lastmile. can be missing when router errors like 404
+            tokens['response-time'](req, res), 'ms', '-',
+            tokens.res(req, res, 'content-length')
+        ].join(' ');
+    }, {
+        immediate: false,
+        // only log failed requests by default
+        // skip: function (req, res) { return res.statusCode < 400; }
+    }));
+
+    router.del = router.delete; // amend router.del for readability further on
+
     // var multipart = multipart({ maxFieldsSize: 2 * 1024, limit: '512mb', timeout: 3 * 60 * 1000 });
+
+    router.post('/api/v1/login', users.login);
+    router.get ('/api/v1/profile', users.tokenAuth, users.profile);
 
     // router.get   ('/api/profile', tokenAuth, auth.getProfile);
     // router.get   ('/api/files/*', tokenAuth);

@@ -41,6 +41,7 @@ MainError.EXTERNAL_ERROR = 'External Error'; // use this for external API errors
 MainError.FS_ERROR = 'FileSystem Error';
 MainError.INTERNAL_ERROR = 'Internal Error';
 MainError.INVALID_CREDENTIALS = 'Invalid Credentials';
+MainError.LDAP_ERROR = 'LDAP Error';
 MainError.MAIL_ERROR = 'Mail Error';
 MainError.NETWORK_ERROR = 'Network Error';
 MainError.NOT_FOUND = 'Not found';
@@ -50,29 +51,4 @@ MainError.TRY_AGAIN = 'Try Again';
 
 MainError.prototype.toPlainObject = function () {
     return _.extend({}, { message: this.message, reason: this.reason }, this.details);
-};
-
-// this is a class method for now in case error is not a MainError
-MainError.toHttpError = function (error) {
-    switch (error.reason) {
-    case MainError.BAD_FIELD:
-        return new HttpError(400, error);
-    case MainError.NOT_FOUND:
-        return new HttpError(404, error);
-    case MainError.ALREADY_EXISTS:
-    case MainError.BAD_STATE:
-    case MainError.CONFLICT:
-        return new HttpError(409, error);
-    case MainError.INVALID_CREDENTIALS:
-        return new HttpError(412, error);
-    case MainError.EXTERNAL_ERROR:
-    case MainError.NETWORK_ERROR:
-    case MainError.FS_ERROR:
-    case MainError.MAIL_ERROR:
-        return new HttpError(424, error);
-    case MainError.DATABASE_ERROR:
-    case MainError.INTERNAL_ERROR:
-    default:
-        return new HttpError(500, error);
-    }
 };

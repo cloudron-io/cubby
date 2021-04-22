@@ -55,5 +55,8 @@ export DEBUG="cubby*"
 echo "=> Run database migrations"
 DATABASE_URL="mysql://root:password@${MYSQL_IP}/cubby" ./node_modules/.bin/db-migrate up
 
+echo "=> Ensure admin account with admin:admin"
+./cli.js user-add --username admin --password admin --email admin@server.local --display-name Admin || true
+
 echo "=> Start cubby"
 ./app.js
