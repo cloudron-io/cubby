@@ -61,6 +61,8 @@ export default {
             this.profile.username = '';
             this.profile.email = '';
             this.profile.displayName = '';
+
+            delete localStorage.accessToken;
         },
         onLoggedIn: function (accessToken, profile) {
             this.accessToken = accessToken;
