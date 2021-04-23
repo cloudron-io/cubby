@@ -18,8 +18,8 @@ function add(userId, callback) {
 
     var token = crypto.randomBytes(32).toString('hex');
 
-    database.query('INSERT INTO tokens (id, userId) VALUES (?, ?)', [ token, userId ], function (error, result) {
-        if (error || result.affectedRows !== 1) return callback(new MainError(MainError.DATABASE_ERROR, error));
+    database.query('INSERT INTO tokens (id, userId) VALUES ($1, $2)', [ token, userId ], function (error, result) {
+        if (error || result.rowCount !== 1) return callback(new MainError(MainError.DATABASE_ERROR, error));
 
         callback(null, token);
     });
@@ -29,11 +29,11 @@ function get(token, callback) {
     assert.strictEqual(typeof token, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('SELECT * FROM tokens WHERE id = ?', [ token ], function (error, result) {
+    database.query('SELECT * FROM tokens WHERE id = $1', [ token ], function (error, result) {
         if (error) return callback(new MainError(MainError.DATABASE_ERROR, error));
-        if (result.length === 0) return callback(new MainError(MainError.NOT_FOUND));
+        if (result.rows.length === 0) return callback(new MainError(MainError.NOT_FOUND));
 
-        callback(null, result[0]);
+        callback(null, result.rows[0]);
     });
 }
 
@@ -41,7 +41,7 @@ function remove(token, callback) {
     assert.strictEqual(typeof token, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('DELETE FROM tokens WHERE id = ?', [ token ], function (error) {
+    database.query('DELETE FROM tokens WHERE id = $1', [ token ], function (error) {
         if (error) return callback(new MainError(MainError.DATABASE_ERROR, error));
         callback(null);
     });

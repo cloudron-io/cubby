@@ -15,7 +15,6 @@ var assert = require('assert'),
     MainError = require('./mainerror.js');
 
 function getValidFullPath(username, filePath) {
-    console.log(path.join(constants.DATA_ROOT, username))
     fs.mkdirSync(path.join(constants.DATA_ROOT, username), { recursive: true });
 
     const fullFilePath = path.resolve(path.join(constants.DATA_ROOT, username, filePath));

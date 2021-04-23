@@ -109,11 +109,10 @@ function add(user, source, callback) {
     hashPasswordIfNeeded(function (error) {
         if (error) return callback(error);
 
-        database.query('INSERT INTO users (id, username, email, displayName, source, password, salt) VALUES (?, ?, ?, ?, ?, ?, ?)', [ userId, username, email, displayName, source, password, salt ], function (error, result) {
-            if (error && error.code === 'ER_DUP_ENTRY' && error.sqlMessage.indexOf('email') !== -1) return callback(new MainError(MainError.ALREADY_EXISTS, 'email already exists'));
-            if (error && error.code === 'ER_DUP_ENTRY' && error.sqlMessage.indexOf('username') !== -1) return callback(new MainError(MainError.ALREADY_EXISTS, 'username already exists'));
-            if (error && error.code === 'ER_DUP_ENTRY' && error.sqlMessage.indexOf('PRIMARY') !== -1) return callback(new MainError(MainError.ALREADY_EXISTS, 'id already exists'));
-            if (error || result.affectedRows !== 1) return callback(new MainError(MainError.DATABASE_ERROR, error));
+        database.query('INSERT INTO users (id, username, email, displayName, source, password, salt) VALUES ($1, $2, $3, $4, $5, $6, $7)', [ userId, username, email, displayName, source, password, salt ], function (error, result) {
+            if (error && error.detail.indexOf('already exists') !== -1 && error.detail.indexOf('email') !== -1) return callback(new MainError(MainError.ALREADY_EXISTS, 'email already exists'));
+            if (error && error.detail.indexOf('already exists') !== -1 && error.detail.indexOf('username') !== -1) return callback(new MainError(MainError.ALREADY_EXISTS, 'username already exists'));
+            if (error || result.rowCount !== 1) return callback(new MainError(MainError.DATABASE_ERROR, error));
 
             callback(null);
         });
@@ -124,9 +123,9 @@ function get(userId, callback) {
     assert.strictEqual(typeof userId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('SELECT * FROM users WHERE id = ?', [ userId ], function (error, result) {
+    database.query('SELECT * FROM users WHERE id = $1', [ userId ], function (error, result) {
         if (error) return callback(new MainError(MainError.DATABASE_ERROR, error));
-        if (result.length === 0) return callback(new MainError(MainError.NOT_FOUND));
+        if (result.rows.length === 0) return callback(new MainError(MainError.NOT_FOUND));
 
         callback(null, result[0]);
     });
@@ -136,11 +135,11 @@ function getByUsername(username, callback) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('SELECT * FROM users WHERE username = ?', [ username ], function (error, result) {
+    database.query('SELECT * FROM users WHERE username = $1', [ username ], function (error, result) {
         if (error) return callback(new MainError(MainError.DATABASE_ERROR, error));
-        if (result.length === 0) return callback(new MainError(MainError.NOT_FOUND));
+        if (result.rows.length === 0) return callback(new MainError(MainError.NOT_FOUND));
 
-        callback(null, result[0]);
+        callback(null, result.rows[0]);
     });
 }
 
@@ -169,7 +168,7 @@ function remove(userId, callback) {
     assert.strictEqual(typeof userId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('DELETE FROM users WHERE id = ?', [ userId ], function (error) {
+    database.query('DELETE FROM users WHERE id = $1', [ userId ], function (error) {
         if (error) return callback(new MainError(MainError.DATABASE_ERROR, error));
         callback(null);
     });

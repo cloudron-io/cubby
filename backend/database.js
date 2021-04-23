@@ -10,18 +10,18 @@ var assert = require('assert'),
     async = require('async'),
     MainError = require('./mainerror.js'),
     debug = require('debug')('cubby:database'),
-    mysql = require('mysql'),
+    pg = require('pg'),
     once = require('once'),
     util = require('util');
 
 var gConnectionPool = null;
 
 const gDatabase = {
-    hostname: process.env.CLOUDRON_MYSQL_HOST || process.env.MYSQL_IP || '127.0.0.1',
-    username: process.env.CLOUDRON_MYSQL_USERNAME || 'root',
-    password: process.env.CLOUDRON_MYSQL_PASSWORD || 'password',
-    port: process.env.CLOUDRON_MYSQL_PORT || 3306,
-    name: process.env.CLOUDRON_MYSQL_DATABASE || 'cubby'
+    hostname: process.env.CLOUDRON_POSTGRESQL_HOST || '127.0.0.1',
+    username: process.env.CLOUDRON_POSTGRESQL_USERNAME || 'root',
+    password: process.env.CLOUDRON_POSTGRESQL_PASSWORD || 'password',
+    port: process.env.CLOUDRON_POSTGRESQL_PORT || 3306,
+    name: process.env.CLOUDRON_POSTGRESQL_DATABASE || 'cubby'
 };
 
 function init(callback) {
@@ -29,27 +29,18 @@ function init(callback) {
 
     if (gConnectionPool !== null) return callback(null);
 
-    // https://github.com/mysqljs/mysql#pool-options
-    gConnectionPool  = mysql.createPool({
-        connectionLimit: 5,
+    gConnectionPool = new pg.Pool({
         host: gDatabase.hostname,
         user: gDatabase.username,
         password: gDatabase.password,
-        port: gDatabase.port,
         database: gDatabase.name,
-        multipleStatements: false,
-        waitForConnections: true, // getConnection() will wait until a connection is avaiable
-        ssl: false,
-        timezone: 'Z' // mysql follows the SYSTEM timezone. on Cloudron, this is UTC
+        port: gDatabase.port,
     });
 
-    gConnectionPool.on('connection', function (connection) {
-        // connection objects are re-used. so we have to attach to the event here (once) to prevent crash
-        // note the pool also has an 'acquire' event but that is called whenever we do a getConnection()
-        connection.on('error', (error) => debug(`Connection ${connection.threadId} error: ${error.message} ${error.code}`));
-
-        connection.query('USE ' + gDatabase.name);
-        connection.query('SET SESSION sql_mode = \'strict_all_tables\'');
+    // the pool will emit an error on behalf of any idle clients
+    // it contains if a backend error or network partition happens
+    gConnectionPool.on('error', function (error, client) {
+        console.error('Unexpected error on idle client', error)
     });
 
     callback(null);
@@ -68,6 +59,8 @@ function query() {
 function transaction(queries, callback) {
     assert(util.isArray(queries));
     assert.strictEqual(typeof callback, 'function');
+
+    return callback(new MainError(MainError.DATABASE_ERROR, 'transactions not yet ported to psql'));
 
     callback = once(callback);
 

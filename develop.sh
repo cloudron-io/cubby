@@ -24,36 +24,42 @@ while true; do
     esac
 done
 
-# create the same mysql server version to test with
-CONTAINER_NAME="mysql-server-cubby"
+# create the same postgres server version to test with
+CONTAINER_NAME="postgres-server-cubby"
+
+export CLOUDRON_POSTGRESQL_USERNAME="postgres"
+export CLOUDRON_POSTGRESQL_PASSWORD="password"
+export CLOUDRON_POSTGRESQL_DATABASE="cubby"
+export CLOUDRON_POSTGRESQL_PORT=5432
 
 if [[ "${fresh}" == "true" ]]; then
-    echo "=> Removing mysql container ${CONTAINER_NAME} if exists..."
+    echo "=> Removing postgres container ${CONTAINER_NAME} if exists..."
     docker rm -f ${CONTAINER_NAME} || true
 fi
 
 OUT=`docker inspect ${CONTAINER_NAME}` || true
 if [[ "${OUT}" = "[]" ]]; then
     echo "=> Starting ${CONTAINER_NAME}..."
-    docker run --name ${CONTAINER_NAME} -e MYSQL_ROOT_PASSWORD=password -d mysql:5.6.34
+    docker run --name ${CONTAINER_NAME} -e POSTGRES_PASSWORD=${CLOUDRON_POSTGRESQL_PASSWORD} -d postgres:12
 else
     echo "=> ${CONTAINER_NAME} already running. If you want to start fresh, run 'docker rm --force ${CONTAINER_NAME}'"
 fi
 
-export MYSQL_IP=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${CONTAINER_NAME}`
+export CLOUDRON_POSTGRESQL_HOST=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${CONTAINER_NAME}`
 
-echo "=> Waiting for mysql server to be ready..."
-while ! mysqladmin ping -h"${MYSQL_IP}" --silent; do
+export PGPASSWORD="${CLOUDRON_POSTGRESQL_PASSWORD}"
+echo "=> Waiting for postgres server to be ready..."
+while ! psql -h "${CLOUDRON_POSTGRESQL_HOST}" -U ${CLOUDRON_POSTGRESQL_USERNAME} -c "SELECT 1"; do
     sleep 1
 done
 
 echo "=> Ensure database"
-mysql -h"${MYSQL_IP}" -uroot -ppassword -e 'CREATE DATABASE IF NOT EXISTS cubby'
+psql -h "${CLOUDRON_POSTGRESQL_HOST}" -U ${CLOUDRON_POSTGRESQL_USERNAME} -tc "SELECT 1 FROM pg_database WHERE datname = '${CLOUDRON_POSTGRESQL_DATABASE}'" | grep -q 1 | psql -h "${CLOUDRON_POSTGRESQL_HOST}" -U postgres -c "CREATE DATABASE cubby" || true
 
 export DEBUG="cubby*"
 
 echo "=> Run database migrations"
-DATABASE_URL="mysql://root:password@${MYSQL_IP}/cubby" ./node_modules/.bin/db-migrate up
+DATABASE_URL="postgres://${CLOUDRON_POSTGRESQL_USERNAME}:${CLOUDRON_POSTGRESQL_PASSWORD}@${CLOUDRON_POSTGRESQL_HOST}/${CLOUDRON_POSTGRESQL_DATABASE}" ./node_modules/.bin/db-migrate up
 
 echo "=> Ensure admin account with admin:admin"
 ./cli.js user-add --username admin --password admin --email admin@server.local --display-name Admin || true
