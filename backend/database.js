@@ -2,17 +2,13 @@
 
 exports = module.exports = {
     init,
-    query,
-    transaction
+    query
 };
 
 var assert = require('assert'),
-    async = require('async'),
     MainError = require('./mainerror.js'),
     debug = require('debug')('cubby:database'),
-    pg = require('pg'),
-    once = require('once'),
-    util = require('util');
+    pg = require('pg');
 
 var gConnectionPool = null;
 
@@ -54,37 +50,4 @@ function query() {
     if (!gConnectionPool) return callback(new MainError(MainError.DATABASE_ERROR, 'database.js not initialized'));
 
     gConnectionPool.query.apply(gConnectionPool, args); // this is same as getConnection/query/release
-}
-
-function transaction(queries, callback) {
-    assert(util.isArray(queries));
-    assert.strictEqual(typeof callback, 'function');
-
-    return callback(new MainError(MainError.DATABASE_ERROR, 'transactions not yet ported to psql'));
-
-    callback = once(callback);
-
-    gConnectionPool.getConnection(function (error, connection) {
-        if (error) return callback(error);
-
-        const releaseConnection = (error) => { connection.release(); callback(error); };
-
-        connection.beginTransaction(function (error) {
-            if (error) return releaseConnection(error);
-
-            async.mapSeries(queries, function iterator(query, done) {
-                connection.query(query.query, query.args, done);
-            }, function seriesDone(error, results) {
-                if (error) return connection.rollback(() => releaseConnection(error));
-
-                connection.commit(function (error) {
-                    if (error) return connection.rollback(() => releaseConnection(error));
-
-                    connection.release();
-
-                    callback(null, results);
-                });
-            });
-        });
-    });
 }
