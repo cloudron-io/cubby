@@ -20,10 +20,9 @@ const gDatabase = {
     name: process.env.CLOUDRON_POSTGRESQL_DATABASE || 'cubby'
 };
 
-function init(callback) {
-    assert.strictEqual(typeof callback, 'function');
+function init() {
 
-    if (gConnectionPool !== null) return callback(null);
+    if (gConnectionPool !== null) return;
 
     gConnectionPool = new pg.Pool({
         host: gDatabase.hostname,
@@ -38,16 +37,17 @@ function init(callback) {
     gConnectionPool.on('error', function (error, client) {
         console.error('Unexpected error on idle client', error)
     });
-
-    callback(null);
 }
 
-function query() {
-    const args = Array.prototype.slice.call(arguments);
-    const callback = args[args.length - 1];
-    assert.strictEqual(typeof callback, 'function');
+async function query(sql, args) {
+    assert.strictEqual(typeof sql, 'string');
+    assert(Array.isArray(args));
 
-    if (!gConnectionPool) return callback(new MainError(MainError.DATABASE_ERROR, 'database.js not initialized'));
+    if (!gConnectionPool) throw new MainError(MainError.DATABASE_ERROR, 'database.js not initialized');
 
-    gConnectionPool.query.apply(gConnectionPool, args); // this is same as getConnection/query/release
+    try {
+        return await gConnectionPool.query(sql, args);
+    } catch (error) {
+        throw new MainError(MainError.DATABASE_ERROR, error);
+    }
 }

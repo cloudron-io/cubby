@@ -13,36 +13,34 @@ var assert = require('assert'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
 
-function login(req, res, next) {
+async function login(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
 
     if (!req.body.username && typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be string'));
     if (!req.body.password && typeof req.body.password !== 'string') return next(new HttpError(400, 'password must be string'));
 
-    users.login(req.body.username, req.body.password, function (error, user) {
-        if (error && error.reason === MainError.ACCESS_DENIED) return next(new HttpError(403, 'invalid username or password'));
+    const user = await users.login(req.body.username, req.body.password);
+    if (!user) return next(new HttpError(403, 'invalid username or password'));
 
-        tokens.add(user.id, function (error, accessToken) {
-            if (error) return next(new HttpError(500, error));
+    const accessToken = await tokens.add(user.id);
 
-            next(new HttpSuccess(200, { user, accessToken }));
-        });
-    });
+    next(new HttpSuccess(200, { user, accessToken }));
 }
 
-function tokenAuth(req, res, next) {
+async function tokenAuth(req, res, next) {
     var accessToken = req.query.access_token || req.body.accessToken;
 
-    users.getByAccessToken(accessToken, function (error, user) {
-        if (error) return next(new HttpError(401, 'Invalid Access Token'));
+    try {
+        req.user = await users.getByAccessToken(accessToken);
+        if (!req.user) return next(new HttpError(401, 'Invalid Access Token'));
+    } catch (error) {
+        return next(new HttpError(500, error));
+    }
 
-        req.user = user;
-
-        next();
-    });
+    next();
 }
 
-function profile(req, res, next) {
+async function profile(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
     // TODO remove private fields

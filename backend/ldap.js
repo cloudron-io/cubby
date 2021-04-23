@@ -8,6 +8,7 @@ exports = module.exports = {
 var assert = require('assert'),
     ldapjs = require('ldapjs'),
     debug = require('debug')('cubby:ldap'),
+    promisify = require('util').promisify,
     MainError = require('./mainerror.js');
 
 const LDAP_URL = process.env.CLOUDRON_LDAP_URL;
@@ -26,14 +27,12 @@ function sanitizeInput(username) {
         .replace(/\//g, '\\2f');
 }
 
-function login(username, password, callback) {
+async function login(username, password) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof password, 'string');
-    assert.strictEqual(typeof callback, 'function');
 
-    if (!LDAP_URL) return callback(new MainError(MainError.ACCESS_DENIED));
-
-    if (username === '' || password === '') return callback(new MainError(MainError.ACCESS_DENIED));
+    if (!LDAP_URL) return false;
+    if (username === '' || password === '') return false;
 
     debug('ldap: login attempt for ' + username);
 
@@ -42,38 +41,45 @@ function login(username, password, callback) {
         console.error('LDAP error', error);
     });
 
-    ldapClient.bind(LDAP_BIND_DN, LDAP_BIND_PASSWORD, function (error) {
-        if (error) return callback(new MainError(MainError.LDAP_ERROR, error));
-
-        username = sanitizeInput(username);
-
-        var filter = `(|(uid=${username})(mail=${username})(username=${username})(sAMAccountName=${username}))`;
-        ldapClient.search(LDAP_USERS_BASE_DN, { filter: filter }, function (error, result) {
+    function searchAndBind(callback) {
+        ldapClient.bind(LDAP_BIND_DN, LDAP_BIND_PASSWORD, function (error) {
             if (error) return callback(new MainError(MainError.LDAP_ERROR, error));
 
-            var items = [];
+            username = sanitizeInput(username);
 
-            result.on('searchEntry', function(entry) { items.push(entry.object); });
-            result.on('error', function (error) { callback(new MainError(MainError.LDAP_ERROR, error)); });
-            result.on('end', function (result) {
-                if (result.status !== 0 || items.length === 0) return callback(new MainError(MainError.ACCESS_DENIED));
+            var filter = `(|(uid=${username})(mail=${username})(username=${username})(sAMAccountName=${username}))`;
+            ldapClient.search(LDAP_USERS_BASE_DN, { filter: filter }, function (error, result) {
+                if (error) return callback(new MainError(MainError.LDAP_ERROR, error));
 
-                // pick the first found
-                var user = items[0];
+                var items = [];
 
-                console.log('found user:', user);
+                result.on('searchEntry', function(entry) { items.push(entry.object); });
+                result.on('error', function (error) { callback(new MainError(MainError.LDAP_ERROR, error)); });
+                result.on('end', function (result) {
+                    if (result.status !== 0 || items.length === 0) return callback(new MainError(MainError.ACCESS_DENIED));
 
-                ldapClient.bind(user.dn, password, function (error) {
-                    if (error) return callback(new MainError(MainError.ACCESS_DENIED));
+                    // pick the first found
+                    var user = items[0];
 
-                    callback(null);
+                    console.log('found user:', user);
+
+                    ldapClient.bind(user.dn, password, function (error) {
+                        if (error) return callback(new MainError(MainError.ACCESS_DENIED));
+
+                        callback(null);
+                    });
                 });
             });
         });
-    });
+    }
+
+    try {
+      await promisify(searchAndBind)();
+      return true;
+    } catch (error) {
+        return false;
+    }
 }
 
-function sync(callback) {
-    assert.strictEqual(typeof callback, 'function');
-
+async function sync() {
 }

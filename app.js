@@ -11,13 +11,11 @@ function exit(error) {
     process.exit(error ? 1 : 0);
 }
 
-database.init(function (error) {
+database.init();
+
+server.init(function (error) {
     if (error) exit(error);
 
-    server.init(function (error) {
-        if (error) exit(error);
-
-        console.log(`Using data folder at: ${constants.DATA_ROOT}`);
-        console.log('Cubby running.');
-    });
+    console.log(`Using data folder at: ${constants.DATA_ROOT}`);
+    console.log('Cubby running.');
 });

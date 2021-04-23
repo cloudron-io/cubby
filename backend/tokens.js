@@ -12,37 +12,35 @@ var assert = require('assert'),
     database = require('./database.js'),
     MainError = require('./mainerror.js');
 
-function add(userId, callback) {
+function postProcess(data) {
+    data.userId = data.user_id;
+    delete data.user_id;
+
+    return data;
+}
+
+async function add(userId) {
     assert.strictEqual(typeof userId, 'string');
-    assert.strictEqual(typeof callback, 'function');
 
-    var token = crypto.randomBytes(32).toString('hex');
+    const token = crypto.randomBytes(32).toString('hex');
 
-    database.query('INSERT INTO tokens (id, userId) VALUES ($1, $2)', [ token, userId ], function (error, result) {
-        if (error || result.rowCount !== 1) return callback(new MainError(MainError.DATABASE_ERROR, error));
+    await database.query('INSERT INTO tokens (id, user_id) VALUES ($1, $2)', [ token, userId ]);
 
-        callback(null, token);
-    });
+    return token;
 }
 
-function get(token, callback) {
+async function get(token) {
+    assert.strictEqual(typeof token, 'string');
+
+    const result = await database.query('SELECT * FROM tokens WHERE id = $1', [ token ]);
+    if (result.rows.length === 0) return null;
+
+    return postProcess(result.rows[0]);
+}
+
+async function remove(token, callback) {
     assert.strictEqual(typeof token, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('SELECT * FROM tokens WHERE id = $1', [ token ], function (error, result) {
-        if (error) return callback(new MainError(MainError.DATABASE_ERROR, error));
-        if (result.rows.length === 0) return callback(new MainError(MainError.NOT_FOUND));
-
-        callback(null, result.rows[0]);
-    });
-}
-
-function remove(token, callback) {
-    assert.strictEqual(typeof token, 'string');
-    assert.strictEqual(typeof callback, 'function');
-
-    database.query('DELETE FROM tokens WHERE id = $1', [ token ], function (error) {
-        if (error) return callback(new MainError(MainError.DATABASE_ERROR, error));
-        callback(null);
-    });
+    await database.query('DELETE FROM tokens WHERE id = $1', [ token ]);
 }

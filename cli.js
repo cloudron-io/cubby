@@ -13,14 +13,7 @@ function exit(error) {
     process.exit(error ? 1 : 0);
 }
 
-function initDb(callback) {
-    database.init(function (error) {
-        if (error) exit(error);
-        callback();
-    });
-}
-
-function addUser(options) {
+async function addUser(options) {
     if (!options.username) exit('missing --username');
     if (!options.password) exit('missing --password');
     if (!options.email) exit('missing --email');
@@ -33,16 +26,17 @@ function addUser(options) {
         displayName: options.displayName
     };
 
-    initDb(function () {
-        users.add(user, constants.USER_SOURCE_LOCAL, function (error) {
-            if (error && error.reason === MainError.ALREADY_EXISTS) exit(error.message);
-            if (error) exit(error);
+    database.init();
+    try {
+        await users.add(user, constants.USER_SOURCE_LOCAL);
+    } catch (error) {
+        if (error.reason === MainError.ALREADY_EXISTS) exit(error.message);
+        exit(error);
+    }
 
-            console.log('Done.');
+    console.log('Done.');
 
-            exit();
-        });
-    });
+    exit();
 }
 
 function editUser(options) {
@@ -52,22 +46,20 @@ function editUser(options) {
     exit('TODO');
 }
 
-function delUser(options) {
+async function delUser(options) {
     if (!options.username) exit('missing --username');
 
-    initDb(function () {
-        users.getByUsername(options.username, function (error, result) {
-            if (error) exit(error);
+    database.init();
+    try {
+        const user = await users.getByUsername(options.username);
+        await users.remove(user.userId);
+    } catch (error) {
+        exit(error);
+    }
 
-            users.remove(result.userId, function (error) {
-                if (error) exit(error);
+    console.log('Done.');
 
-                console.log('Done.');
-
-                exit();
-            });
-        });
-    });
+    exit();
 }
 
 function listUsers() {
