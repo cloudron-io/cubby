@@ -1,7 +1,8 @@
 'use strict';
 
 exports = module.exports = {
-    add,
+    addDirectory,
+    addFile,
     get,
     update,
     remove
@@ -10,7 +11,7 @@ exports = module.exports = {
 var assert = require('assert'),
     constants = require('./constants.js'),
     debug = require('debug')('cubby:fs'),
-    fs = require('fs'),
+    fs = require('fs-extra'),
     path = require('path'),
     MainError = require('./mainerror.js');
 
@@ -23,13 +24,58 @@ function getValidFullPath(username, filePath) {
     return fullFilePath;
 }
 
-function add(username, filePath, callback) {
+async function addDirectory(username, filePath) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof filePath, 'string');
-    assert.strictEqual(typeof callback, 'function');
 
     const fullFilePath = getValidFullPath(username, filePath);
-    if (!fullFilePath) return callback(new MainError(MainError.INVALID_PATH));
+    if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);
+
+    try {
+        var stat = fs.statSync(fullFilePath);
+        if (stat) throw new MainError(MainError.ALREADY_EXISTS);
+    } catch (error) {
+        if (error.code !== 'ENOENT') throw new MainError(MainError.FS_ERROR, error);
+    }
+
+    try {
+        await fs.ensureDir(fullFilePath);
+    } catch (error) {
+        throw new MainError(MainError.FS_ERROR, error);
+    }
+}
+
+async function addFile(username, filePath, sourceFilePath, mtime) {
+    assert.strictEqual(typeof username, 'string');
+    assert.strictEqual(typeof filePath, 'string');
+    assert.strictEqual(typeof mtime, 'number');
+    assert.strictEqual(typeof sourceFilePath, 'string');
+
+    const fullFilePath = getValidFullPath(username, filePath);
+    if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);
+
+    try {
+        var stat = fs.statSync(fullFilePath);
+        if (stat) throw new MainError(MainError.ALREADY_EXISTS);
+    } catch (error) {
+        if (error.code !== 'ENOENT') throw new MainError(MainError.FS_ERROR, error);
+    }
+
+    try {
+        await fs.ensureDir(fullFilePath);
+        await fs.copy(sourceFilePath, fullFilePath);
+    } catch (error) {
+        throw new MainError(MainError.FS_ERROR, error);
+    }
+
+    if (!mtime) return;
+
+    try {
+        var fd = fs.openSync(fullFilePath);
+        fs.futimesSync(fd, mtime, mtime);
+    } catch (error) {
+        throw new MainError(MainError.FS_ERROR, error);
+    }
 }
 
 function getDirectory(fullFilePath, filePath, stats, callback) {
@@ -122,12 +168,16 @@ function update(username, filePath, callback) {
     if (!fullFilePath) return callback(new MainError(MainError.INVALID_PATH));
 }
 
-function remove(username, filePath, recursive, callback) {
+async function remove(username, filePath) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof filePath, 'string');
-    assert.strictEqual(typeof recursive, 'boolean');
-    assert.strictEqual(typeof callback, 'function');
 
     const fullFilePath = getValidFullPath(username, filePath);
-    if (!fullFilePath) return callback(new MainError(MainError.INVALID_PATH));
+    if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);
+
+    try {
+        await fs.remove(fullFilePath);
+    } catch (error) {
+        throw new MainError(MainError.FS_ERROR, error);
+    }
 }

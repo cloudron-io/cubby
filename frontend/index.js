@@ -27,7 +27,7 @@ import './style.css';
 
 import Index from './Index.vue';
 import EntryList from './components/EntryList.vue';
-import Preview from './components/Preview.vue';
+import SideBar from './components/SideBar.vue';
 import Login from './components/Login.vue';
 import MainToolbar from './components/MainToolbar.vue';
 
@@ -57,6 +57,6 @@ app.directive('tooltip', Tooltip);
 app.component('Login', Login);
 app.component('MainToolbar', MainToolbar);
 app.component('EntryList', EntryList);
-app.component('Preview', Preview);
+app.component('SideBar', SideBar);
 
 app.mount('#app');

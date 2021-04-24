@@ -20,9 +20,10 @@
       <MainToolbar @logout="onLogout"/>
       <div class="container">
         <div class="main-container-content">
-          <EntryList :entries="entry.files" sort-folders-first="true" @selection-changed="onSelectionChanged" editable/>
+          <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
+          <EntryList :entries="entry.files" sort-folders-first="true" @entry-delete="onDelete" @selection-changed="onSelectionChanged" editable/>
         </div>
-        <Preview :entry="activeEntry" @close="onPreviewClose"/>
+        <SideBar :entry="activeEntry" :visible="sideBarVisible"/>
       </div>
       <div class="upload">
         <ProgressBar :value="uploadPercent">
@@ -38,6 +39,11 @@
 
 import superagent from 'superagent';
 import { encode, getPreviewUrl, getExtension } from './utils.js';
+
+function sanitize(path) {
+    path = '/' + path;
+    return path.replace(/\/+/g, '/');
+}
 
 export default {
     name: 'Index',
@@ -55,8 +61,9 @@ export default {
             entry: {
                 files: []
             },
-            entryPath: '/',
-            activeEntry: {}
+            currentPath: '/',
+            activeEntry: {},
+            sideBarVisible: true
         };
     },
     methods: {
@@ -81,8 +88,23 @@ export default {
         onSelectionChanged: function (selectedEntries) {
             this.activeEntry = selectedEntries[0];
         },
-        onPreviewClose: function () {
-            this.activeEntry = {};
+        onToggleSideBar: function () {
+            this.sideBarVisible = !this.sideBarVisible;
+        },
+        onDelete: function (entry) {
+            var that = this;
+
+            var filePath = sanitize(that.currentPath + '/' + entry.fileName);
+
+            console.log('==', filePath)
+
+            superagent.del('/api/v1/files').query({ path: filePath, access_token: localStorage.accessToken }).end(function (error, result) {
+                if (result && result.statusCode === 401) return that.logout();
+                if (result && result.statusCode !== 200) return that.error('Error deleting file or folder');
+                if (error) return that.error(error.message);
+
+                that.openEntry(that.currentPath);
+            });
         },
         openEntry: function (filePath) {
             var that = this;
@@ -98,7 +120,7 @@ export default {
                     return;
                 }
 
-                that.entryPath = filePath;
+                that.currentPath = filePath;
 
                 if (result.body.isDirectory) {
                     result.body.files.forEach(function (entry) {
@@ -235,6 +257,16 @@ label {
 
 .p-toast {
     z-index: 2000 !important;
+}
+
+.main-container-content {
+    position: relative;
+}
+
+.side-bar-toggle {
+    position: absolute;
+    right: 10px;
+    top: 10px;
 }
 
 </style>

@@ -306,6 +306,10 @@ export default {
     margin: auto 0px;
 }
 
+.td > a:hover {
+    text-decoration: underline;
+}
+
 .td {
     display: flex;
     flex-flow: row nowrap;

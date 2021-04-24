@@ -8,6 +8,7 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
+    debug = require('debug')('cubby:routes:fs'),
     files = require('../files.js'),
     util = require('util'),
     MainError = require('../mainerror.js'),
@@ -22,8 +23,29 @@ function boolLike(arg) {
     return true;
 }
 
-function add(req, res, next) {
+async function add(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
+
+    var directory = boolLike(req.query.directory);
+    var filePath = req.query.path;
+
+    if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
+    if (!(req.files && req.files.file) && !directory) return next(new HttpError(400, 'missing file or directory'));
+    if ((req.files && req.files.file) && directory) return next(new HttpError(400, 'either file or directory'));
+
+    var mtime = req.fields && req.fields.mtime ? new Date(req.fields.mtime) : null;
+
+    debug('add:', filePath, mtime);
+
+    try {
+        if (directory) await files.addDirectory(req.user.username, filePath);
+        else await files.addFile(req.user.username, filePath, req.files.file.path, mtime);
+    } catch (error) {
+        if (error.reason === MainError.ALREADY_EXISTS) return next(new HttpError(409, 'already exists'));
+        return next(new HttpError(500, error));
+    }
+
+    next(new HttpSuccess(200, {}));
 }
 
 function get(req, res, next) {
@@ -33,6 +55,8 @@ function get(req, res, next) {
     var filePath = req.query.path;
 
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
+
+    debug('get:', filePath);
 
     files.get(req.user.username, filePath, function (error, result) {
         if (error && error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'not found'));
@@ -53,8 +77,28 @@ function get(req, res, next) {
 
 function update(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
+
+    var filePath = req.query.path;
+
+    if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
+
+    debug('update:', filePath);
 }
 
-function remove(req, res, next) {
+async function remove(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
+
+    var filePath = req.query.path;
+
+    if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
+
+    debug('remove:', filePath);
+
+    try {
+        await files.remove(req.user.username, filePath);
+    } catch (error) {
+        return next(new HttpError(500, error));
+    }
+
+    next(new HttpSuccess(200, {}));
 }
