@@ -31,6 +31,8 @@ async function addDirectory(username, filePath) {
     const fullFilePath = getValidFullPath(username, filePath);
     if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);
 
+    debug('addDirectory:', fullFilePath);
+
     try {
         var stat = fs.statSync(fullFilePath);
         if (stat) throw new MainError(MainError.ALREADY_EXISTS);
@@ -48,11 +50,13 @@ async function addDirectory(username, filePath) {
 async function addFile(username, filePath, sourceFilePath, mtime) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof filePath, 'string');
-    assert.strictEqual(typeof mtime, 'number');
+    assert.strictEqual(typeof mtime, 'object');
     assert.strictEqual(typeof sourceFilePath, 'string');
 
     const fullFilePath = getValidFullPath(username, filePath);
     if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);
+
+    debug('addFile:', fullFilePath);
 
     try {
         var stat = fs.statSync(fullFilePath);
@@ -62,7 +66,7 @@ async function addFile(username, filePath, sourceFilePath, mtime) {
     }
 
     try {
-        await fs.ensureDir(fullFilePath);
+        await fs.ensureDir(path.dirname(fullFilePath));
         await fs.copy(sourceFilePath, fullFilePath);
     } catch (error) {
         throw new MainError(MainError.FS_ERROR, error);

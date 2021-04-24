@@ -11,7 +11,7 @@
             <span class="p-buttonset p-d-none p-d-md-flex">
                 <Button class="p-button-sm" label="Upload File" icon="pi pi-upload" @click="onUpload"/>
                 <Button class="p-button-sm" label="Upload Folder" icon="pi pi-cloud-upload" @click="onUploadFolder"/>
-                <Button class="p-button-sm" label="New Folder" icon="pi pi-plus" @click="openNewFolderDialog"/>
+                <Button class="p-button-sm" label="New Folder" icon="pi pi-plus" @click="onNewFolder"/>
             </span>
             <Button icon="pi pi-ellipsis-h" class="p-ml-2 p-button-sm p-button-outlined" @click="toggleMenu"/>
             <Menu ref="menu" :model="mainMenu" :popup="true"/>
@@ -79,6 +79,15 @@ export default {
         },
         toggleMenu(event) {
             this.$refs.menu.toggle(event);
+        },
+        onUpload() {
+            this.$emit('upload');
+        },
+        onUploadFolder() {
+            this.$emit('upload-folder');
+        },
+        onNewFolder() {
+            this.$emit('new-folder');
         }
     },
     mounted() {

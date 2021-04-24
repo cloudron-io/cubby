@@ -1,7 +1,6 @@
 <template>
   <input type="file" ref="upload" style="display: none" multiple/>
   <input type="file" ref="uploadFolder" style="display: none" multiple webkitdirectory directory/>
-  <input type="file" ref="uploadFavicon" style="display: none"/>
 
   <!-- This is re-used and thus global -->
   <ConfirmDialog></ConfirmDialog>
@@ -17,7 +16,7 @@
       <Button icon="pi pi-share-alt" class="" label="Shared"/>
     </div>
     <div class="content">
-      <MainToolbar @logout="onLogout"/>
+      <MainToolbar @logout="onLogout" @upload="onUpload" @upload-folder="onUploadFolder"/>
       <div class="container">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
@@ -25,10 +24,12 @@
         </div>
         <SideBar :entry="activeEntry" :visible="sideBarVisible"/>
       </div>
-      <div class="upload">
-        <ProgressBar :value="uploadPercent">
-          Uploading: {{uploadPercent}}%
-        </ProgressBar>
+      <div class="upload" v-show="uploadStatus.busy">
+        <div v-show="uploadStatus.uploadListCount">
+          <i class="pi pi-spin pi-spinner"></i> Fetching file information for upload <span class="p-badge">{{ uploadStatus.uploadListCount }}</span>
+        </div>
+        <div style="margin-right: 10px;" v-show="!uploadStatus.uploadListCount">Uploading {{ uploadStatus.count }} files ({{ Math.round(uploadStatus.done/1000/1000) }}MB / {{ Math.round(uploadStatus.size/1000/1000) }}MB)</div>
+        <ProgressBar :value="uploadStatus.percentDone" v-show="!uploadStatus.uploadListCount">{{uploadStatus.percentDone}}%</ProgressBar>
       </div>
     </div>
   </div>
@@ -38,6 +39,7 @@
 <script>
 
 import superagent from 'superagent';
+import { eachLimit } from 'async';
 import { encode, getPreviewUrl, getExtension } from './utils.js';
 
 function sanitize(path) {
@@ -56,7 +58,13 @@ export default {
                 displayName: '',
                 email: ''
             },
-            uploadPercent: 23,
+            uploadStatus: {
+                busy: false,
+                count: 0,
+                done: 0,
+                percentDone: 50,
+                uploadListCount: 0
+            },
             error: '',
             entry: {
                 files: []
@@ -88,26 +96,94 @@ export default {
             // TODO maybe allow direct entry path
             this.openEntry('/');
         },
+        onUpload: function () {
+            // reset the form first to make the change handler retrigger even on the same file selected
+            this.$refs.upload.value = '';
+            this.$refs.upload.click();
+        },
+        onUploadFolder: function () {
+            // reset the form first to make the change handler retrigger even on the same file selected
+            this.$refs.uploadFolder.value = '';
+            this.$refs.uploadFolder.click();
+        },
         onSelectionChanged: function (selectedEntries) {
             this.activeEntry = selectedEntries[0];
         },
         onToggleSideBar: function () {
             this.sideBarVisible = !this.sideBarVisible;
         },
+        uploadFiles: function (files, targetPath) {
+            var that = this;
+
+            if (!files || !files.length) return;
+
+            targetPath = targetPath || that.currentPath;
+
+            that.uploadStatus.busy = true;
+            that.uploadStatus.count = files.length;
+            that.uploadStatus.size = 0;
+            that.uploadStatus.done = 0;
+            that.uploadStatus.percentDone = 0;
+
+            for (var i = 0; i < files.length; ++i) {
+                that.uploadStatus.size += files[i].size;
+            }
+
+            eachLimit(files, 10, function (file, callback) {
+                var path = sanitize(targetPath + '/' + (file.webkitRelativePath || file.name));
+
+                var formData = new FormData();
+                formData.append('file', file);
+
+                var finishedUploadSize = 0;
+
+                superagent.post('/api/v1/files')
+                  .query({ path: path, access_token: localStorage.accessToken })
+                  .send(formData)
+                  .on('progress', function (event) {
+                    // only handle upload events
+                    if (!(event.target instanceof XMLHttpRequestUpload)) return;
+
+                    that.uploadStatus.done += event.loaded - finishedUploadSize;
+                    // keep track of progress diff not absolute
+                    finishedUploadSize = event.loaded;
+
+                    var tmp = Math.round(that.uploadStatus.done / that.uploadStatus.size * 100);
+                    that.uploadStatus.percentDone = tmp > 100 ? 100 : tmp;
+                }).end(function (error, result) {
+                    if (result && result.statusCode === 401) return that.logout();
+                    if (result && result.statusCode !== 201) return callback('Error uploading file: ', result.statusCode);
+                    if (error) return callback(error);
+
+                    callback();
+                });
+            }, function (error) {
+                if (error) console.error(error);
+
+                that.uploadStatus.busy = false;
+                that.uploadStatus.count = 0;
+                that.uploadStatus.size = 0;
+                that.uploadStatus.done = 0;
+                that.uploadStatus.percentDone = 100;
+
+                that.refresh();
+            });
+        },
         onDelete: function (entry) {
             var that = this;
 
             var filePath = sanitize(that.currentPath + '/' + entry.fileName);
-
-            console.log('==', filePath)
 
             superagent.del('/api/v1/files').query({ path: filePath, access_token: localStorage.accessToken }).end(function (error, result) {
                 if (result && result.statusCode === 401) return that.logout();
                 if (result && result.statusCode !== 200) return that.error('Error deleting file or folder');
                 if (error) return that.error(error.message);
 
-                that.openEntry(that.currentPath);
+                that.refresh();
             });
+        },
+        refresh: function () {
+            this.openEntry(this.currentPath);
         },
         openEntry: function (filePath) {
             var that = this;
@@ -144,50 +220,14 @@ export default {
     mounted() {
         var that = this;
 
-        // var dummy = [
-        //   {
-        //     "isDirectory": true,
-        //     "isFile": false,
-        //     "atime": "2021-04-15T23:31:42.516Z",
-        //     "mtime": "2020-11-18T19:49:55.439Z",
-        //     "ctime": "2021-04-13T14:21:09.436Z",
-        //     "birthtime": "2020-11-18T19:49:48.347Z",
-        //     "size": 4096,
-        //     "fileName": "fotos",
-        //     "filePath": "/fotos"
-        //   },
-        //   {
-        //     "isDirectory": false,
-        //     "isFile": true,
-        //     "atime": "2021-04-16T07:01:09.553Z",
-        //     "mtime": "2021-03-15T12:43:50.230Z",
-        //     "ctime": "2021-04-13T14:21:09.436Z",
-        //     "birthtime": "2021-03-15T12:43:50.230Z",
-        //     "size": 9,
-        //     "fileName": "index.html",
-        //     "filePath": "/index.html"
-        //   },
-        //   {
-        //     "isDirectory": false,
-        //     "isFile": true,
-        //     "atime": "2021-04-16T17:26:19.780Z",
-        //     "mtime": "2020-05-26T20:22:59.086Z",
-        //     "ctime": "2021-04-13T14:21:09.436Z",
-        //     "birthtime": "2020-05-26T20:22:59.078Z",
-        //     "size": 220600,
-        //     "fileName": "orange.jpg",
-        //     "filePath": "/orange.jpg"
-        //   },
-        // ];
+        // upload input event handler
+        this.$refs.upload.addEventListener('change', function () {
+            that.uploadFiles(that.$refs.upload.files || []);
+        });
 
-        // this.entries = dummy.map(function (entry) {
-        //     entry.previewUrl = getPreviewUrl(entry, '/');
-        //     entry.extension = getExtension(entry);
-        //     entry.rename = false;
-        //     entry.filePathNew = entry.fileName;
-        //     entry.filePath = encode(entry.filePath);
-        //     return entry;
-        // });
+        this.$refs.uploadFolder.addEventListener('change', function () {
+            that.uploadFiles(that.$refs.uploadFolder.files || []);
+        });
 
         if (!localStorage.accessToken) {
             this.ready = true;
