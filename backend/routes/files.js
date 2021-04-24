@@ -48,7 +48,7 @@ async function add(req, res, next) {
     next(new HttpSuccess(200, {}));
 }
 
-function get(req, res, next) {
+async function get(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
     var raw = boolLike(req.query.raw);
@@ -58,24 +58,27 @@ function get(req, res, next) {
 
     debug('get:', filePath);
 
-    files.get(req.user.username, filePath, function (error, result) {
-        if (error && error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'not found'));
-        if (error) return next(new HttpError(500, error));
+    let result;
 
-        if (raw) {
-            if (result.isDirectory) return next(new HttpError(417, 'raw is not supported for directories'));
+    try {
+        result = await files.get(req.user.username, filePath);
+    } catch (error) {
+        if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'not found'));
+        return next(new HttpError(500, error));
+    }
 
-            return res.sendFile(result._fullFilePath);
-        }
+    if (raw) {
+        if (result.isDirectory) return next(new HttpError(417, 'raw is not supported for directories'));
+        return res.sendFile(result._fullFilePath);
+    }
 
-        // remove private fields
-        delete result._fullFilePath;
+    // remove private fields
+    delete result._fullFilePath;
 
-        return next(new HttpSuccess(200, result));
-    });
+    next(new HttpSuccess(200, result));
 }
 
-function update(req, res, next) {
+async function update(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
     var filePath = req.query.path;

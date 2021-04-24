@@ -78,16 +78,16 @@ async function addFile(username, filePath, sourceFilePath, mtime) {
     }
 }
 
-function getDirectory(fullFilePath, filePath, stats, callback) {
+async function getDirectory(fullFilePath, filePath, stats) {
     assert.strictEqual(typeof fullFilePath, 'string');
     assert.strictEqual(typeof filePath, 'string');
     assert.strictEqual(typeof stats, 'object');
-    assert.strictEqual(typeof callback, 'function');
 
-    fs.readdir(fullFilePath, function (error, result) {
-        if (error) return callback(new MainError(MainError.FS_ERROR, error));
+    let files;
 
-        var files = result.map(function (file) {
+    try {
+        const contents = await fs.readdir(fullFilePath);
+        files = contents.map(function (file) {
             try {
                 var stat = fs.statSync(path.join(fullFilePath, file));
                 return { name: file, stat: stat };
@@ -105,25 +105,26 @@ function getDirectory(fullFilePath, filePath, stats, callback) {
                 isFile: file.stat.isFile()
             };
         });
+    } catch (error) {
+        throw new MainError(MainError.FS_ERROR, error);
+    }
 
-        callback(null, {
-            _fullFilePath: fullFilePath,
-            fileName: path.basename(filePath),
-            filePath: filePath,
-            size: stats.size,
-            mtime: stats.mtime,
-            isDirectory: true,
-            isFile: false,
-            files: files
-        });
-    });
+    return {
+        _fullFilePath: fullFilePath,
+        fileName: path.basename(filePath),
+        filePath: filePath,
+        size: stats.size,
+        mtime: stats.mtime,
+        isDirectory: true,
+        isFile: false,
+        files: files
+    };
 }
 
-function getFile(fullFilePath, filePath, stats, callback) {
+async function getFile(fullFilePath, filePath, stats) {
     assert.strictEqual(typeof fullFilePath, 'string');
     assert.strictEqual(typeof filePath, 'string');
     assert.strictEqual(typeof stats, 'object');
-    assert.strictEqual(typeof callback, 'function');
 
     var file = {
         _fullFilePath: fullFilePath,
@@ -135,28 +136,26 @@ function getFile(fullFilePath, filePath, stats, callback) {
         isFile: stats.isFile()
     };
 
-    callback(null, file);
+    return file;
 }
 
-function get(username, filePath, callback) {
+async function get(username, filePath) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof filePath, 'string');
-    assert.strictEqual(typeof callback, 'function');
 
     debug(`file: get ${username} ${filePath}`);
 
     const fullFilePath = getValidFullPath(username, filePath);
-    if (!fullFilePath) return callback(new MainError(MainError.INVALID_PATH));
+    if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);
 
-    fs.stat(fullFilePath, function (error, result) {
-        if (error && error.code === 'ENOENT') return callback(new MainError(MainError.NOT_FOUND));
-        if (error) return callback(new MainError(MainError.FS_ERROR, error));
-
-        if (result.isDirectory()) return getDirectory(fullFilePath, filePath, result, callback);
-        if (result.isFile()) return getFile(fullFilePath, filePath, result, callback);
-
-        return callback(new MainError(MainError.FS_ERROR, 'unsupported type'));
-    });
+    try {
+        const stat = await fs.stat(fullFilePath);
+        if (stat.isDirectory()) return await getDirectory(fullFilePath, filePath, stat);
+        if (stat.isFile()) return await getFile(fullFilePath, filePath, stat);
+    } catch (error) {
+        if (error.code === 'ENOENT') throw new MainError(MainError.NOT_FOUND);
+        throw new MainError(MainError.FS_ERROR, error);
+    }
 }
 
 function update(username, filePath, callback) {

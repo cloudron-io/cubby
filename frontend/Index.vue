@@ -84,6 +84,9 @@ export default {
 
             // stash locally
             localStorage.accessToken = accessToken;
+
+            // TODO maybe allow direct entry path
+            this.openEntry('/');
         },
         onSelectionChanged: function (selectedEntries) {
             this.activeEntry = selectedEntries[0];
