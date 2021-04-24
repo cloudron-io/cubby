@@ -20,7 +20,7 @@
       <div class="container">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
-          <EntryList :entries="entry.files" sort-folders-first="true" @entry-delete="onDelete" @selection-changed="onSelectionChanged" editable/>
+          <EntryList :entries="entry.files" sort-folders-first="true" @entry-activated="openEntry" @entry-delete="onDelete" @selection-changed="onSelectionChanged" editable/>
         </div>
         <SideBar :entry="activeEntry" :visible="sideBarVisible"/>
       </div>
@@ -94,7 +94,7 @@ export default {
             localStorage.accessToken = accessToken;
 
             // TODO maybe allow direct entry path
-            this.openEntry('/');
+            this.refresh();
         },
         onUpload: function () {
             // reset the form first to make the change handler retrigger even on the same file selected
@@ -182,11 +182,10 @@ export default {
                 that.refresh();
             });
         },
-        refresh: function () {
-            this.openEntry(this.currentPath);
-        },
-        openEntry: function (filePath) {
+        refresh: function (path) {
             var that = this;
+
+            var filePath = path || that.currentPath || '/';
 
             superagent.get('/api/v1/files').query({ path: filePath, access_token: that.accessToken }).end(function (error, result) {
                 if (error) {
@@ -215,6 +214,11 @@ export default {
 
                 that.entry = result.body;
             });
+        },
+        openEntry: function (entry) {
+            if (entry.isDirectory) return this.refresh(entry.filePath);
+
+            console.log('open', entry);
         }
     },
     mounted() {
@@ -249,7 +253,7 @@ export default {
 
             that.ready = true;
 
-            that.openEntry('/');
+            that.refresh();
         });
     }
 };
