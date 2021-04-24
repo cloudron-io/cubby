@@ -29,7 +29,7 @@ export default {
         return {
             username: '',
             password: '',
-            error: '',
+            error: false,
             busy: false
         };
     },
@@ -37,7 +37,7 @@ export default {
         onLogin() {
             var that = this;
 
-            that.error = true;
+            that.error = false;
             that.busy = true;
 
             superagent.post('/api/v1/login', { username: this.username, password: this.password }).end(function (error, result) {
@@ -51,6 +51,9 @@ export default {
                 if (error) return console.error(error);
 
                 that.$emit('success', result.body.accessToken, result.body.user);
+
+                that.username = '';
+                that.password = '';
             });
         }
     },
