@@ -1,20 +1,18 @@
 <template>
     <Toolbar>
         <template #left>
-            <span class="p-input-icon-left">
-                <i class="pi pi-search" />
-                <InputText type="text" v-model="search" placeholder="Search" />
-            </span>
+          <Button icon="pi pi-chevron-left" class="p-mr-2 p-button-sm" :disabled="breadCrumbs.items.length === 0" @click="onUp"/>
+          <Breadcrumb :home="breadCrumbs.home" :model="breadCrumbs.items"/>
         </template>
 
         <template #right>
-            <span class="p-buttonset p-d-none p-d-md-flex">
-                <Button class="p-button-sm" label="Upload File" icon="pi pi-upload" @click="onUpload"/>
-                <Button class="p-button-sm" label="Upload Folder" icon="pi pi-cloud-upload" @click="onUploadFolder"/>
-                <Button class="p-button-sm" label="New Folder" icon="pi pi-plus" @click="onNewFolder"/>
-            </span>
-            <Button icon="pi pi-ellipsis-h" class="p-ml-2 p-button-sm p-button-outlined" @click="toggleMenu"/>
-            <Menu ref="menu" :model="mainMenu" :popup="true"/>
+            <Button icon="pi pi-upload" class="p-ml-2 p-button-sm" label="Upload" @click="onToggleMenuUpload"/>
+            <Button icon="pi pi-plus" class="p-ml-2 p-button-sm" label="New" @click="onToggleMenuNew"/>
+            <Button icon="pi pi-ellipsis-h" class="p-ml-2 p-button-sm p-button-outlined" @click="onToggleMenuMain"/>
+
+            <Menu ref="menuUpload" :model="uploadMenu" :popup="true"/>
+            <Menu ref="menuNew" :model="newMenu" :popup="true"/>
+            <Menu ref="menuMain" :model="mainMenu" :popup="true"/>
         </template>
     </Toolbar>
 
@@ -32,14 +30,36 @@
 
 <script>
 
+import { sanitize } from '../utils.js';
+
 export default {
     name: 'MainToolbar',
-    emits: [ 'logout' ],
+    emits: [ 'logout', 'upload', 'upload-folder', 'new-folder' ],
+    props: {
+        currentPath: {
+            type: String,
+            default: ''
+        }
+    },
+    watch: {
+        currentPath(newCurrentPath) {
+            this.breadCrumbs.items = sanitize(newCurrentPath).split('/').slice(1).map(function (e, i, a) {
+                return {
+                    label: e,
+                    url: '#' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
+                };
+            });
+        }
+    },
     data() {
         return {
             search: '',
             aboutDialog: {
                 visible: false
+            },
+            breadCrumbs: {
+                home: { icon: 'pi pi-home', url: '#/' },
+                items: []
             },
             mainMenu: [{
                 label: 'Upload File',
@@ -70,18 +90,45 @@ export default {
                 label: 'Logout',
                 icon: 'pi pi-sign-out',
                 command: this.onLogout
+            }],
+            newMenu: [{
+                label: 'New File',
+                icon: 'pi pi-file',
+                command: () => console.log('TODO')
+            }, {
+                label: 'New Folder',
+                icon: 'pi pi-folder',
+                command: () => console.log('TODO')
+            }],
+            uploadMenu: [{
+                label: 'Upload File',
+                icon: 'pi pi-file',
+                command: () => this.onUploadFile()
+            }, {
+                label: 'Upload Folder',
+                icon: 'pi pi-folder',
+                command: () => this.onUploadFolder()
             }]
         };
     },
     methods: {
+        onToggleMenuUpload(event) {
+            this.$refs.menuUpload.toggle(event);
+        },
+        onToggleMenuNew(event) {
+            this.$refs.menuNew.toggle(event);
+        },
+        onToggleMenuMain(event) {
+            this.$refs.menuMain.toggle(event);
+        },
         onLogout() {
             this.$emit('logout');
         },
-        toggleMenu(event) {
-            this.$refs.menu.toggle(event);
+        onUp() {
+            window.location.hash = sanitize(this.currentPath.split('/').slice(0, -1).filter(function (p) { return !!p; }).join('/'));
         },
-        onUpload() {
-            this.$emit('upload');
+        onUploadFile() {
+            this.$emit('upload-file');
         },
         onUploadFolder() {
             this.$emit('upload-folder');

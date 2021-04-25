@@ -11,12 +11,22 @@
   <div class="container" v-show="ready && profile.username">
     <div class="sidebar">
       <h1 style="margin-bottom: 50px;">Cubby</h1>
+
       <Button icon="pi pi-folder-open" class="" label="All Files"/>
       <Button icon="pi pi-clock" class="" label="Recent"/>
       <Button icon="pi pi-share-alt" class="" label="Shared"/>
+
+      <div style="flex-grow: 1">&nbsp;</div>
+
+      <div class="p-fluid">
+        <span class="p-input-icon-left">
+          <i class="pi pi-search" />
+          <InputText type="text" v-model="search" placeholder="Search" />
+        </span>
+      </div>
     </div>
     <div class="content">
-      <MainToolbar @logout="onLogout" @upload="onUpload" @upload-folder="onUploadFolder"/>
+      <MainToolbar :currentPath="currentPath" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder"/>
       <div class="container">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
@@ -40,12 +50,7 @@
 
 import superagent from 'superagent';
 import { eachLimit } from 'async';
-import { encode, getPreviewUrl, getExtension } from './utils.js';
-
-function sanitize(path) {
-    path = '/' + path;
-    return path.replace(/\/+/g, '/');
-}
+import { encode, getPreviewUrl, getExtension, sanitize } from './utils.js';
 
 export default {
     name: 'Index',
@@ -53,6 +58,7 @@ export default {
         return {
             ready: false,
             accessToken: '',
+            search: '',
             profile: {
                 username: '',
                 displayName: '',
@@ -96,7 +102,7 @@ export default {
             // TODO maybe allow direct entry path
             this.refresh();
         },
-        onUpload: function () {
+        onUploadFile: function () {
             // reset the form first to make the change handler retrigger even on the same file selected
             this.$refs.upload.value = '';
             this.$refs.upload.click();
@@ -187,6 +193,8 @@ export default {
 
             var filePath = path || that.currentPath || '/';
 
+            window.location.hash = filePath;
+
             superagent.get('/api/v1/files').query({ path: filePath, access_token: that.accessToken }).end(function (error, result) {
                 if (error) {
                     that.entries = [];
@@ -232,6 +240,10 @@ export default {
         this.$refs.uploadFolder.addEventListener('change', function () {
             that.uploadFiles(that.$refs.uploadFolder.files || []);
         });
+
+        window.addEventListener('hashchange', function () {
+            that.refresh(window.location.hash.slice(1));
+        }, false);
 
         if (!localStorage.accessToken) {
             this.ready = true;

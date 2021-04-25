@@ -58,11 +58,12 @@ const mimeTypes = {
     video: [ '.mp4', '.mpg', '.mpeg', '.mkv', '.avi', '.mov' ]
 };
 
-function getPreviewUrl(entry, basePath) {
+function getPreviewUrl(entry/*, basePath*/) {
     var path = '/mime-types/';
 
     if (entry.isDirectory) return path + 'directory.png';
-    if (mimeTypes.images.some(function (e) { return entry.fileName.endsWith(e); })) return encode(sanitize(basePath + '/' + entry.fileName));
+    // if (mimeTypes.images.some(function (e) { return entry.fileName.endsWith(e); })) return encode(sanitize(basePath + '/' + entry.fileName));
+    if (mimeTypes.images.some(function (e) { return entry.fileName.endsWith(e); })) return path +'image.png';
     if (mimeTypes.text.some(function (e) { return entry.fileName.endsWith(e); })) return path +'text.png';
     if (mimeTypes.pdf.some(function (e) { return entry.fileName.endsWith(e); })) return path + 'pdf.png';
     if (mimeTypes.html.some(function (e) { return entry.fileName.endsWith(e); })) return path + 'html.png';
