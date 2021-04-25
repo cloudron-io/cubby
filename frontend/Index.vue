@@ -12,7 +12,7 @@
     <div class="sidebar">
       <h1 style="margin-bottom: 50px;">Cubby</h1>
 
-      <Button icon="pi pi-folder-open" class="" label="All Files"/>
+      <Button icon="pi pi-folder-open" class="" label="All Files" @click="showAllFiles"/>
       <Button icon="pi pi-clock" class="" label="Recent"/>
       <Button icon="pi pi-share-alt" class="" label="Shared"/>
 
@@ -81,7 +81,10 @@ export default {
         };
     },
     methods: {
-        onLogout: function () {
+        showAllFiles() {
+            window.location.hash = '/';
+        },
+        onLogout() {
             this.accessToken = '';
             this.profile.username = '';
             this.profile.email = '';
@@ -89,7 +92,7 @@ export default {
 
             delete localStorage.accessToken;
         },
-        onLoggedIn: function (accessToken, profile) {
+        onLoggedIn(accessToken, profile) {
             this.accessToken = accessToken;
 
             this.profile.username = profile.username;
@@ -102,23 +105,23 @@ export default {
             // TODO maybe allow direct entry path
             this.refresh();
         },
-        onUploadFile: function () {
+        onUploadFile() {
             // reset the form first to make the change handler retrigger even on the same file selected
             this.$refs.upload.value = '';
             this.$refs.upload.click();
         },
-        onUploadFolder: function () {
+        onUploadFolder() {
             // reset the form first to make the change handler retrigger even on the same file selected
             this.$refs.uploadFolder.value = '';
             this.$refs.uploadFolder.click();
         },
-        onSelectionChanged: function (selectedEntries) {
+        onSelectionChanged(selectedEntries) {
             this.activeEntry = selectedEntries[0];
         },
-        onToggleSideBar: function () {
+        onToggleSideBar() {
             this.sideBarVisible = !this.sideBarVisible;
         },
-        uploadFiles: function (files, targetPath) {
+        uploadFiles(files, targetPath) {
             var that = this;
 
             if (!files || !files.length) return;
@@ -175,7 +178,7 @@ export default {
                 that.refresh();
             });
         },
-        onDelete: function (entry) {
+        onDelete(entry) {
             var that = this;
 
             var filePath = sanitize(that.currentPath + '/' + entry.fileName);
@@ -188,7 +191,7 @@ export default {
                 that.refresh();
             });
         },
-        refresh: function (path) {
+        refresh(path) {
             var that = this;
 
             var filePath = path || that.currentPath || '/';
@@ -223,7 +226,7 @@ export default {
                 that.entry = result.body;
             });
         },
-        openEntry: function (entry) {
+        openEntry(entry) {
             if (entry.isDirectory) return this.refresh(entry.filePath);
 
             console.log('open', entry);
