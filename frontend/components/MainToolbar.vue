@@ -8,7 +8,7 @@
         <template #right>
             <Button icon="pi pi-upload" class="p-ml-2 p-button-sm" label="Upload" @click="onToggleMenuUpload"/>
             <Button icon="pi pi-plus" class="p-ml-2 p-button-sm" label="New" @click="onToggleMenuNew"/>
-            <Button icon="pi pi-ellipsis-h" class="p-ml-2 p-button-sm p-button-outlined" @click="onToggleMenuMain"/>
+            <Button icon="pi pi-ellipsis-h" class="p-ml-6 p-button-sm p-button-outlined" @click="onToggleMenuMain"/>
 
             <Menu ref="menuUpload" :model="uploadMenu" :popup="true"/>
             <Menu ref="menuNew" :model="newMenu" :popup="true"/>
