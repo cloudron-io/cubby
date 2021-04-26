@@ -34,7 +34,7 @@ import { sanitize } from '../utils.js';
 
 export default {
     name: 'MainToolbar',
-    emits: [ 'logout', 'upload', 'upload-folder', 'new-folder' ],
+    emits: [ 'logout', 'upload-file', 'upload-folder', 'new-file', 'new-folder' ],
     props: {
         currentPath: {
             type: String,
@@ -94,11 +94,11 @@ export default {
             newMenu: [{
                 label: 'New File',
                 icon: 'pi pi-file',
-                command: () => console.log('TODO')
+                command: () => this.onNewFile()
             }, {
                 label: 'New Folder',
                 icon: 'pi pi-folder',
-                command: () => console.log('TODO')
+                command: () => this.onNewFolder()
             }],
             uploadMenu: [{
                 label: 'Upload File',
@@ -132,6 +132,9 @@ export default {
         },
         onUploadFolder() {
             this.$emit('upload-folder');
+        },
+        onNewFile() {
+            this.$emit('new-file');
         },
         onNewFolder() {
             this.$emit('new-folder');

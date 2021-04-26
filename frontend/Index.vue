@@ -26,7 +26,7 @@
       </div>
     </div>
     <div class="content">
-      <MainToolbar :currentPath="currentPath" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder"/>
+      <MainToolbar :currentPath="currentPath" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @new-folder="onNewFolder"/>
       <div class="container">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
@@ -44,6 +44,37 @@
     </div>
   </div>
 
+  <!-- New File Dialog -->
+  <Dialog header="New Filename" v-model:visible="newFileDialog.visible" :dismissableMask="true" :closable="true" :style="{width: '350px'}" :modal="true">
+    <form @submit="onSaveNewFileDialog" @submit.prevent>
+      <div class="p-fluid">
+        <div class="p-field">
+          <InputText type="text" v-model="newFileDialog.fileName" autofocus required :class="{ 'p-invalid': newFileDialog.error }"/>
+          <small class="p-invalid" v-show="newFileDialog.error">{{ newFileDialog.error }}</small>
+        </div>
+      </div>
+    </form>
+    <template #footer>
+      <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="newFileDialog.visible = false"/>
+      <Button label="Create" icon="pi pi-check" class="p-button-text p-button-success" @click="onSaveNewFileDialog" :disabled="!newFileDialog.fileName"/>
+    </template>
+  </Dialog>
+
+  <!-- New Folder Dialog -->
+  <Dialog header="New Foldername" v-model:visible="newFolderDialog.visible" :dismissableMask="true" :closable="true" :style="{width: '350px'}" :modal="true">
+    <form @submit="onSaveNewFolderDialog" @submit.prevent>
+      <div class="p-fluid">
+        <div class="p-field">
+          <InputText type="text" v-model="newFolderDialog.folderName" autofocus required :class="{ 'p-invalid': newFolderDialog.error }"/>
+          <small class="p-invalid" v-show="newFolderDialog.error">{{ newFolderDialog.error }}</small>
+        </div>
+      </div>
+    </form>
+    <template #footer>
+      <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="newFolderDialog.visible = false"/>
+      <Button label="Create" icon="pi pi-check" class="p-button-text p-button-success" @click="onSaveNewFolderDialog" :disabled="!newFolderDialog.folderName"/>
+    </template>
+  </Dialog>
 </template>
 
 <script>
@@ -77,7 +108,17 @@ export default {
             },
             currentPath: '/',
             activeEntry: {},
-            sideBarVisible: true
+            sideBarVisible: true,
+            newFileDialog: {
+                visible: false,
+                error: '',
+                fileName: ''
+            },
+            newFolderDialog: {
+                visible: false,
+                error: '',
+                folderName: ''
+            }
         };
     },
     methods: {
@@ -109,6 +150,50 @@ export default {
             // reset the form first to make the change handler retrigger even on the same file selected
             this.$refs.upload.value = '';
             this.$refs.upload.click();
+        },
+        onNewFile() {
+            this.newFileDialog.error = '';
+            this.newFileDialog.fileName = '';
+            this.newFileDialog.visible = true;
+        },
+        onNewFolder() {
+            this.newFolderDialog.error = '';
+            this.newFolderDialog.folderName = '';
+            this.newFolderDialog.visible = true;
+        },
+        onSaveNewFileDialog: function () {
+            var that = this;
+
+            var path = sanitize(this.currentPath + '/' + this.newFileDialog.folderName);
+
+            superagent.post('/api/v1/files').query({ path: path, access_token: localStorage.accessToken }).end(function (error, result) {
+                if (result && result.statusCode === 401) return that.onLogout();
+                if (result && result.statusCode === 403) return that.newFilDialog.error = 'File name not allowed';
+                if (result && result.statusCode === 409) return that.newFilDialog.error = 'File already exists';
+                if (result && result.statusCode !== 200) return that.newFilDialog.error = 'Error creating file: ' + result.statusCode;
+                if (error) return console.error(error.message);
+
+                that.refresh();
+
+                that.newFileDialog.visible = false;
+            });
+        },
+        onSaveNewFolderDialog: function () {
+            var that = this;
+
+            var path = sanitize(this.currentPath + '/' + this.newFolderDialog.folderName);
+
+            superagent.post('/api/v1/files').query({ path: path, access_token: localStorage.accessToken, directory: true }).end(function (error, result) {
+                if (result && result.statusCode === 401) return that.onLogout();
+                if (result && result.statusCode === 403) return that.newFolderDialog.error = 'Folder name not allowed';
+                if (result && result.statusCode === 409) return that.newFolderDialog.error = 'Folder already exists';
+                if (result && result.statusCode !== 200) return that.newFolderDialog.error = 'Error creating folder: ' + result.statusCode;
+                if (error) return console.error(error.message);
+
+                that.refresh();
+
+                that.newFolderDialog.visible = false;
+            });
         },
         onUploadFolder() {
             // reset the form first to make the change handler retrigger even on the same file selected
