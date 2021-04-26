@@ -283,7 +283,7 @@ export default {
 
             window.location.hash = filePath;
 
-            superagent.get('/api/v1/files').query({ path: filePath, access_token: that.accessToken }).end(function (error, result) {
+            superagent.get('/api/v1/files').query({ path: encode(filePath), access_token: that.accessToken }).end(function (error, result) {
                 if (error) {
                     that.entries = [];
 
@@ -302,7 +302,6 @@ export default {
                         entry.extension = getExtension(entry);
                         entry.rename = false;
                         entry.filePathNew = entry.fileName;
-                        entry.filePath = encode(entry.filePath);
                     });
                 } else {
                     result.body.files = [];

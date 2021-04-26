@@ -27,7 +27,7 @@ async function add(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
     var directory = boolLike(req.query.directory);
-    var filePath = req.query.path;
+    var filePath = decodeURIComponent(req.query.path);
 
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
     if (!(req.files && req.files.file) && !directory) return next(new HttpError(400, 'missing file or directory'));
@@ -52,7 +52,7 @@ async function get(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
     var raw = boolLike(req.query.raw);
-    var filePath = req.query.path;
+    var filePath = decodeURIComponent(req.query.path);
 
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
 
@@ -81,7 +81,7 @@ async function get(req, res, next) {
 async function update(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
-    var filePath = req.query.path;
+    var filePath = decodeURIComponent(req.query.path);
 
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
 
@@ -91,7 +91,7 @@ async function update(req, res, next) {
 async function remove(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
-    var filePath = req.query.path;
+    var filePath = decodeURIComponent(req.query.path);
 
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
 

@@ -43,6 +43,7 @@ export default {
     },
     watch: {
         currentPath(newCurrentPath) {
+            console.log(newCurrentPath)
             this.breadCrumbs.items = sanitize(newCurrentPath).split('/').slice(1).map(function (e, i, a) {
                 return {
                     label: e,
