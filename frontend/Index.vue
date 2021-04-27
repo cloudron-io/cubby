@@ -143,8 +143,7 @@ export default {
             // stash locally
             localStorage.accessToken = accessToken;
 
-            // TODO maybe allow direct entry path
-            this.refresh();
+            this.refresh(window.location.hash.slice(1));
         },
         onUploadFile() {
             // reset the form first to make the change handler retrigger even on the same file selected
@@ -368,7 +367,7 @@ export default {
 
             that.ready = true;
 
-            that.refresh();
+            that.refresh(window.location.hash.slice(1));
         });
     }
 };
