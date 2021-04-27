@@ -335,7 +335,8 @@ export default {
                 this.viewer = 'image';
                 this.activeEntry = entry;
             } else {
-                console.log('TODO');
+                console.log('TODO implement viewer');
+                window.open('/api/v1/files?raw=1&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(entry.filePath));
             }
         },
         onViewerClose() {
