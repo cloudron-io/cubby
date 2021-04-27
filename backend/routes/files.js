@@ -56,7 +56,7 @@ async function get(req, res, next) {
 
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
 
-    debug('get:', filePath);
+    debug(`get: ${filePath} raw:${raw}`);
 
     let result;
 

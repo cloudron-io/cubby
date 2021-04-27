@@ -26,7 +26,7 @@
       </div>
     </div>
     <div class="content">
-      <MainToolbar :currentPath="currentPath" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @new-folder="onNewFolder"/>
+      <MainToolbar :currentPath="currentPath" :displayName="profile.displayName" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @new-folder="onNewFolder"/>
       <div class="container">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
@@ -386,7 +386,7 @@ export default {
 
 </script>
 
-<style>
+<style scoped>
 
 hr {
     border: none;

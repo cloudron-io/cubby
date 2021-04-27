@@ -8,7 +8,7 @@
         <template #right>
             <Button icon="pi pi-upload" class="p-ml-2 p-button-sm" label="Upload" @click="onToggleMenuUpload"/>
             <Button icon="pi pi-plus" class="p-ml-2 p-button-sm" label="New" @click="onToggleMenuNew"/>
-            <Button icon="pi pi-ellipsis-h" class="p-ml-6 p-button-sm p-button-outlined" @click="onToggleMenuMain"/>
+            <Button icon="pi pi-user" class="p-ml-6 p-button-sm p-button-outlined" @click="onToggleMenuMain"/>
 
             <Menu ref="menuUpload" :model="uploadMenu" :popup="true"/>
             <Menu ref="menuNew" :model="newMenu" :popup="true"/>
@@ -39,6 +39,9 @@ export default {
         currentPath: {
             type: String,
             default: ''
+        },
+        displayName: {
+            type: String
         }
     },
     watch: {
@@ -49,6 +52,9 @@ export default {
                     url: '#' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
                 };
             });
+        },
+        displayName(newDisplayName) {
+            this.mainMenu[0].label = newDisplayName;
         }
     },
     data() {
@@ -62,24 +68,11 @@ export default {
                 items: []
             },
             mainMenu: [{
-                label: 'Upload File',
-                icon: 'pi pi-upload',
-                command: () => console.log('TODO'),
-                class: 'p-d-md-none'
-            }, {
-                label: 'Upload Folder',
-                icon: 'pi pi-cloud-upload',
-                command: () => console.log('TODO'),
-                class: 'p-d-md-none'
-            }, {
-                label: 'New Folder',
-                icon: 'pi pi-plus',
-                command: () => console.log('TODO'),
-                class: 'p-d-md-none'
-            }, {
-                label: 'Settings',
-                icon: 'pi pi-cog',
-                command: () => console.log('TODO')
+                // the position of this item is used when profile is fetched
+                label: 'Display Name',
+                icon: 'pi pi-user',
+                disabled: true,
+                class: 'menu-profile-item'
             }, {
                 separator: true
             }, {
@@ -152,6 +145,15 @@ export default {
     max-width: 480px;
     margin: auto;
     padding: 20px;
+}
+
+</style>
+
+<!-- WARNING those are not scoped, but menu DOM elements are taken out -->
+<style>
+
+.menu-profile-item > a {
+    opacity: 1;
 }
 
 </style>
