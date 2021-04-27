@@ -81,7 +81,7 @@
 
 import superagent from 'superagent';
 import { eachLimit } from 'async';
-import { encode, getPreviewUrl, getExtension, sanitize } from './utils.js';
+import { encode, getPreviewUrl, getExtension, sanitize, getFileType } from './utils.js';
 
 export default {
     name: 'Index',
@@ -329,6 +329,8 @@ export default {
             if (entry.isDirectory) return this.refresh(entry.filePath);
 
             console.log('open', entry);
+
+            console.log('===', getFileType(entry));
         }
     },
     mounted() {
