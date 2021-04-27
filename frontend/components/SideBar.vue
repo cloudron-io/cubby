@@ -19,7 +19,7 @@ import { download, encode, copyToClipboard } from '../utils.js';
 
 export default {
     name: 'SideBar',
-    emits: [],
+    emits: [ 'close' ],
     data() {
         return {};
     },

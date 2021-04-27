@@ -75,6 +75,8 @@
       <Button label="Create" icon="pi pi-check" class="p-button-text p-button-success" @click="onSaveNewFolderDialog" :disabled="!newFolderDialog.folderName"/>
     </template>
   </Dialog>
+
+  <ImageViewer :entry="activeEntry" @close="onViewerClose" v-show="viewer === 'image'" />
 </template>
 
 <script>
@@ -90,6 +92,7 @@ export default {
             ready: false,
             accessToken: '',
             search: '',
+            viewer: '',
             profile: {
                 username: '',
                 displayName: '',
@@ -276,8 +279,6 @@ export default {
             });
         },
         onRename(entry, newFileName) {
-            console.log(entry, newFileName);
-
             var that = this;
 
             var filePath = sanitize(that.currentPath + '/' + entry.fileName);
@@ -328,9 +329,17 @@ export default {
         openEntry(entry) {
             if (entry.isDirectory) return this.refresh(entry.filePath);
 
-            console.log('open', entry);
+            const fileType = getFileType(entry);
 
-            console.log('===', getFileType(entry));
+            if (fileType === 'image') {
+                this.viewer = 'image';
+                this.activeEntry = entry;
+            } else {
+                console.log('TODO');
+            }
+        },
+        onViewerClose() {
+            this.viewer = null;
         }
     },
     mounted() {
