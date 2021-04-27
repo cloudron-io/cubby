@@ -5,6 +5,7 @@
   "tagline": "Collaborative filemanager",
   "version": "0.1.0",
   "healthCheckPath": "/",
+  "icon": "file://logo.png",
   "httpPort": 3000,
   "addons": {
     "localstorage": {},
