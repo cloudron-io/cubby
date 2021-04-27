@@ -3,7 +3,8 @@
 exports = module.exports = {
     login,
     tokenAuth,
-    profile
+    profile,
+    list
 };
 
 var assert = require('assert'),
@@ -45,4 +46,15 @@ async function profile(req, res, next) {
 
     // TODO remove private fields
     next(new HttpSuccess(200, req.user));
+}
+
+async function list(req, res, next) {
+    assert.strictEqual(typeof req.user, 'object');
+
+    try {
+        const result = await users.list();
+        return next(new HttpSuccess(200, { users: result }));
+    } catch (error) {
+        return next(new HttpError(500, error));
+    }
 }

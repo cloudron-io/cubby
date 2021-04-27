@@ -51,6 +51,8 @@ function init(callback) {
     router.post('/api/v1/login', users.login);
     router.get ('/api/v1/profile', users.tokenAuth, users.profile);
 
+    router.get ('/api/v1/users', users.tokenAuth, users.list);
+
     router.get ('/api/v1/files', users.tokenAuth, files.get);
     router.post('/api/v1/files', users.tokenAuth, multipart({ maxFieldsSize: 2 * 1024, limit: '512mb', timeout: 3 * 60 * 1000 }), files.add);
     router.put ('/api/v1/files', users.tokenAuth, files.update);

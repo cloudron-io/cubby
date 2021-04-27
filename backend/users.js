@@ -131,6 +131,8 @@ async function getByAccessToken(accessToken) {
 }
 
 async function list() {
+    const users = await database.query('SELECT * FROM users');
+    return users.forEach(postProcess);
 }
 
 async function update(userId, user) {
@@ -138,9 +140,8 @@ async function update(userId, user) {
     assert.strictEqual(typeof user, 'object');
 }
 
-async function remove(userId, callback) {
+async function remove(userId) {
     assert.strictEqual(typeof userId, 'string');
-    assert.strictEqual(typeof callback, 'function');
 
     await database.query('DELETE FROM users WHERE id = $1', [ userId ]);
 }
