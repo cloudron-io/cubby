@@ -81,11 +81,28 @@ async function get(req, res, next) {
 async function update(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
-    var filePath = decodeURIComponent(req.query.path);
+    const filePath = decodeURIComponent(req.query.path);
+    const action = req.query.action;
 
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
 
-    debug('update:', filePath);
+    debug(`update: [${action}] ${filePath}`);
+
+    if (action === 'move') {
+        const newFilePath = decodeURIComponent(req.query.new_path);
+        if (!newFilePath) return next(new HttpError(400, 'move action requires new_path argument'));
+
+        try {
+            files.move(req.user.username, filePath, newFilePath);
+        } catch (error) {
+            if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'not found'));
+            return next(new HttpError(500, error));
+        }
+
+        return next(new HttpSuccess(200, {}));
+    } else {
+        return next(new HttpError(400, 'unknown action'));
+    }
 }
 
 async function remove(req, res, next) {

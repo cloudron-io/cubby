@@ -126,7 +126,10 @@ export default {
             this.$toast.add({ severity:'success', summary: 'Link copied to Clipboard', life: 1500 });
         },
         onRename: function (entry) {
-            if (entry.rename) return entry.rename = false;
+            if (entry.rename) {
+                entry.rename = false;
+                return;
+            }
 
             entry.filePathNew = entry.fileName;
             entry.rename = true;

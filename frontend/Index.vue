@@ -30,7 +30,7 @@
       <div class="container">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
-          <EntryList :entries="entry.files" sort-folders-first="true" @entry-activated="openEntry" @entry-delete="onDelete" @selection-changed="onSelectionChanged" editable/>
+          <EntryList :entries="entry.files" sort-folders-first="true" @entry-renamed="onRename" @entry-activated="openEntry" @entry-delete="onDelete" @selection-changed="onSelectionChanged" editable/>
         </div>
         <SideBar :entry="activeEntry" :visible="sideBarVisible"/>
       </div>
@@ -270,8 +270,24 @@ export default {
 
             superagent.del('/api/v1/files').query({ path: filePath, access_token: localStorage.accessToken }).end(function (error, result) {
                 if (result && result.statusCode === 401) return that.logout();
-                if (result && result.statusCode !== 200) return that.error('Error deleting file or folder');
-                if (error) return that.error(error.message);
+                if (result && result.statusCode !== 200) return console.error('Error deleting file or folder');
+                if (error) return console.error(error.message);
+
+                that.refresh();
+            });
+        },
+        onRename(entry, newFileName) {
+            console.log(entry, newFileName);
+
+            var that = this;
+
+            var filePath = sanitize(that.currentPath + '/' + entry.fileName);
+            var newFilePath = sanitize(that.currentPath + '/' + newFileName);
+
+            superagent.put('/api/v1/files').query({ path: filePath, action: 'move', new_path: newFilePath, access_token: localStorage.accessToken }).end(function (error, result) {
+                if (result && result.statusCode === 401) return that.logout();
+                if (result && result.statusCode !== 200) return console.error('Error moving file or folder');
+                if (error) return console.error(error.message);
 
                 that.refresh();
             });

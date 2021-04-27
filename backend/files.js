@@ -4,7 +4,7 @@ exports = module.exports = {
     addDirectory,
     addFile,
     get,
-    update,
+    move,
     remove
 };
 
@@ -162,13 +162,25 @@ async function get(username, filePath) {
     }
 }
 
-function update(username, filePath, callback) {
+function move(username, filePath, newFilePath) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof filePath, 'string');
-    assert.strictEqual(typeof callback, 'function');
+    assert.strictEqual(typeof newFilePath, 'string');
 
     const fullFilePath = getValidFullPath(username, filePath);
-    if (!fullFilePath) return callback(new MainError(MainError.INVALID_PATH));
+    if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);
+
+    const fullNewFilePath = getValidFullPath(username, newFilePath);
+    if (!fullNewFilePath) throw new MainError(MainError.INVALID_PATH);
+
+    debug(`file: move ${fullFilePath} -> ${fullNewFilePath}`);
+
+    try {
+        // TODO add option for overwrite
+        fs.move(fullFilePath, fullNewFilePath, { overwrite: false });
+    } catch (error) {
+        throw new MainError(MainError.FS_ERROR, error);
+    }
 }
 
 async function remove(username, filePath) {
