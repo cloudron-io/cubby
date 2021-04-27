@@ -44,9 +44,13 @@ function decode(path) {
     return path.split('/').map(decodeURIComponent).join('/');
 }
 
+function getDirectLink(entry) {
+    return '/api/v1/files?type=raw&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(entry.filePath);
+}
+
 function download(entry) {
     if (entry.isDirectory) return;
-    window.location.href = encode('/api/files/' + entry.filePath);
+    window.location.href = '/api/v1/files?type=download&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(entry.filePath);
 }
 
 const FILE_TYPES = {
@@ -113,6 +117,7 @@ function copyToClipboard(value) {
 
 export {
     FILE_TYPES,
+    getDirectLink,
     getFileType,
     prettyDate,
     prettyLongDate,

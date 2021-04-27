@@ -40,7 +40,7 @@
 <script>
 
 import { nextTick } from 'vue';
-import { prettyDate, prettyLongDate, prettyFileSize, download, encode, copyToClipboard } from '../utils.js';
+import { prettyDate, prettyLongDate, prettyFileSize, download, copyToClipboard, getDirectLink } from '../utils.js';
 
 export default {
     name: 'EntryList',
@@ -122,7 +122,7 @@ export default {
             download(entry);
         },
         onCopyLink: function (entry) {
-            copyToClipboard(location.origin + encode(entry.filePath));
+            copyToClipboard(getDirectLink(entry));
             this.$toast.add({ severity:'success', summary: 'Link copied to Clipboard', life: 1500 });
         },
         onRename: function (entry) {

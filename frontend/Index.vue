@@ -83,7 +83,7 @@
 
 import superagent from 'superagent';
 import { eachLimit } from 'async';
-import { encode, getPreviewUrl, getExtension, sanitize, getFileType } from './utils.js';
+import { encode, getPreviewUrl, getExtension, sanitize, getFileType, getDirectLink } from './utils.js';
 
 export default {
     name: 'Index',
@@ -336,7 +336,7 @@ export default {
                 this.activeEntry = entry;
             } else {
                 console.log('TODO implement viewer');
-                window.open('/api/v1/files?raw=1&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(entry.filePath));
+                window.open(getDirectLink(entry));
             }
         },
         onViewerClose() {

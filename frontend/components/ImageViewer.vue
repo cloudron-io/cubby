@@ -6,6 +6,8 @@
 
 <script>
 
+import { getDirectLink } from '../utils.js';
+
 export default {
     name: 'ImageViewer',
     emits: [],
@@ -19,8 +21,7 @@ export default {
         entry(newEntry) {
             if (!newEntry || newEntry.isDirectory) return;
 
-            const url = '/api/v1/files?raw=1&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(newEntry.filePath);
-            this.$refs.image.style.backgroundImage = 'url("' + url + '")';
+            this.$refs.image.style.backgroundImage = 'url("' + getDirectLink(newEntry) + '")';
         }
     },
     methods: {
