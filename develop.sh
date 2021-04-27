@@ -42,7 +42,8 @@ if [[ "${OUT}" = "[]" ]]; then
     echo "=> Starting ${CONTAINER_NAME}..."
     docker run --name ${CONTAINER_NAME} -e POSTGRES_PASSWORD=${CLOUDRON_POSTGRESQL_PASSWORD} -d postgres:12
 else
-    echo "=> ${CONTAINER_NAME} already running. If you want to start fresh, run 'docker rm --force ${CONTAINER_NAME}'"
+    echo "=> ${CONTAINER_NAME} already created, just restarting. If you want to start fresh, run 'docker rm --force ${CONTAINER_NAME}'"
+    docker restart ${CONTAINER_NAME}
 fi
 
 export CLOUDRON_POSTGRESQL_HOST=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${CONTAINER_NAME}`
