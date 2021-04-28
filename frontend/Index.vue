@@ -1,5 +1,5 @@
 <template>
-  <input type="file" ref="upload" style="display: none" multiple/>
+  <input type="file" ref="uploadFile" style="display: none" multiple/>
   <input type="file" ref="uploadFolder" style="display: none" multiple webkitdirectory directory/>
 
   <!-- This is re-used and thus global -->
@@ -150,8 +150,8 @@ export default {
         },
         onUploadFile() {
             // reset the form first to make the change handler retrigger even on the same file selected
-            this.$refs.upload.value = '';
-            this.$refs.upload.click();
+            this.$refs.uploadFile.value = '';
+            this.$refs.uploadFile.click();
         },
         onNewFile() {
             this.newFileDialog.error = '';
@@ -356,7 +356,7 @@ export default {
 
         // upload input event handler
         this.$refs.upload.addEventListener('change', function () {
-            that.uploadFiles(that.$refs.upload.files || []);
+            that.uploadFiles(that.$refs.uploadFile.files || []);
         });
 
         this.$refs.uploadFolder.addEventListener('change', function () {

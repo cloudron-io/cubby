@@ -59,12 +59,14 @@ async function addFile(username, filePath, sourceFilePath, mtime) {
 
     debug('addFile:', fullFilePath);
 
+    var stat;
     try {
-        var stat = fs.statSync(fullFilePath);
-        if (stat) throw new MainError(MainError.ALREADY_EXISTS);
+        stat = fs.statSync(fullFilePath);
     } catch (error) {
         if (error.code !== 'ENOENT') throw new MainError(MainError.FS_ERROR, error);
     }
+
+    if (stat) throw new MainError(MainError.ALREADY_EXISTS);
 
     try {
         await fs.ensureDir(path.dirname(fullFilePath));
