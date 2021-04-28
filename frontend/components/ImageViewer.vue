@@ -1,6 +1,7 @@
 <template>
-    <div class="container" ref="imageContainer" tabindex="0" @click="onClose" @keydown.escape="onClose" @keydown.right="onNext" @keydown.left="onPrev" @keydown.down="onNext" @keydown.up="onPrev">
+    <div class="container" ref="imageContainer" tabindex="0" @keydown.escape="onClose" @keydown.right="onNext" @keydown.left="onPrev" @keydown.down="onNext" @keydown.up="onPrev">
         <div ref="image" class="image"></div>
+        <Button class="p-button-rounded p-button-outlined p-button-secondary close-button" icon="pi pi-times" @click="onClose"/>
     </div>
 </template>
 
@@ -79,6 +80,13 @@ export default {
     background-repeat: no-repeat;
     background-size: contain;
     background-position: center;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 35px;
 }
 
 </style>
