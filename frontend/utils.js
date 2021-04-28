@@ -49,7 +49,7 @@ function decode(path) {
 }
 
 function getDirectLink(entry) {
-    return '/api/v1/files?type=raw&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(entry.filePath);
+    return window.location.origin + '/api/v1/files?type=raw&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(entry.filePath);
 }
 
 function download(entry) {
