@@ -194,6 +194,7 @@ export default {
     mounted() {
         var that = this;
 
+        // TODO fix this to be component local to avoid interaction with viewers
         // global key handler for up/down selection
         window.addEventListener('keydown', function () {
             if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {

@@ -76,7 +76,7 @@
     </template>
   </Dialog>
 
-  <ImageViewer :entry="activeEntry" @close="onViewerClose" v-show="viewer === 'image'" />
+  <ImageViewer :entry="activeEntry" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'image'" />
 </template>
 
 <script>
