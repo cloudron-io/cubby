@@ -83,7 +83,7 @@
 
 import superagent from 'superagent';
 import { eachLimit } from 'async';
-import { encode, getPreviewUrl, getExtension, sanitize, getFileType, getDirectLink } from './utils.js';
+import { encode, getPreviewUrl, getExtension, sanitize, getFileTypeGroup, getDirectLink } from './utils.js';
 
 export default {
     name: 'Index',
@@ -337,9 +337,9 @@ export default {
         openEntry(entry) {
             if (entry.isDirectory) return this.refresh(entry.filePath);
 
-            const fileType = getFileType(entry);
+            const fileTypeGroup = getFileTypeGroup(entry);
 
-            if (fileType === 'image') {
+            if (fileTypeGroup === 'image') {
                 this.viewer = 'image';
                 this.activeEntry = entry;
             } else {

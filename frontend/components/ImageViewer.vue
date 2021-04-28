@@ -7,7 +7,7 @@
 
 <script>
 
-import { getDirectLink, getFileType, FILE_TYPES } from '../utils.js';
+import { getDirectLink, getFileTypeGroup } from '../utils.js';
 
 export default {
     name: 'ImageViewer',
@@ -26,7 +26,7 @@ export default {
             if (!newEntry || newEntry.isDirectory) return;
 
             this.$refs.image.style.backgroundImage = 'url("' + getDirectLink(newEntry) + '")';
-            this.currentIndex = this.entries.filter(function (e) { return getFileType(e) === FILE_TYPES.image; }).findIndex(function (e) { return e.fileName === newEntry.fileName; });
+            this.currentIndex = this.entries.filter(function (e) { return getFileTypeGroup(e) === 'image'; }).findIndex(function (e) { return e.fileName === newEntry.fileName; });
 
             // TODO come up with something better here
             setTimeout(() => this.$refs.imageContainer.focus(), 1000);
@@ -37,7 +37,7 @@ export default {
             this.$emit('close');
         },
         onNext() {
-            var images = this.entries.filter(function (e) { return getFileType(e) === FILE_TYPES.image; });
+            var images = this.entries.filter(function (e) { return getFileTypeGroup(e) === 'image'; });
             if (images.length <= 1) return;
 
             if (this.currentIndex >= images.length-1) return;
@@ -47,7 +47,7 @@ export default {
             this.$refs.image.style.backgroundImage = 'url("' + getDirectLink(images[this.currentIndex]) + '")';
         },
         onPrev() {
-            var images = this.entries.filter(function (e) { return getFileType(e) === FILE_TYPES.image; });
+            var images = this.entries.filter(function (e) { return getFileTypeGroup(e) === 'image'; });
             if (images.length <= 1) return;
 
             if (this.currentIndex <= 0) return;

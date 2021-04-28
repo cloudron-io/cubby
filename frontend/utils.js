@@ -57,54 +57,13 @@ function download(entry) {
     window.location.href = '/api/v1/files?type=download&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(entry.filePath);
 }
 
-const FILE_TYPES = {
-    unknown: 'unknown',
-    directory: 'directory',
-    image: 'image',
-    text: 'text',
-    pdf: 'pdf',
-    html: 'html',
-    music: 'music',
-    video: 'video'
-};
-
-const MIME_TYPES = {
-    image: [ '.png', '.jpg', '.jpeg', '.tiff', '.gif' ],
-    text: [ '.txt', '.md' ],
-    pdf: [ '.pdf' ],
-    html: [ '.html', '.htm', '.php' ],
-    music: [ '.mp2', '.mp3', '.ogg', '.flac', '.wav', '.aac' ],
-    video: [ '.mp4', '.mpg', '.mpeg', '.mkv', '.avi', '.mov' ]
-};
-
 function getPreviewUrl(entry) {
-    // var path = '/mime-types/';
-
-    // if (entry.isDirectory) return path + 'directory.png';
-
-    // if (MIME_TYPES.image.some(function (e) { return entry.fileName.endsWith(e); })) return path +'image.png';
-    // if (MIME_TYPES.text.some(function (e) { return entry.fileName.endsWith(e); })) return path +'text.png';
-    // if (MIME_TYPES.pdf.some(function (e) { return entry.fileName.endsWith(e); })) return path + 'pdf.png';
-    // if (MIME_TYPES.html.some(function (e) { return entry.fileName.endsWith(e); })) return path + 'html.png';
-    // if (MIME_TYPES.music.some(function (e) { return entry.fileName.endsWith(e); })) return path + 'music.png';
-    // if (MIME_TYPES.video.some(function (e) { return entry.fileName.endsWith(e); })) return path + 'video.png';
-
     var mime = entry.mimeType.split('/');
-    console.log(entry.mimeType)
-
     return '/mime-types/' + mime[0] + '-' + mime[1] + '.svg';
 }
 
-function getFileType(entry) {
-    if (entry.isDirectory) return FILE_TYPES.directory;
-
-    const mimeType = Object.keys(MIME_TYPES).find(function (type) {
-        return MIME_TYPES[type].some(function (e) { return entry.fileName.endsWith(e); });
-    });
-
-    if (mimeType) return FILE_TYPES[mimeType];
-
-    return FILE_TYPES.unknown;
+function getFileTypeGroup(entry) {
+    return entry.mimeType.split('/')[0];
 }
 
 // simple extension detection, does not work with double extension like .tar.gz
@@ -123,9 +82,8 @@ function copyToClipboard(value) {
 }
 
 export {
-    FILE_TYPES,
     getDirectLink,
-    getFileType,
+    getFileTypeGroup,
     prettyDate,
     prettyLongDate,
     prettyFileSize,

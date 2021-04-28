@@ -31,11 +31,6 @@ export default {
         entry: Object,
         visible: Boolean
     },
-    watch: {
-        entry(newEntry) {
-            console.log(newEntry)
-        }
-    },
     methods: {
         prettyLongDate,
         prettyFileSize,
