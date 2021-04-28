@@ -166,13 +166,16 @@ export default {
         onSaveNewFileDialog: function () {
             var that = this;
 
-            var path = sanitize(this.currentPath + '/' + this.newFileDialog.folderName);
+            var path = sanitize(this.currentPath + '/' + this.newFileDialog.fileName);
 
-            superagent.post('/api/v1/files').query({ path: path, access_token: localStorage.accessToken }).end(function (error, result) {
+            var formData = new FormData();
+            formData.append('file', new Blob());
+
+            superagent.post('/api/v1/files').query({ path: path, access_token: localStorage.accessToken }).send(formData).end(function (error, result) {
                 if (result && result.statusCode === 401) return that.onLogout();
-                if (result && result.statusCode === 403) return that.newFilDialog.error = 'File name not allowed';
-                if (result && result.statusCode === 409) return that.newFilDialog.error = 'File already exists';
-                if (result && result.statusCode !== 200) return that.newFilDialog.error = 'Error creating file: ' + result.statusCode;
+                if (result && result.statusCode === 403) return that.newFileDialog.error = 'File name not allowed';
+                if (result && result.statusCode === 409) return that.newFileDialog.error = 'File already exists';
+                if (result && result.statusCode !== 200) return that.newFileDialog.error = 'Error creating file: ' + result.statusCode;
                 if (error) return console.error(error.message);
 
                 that.refresh();
