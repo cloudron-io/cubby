@@ -90,6 +90,7 @@ export default {
     data() {
         return {
             ready: false,
+            busy: true,
             accessToken: '',
             search: '',
             viewer: '',
@@ -302,7 +303,10 @@ export default {
 
             window.location.hash = filePath;
 
+            that.busy = true;
             superagent.get('/api/v1/files').query({ path: encode(filePath), access_token: that.accessToken }).end(function (error, result) {
+                that.busy = false;
+
                 if (error) {
                     that.entries = [];
 
