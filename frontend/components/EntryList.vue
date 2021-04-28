@@ -40,7 +40,7 @@
 <script>
 
 import { nextTick } from 'vue';
-import { prettyDate, prettyLongDate, prettyFileSize, download, copyToClipboard, getDirectLink } from '../utils.js';
+import { prettyDate, prettyLongDate, prettyFileSize, download, copyToClipboard, getDirectLink, clearSelection } from '../utils.js';
 
 export default {
     name: 'EntryList',
@@ -112,6 +112,8 @@ export default {
             this.$emit('selection-changed', selectedEntries);
         },
         onEntryOpen: function (entry, select) {
+            clearSelection();
+
             if (entry.rename) return;
 
             this.$emit('entry-activated', entry);

@@ -355,7 +355,7 @@ export default {
         var that = this;
 
         // upload input event handler
-        this.$refs.upload.addEventListener('change', function () {
+        this.$refs.uploadFile.addEventListener('change', function () {
             that.uploadFiles(that.$refs.uploadFile.files || []);
         });
 
