@@ -13,6 +13,7 @@ var assert = require('assert'),
     debug = require('debug')('cubby:fs'),
     fs = require('fs-extra'),
     path = require('path'),
+    mime = require('./mime.js'),
     MainError = require('./mainerror.js');
 
 function getValidFullPath(username, filePath) {
@@ -106,7 +107,8 @@ async function getDirectory(fullFilePath, filePath, stats) {
                 size: file.stat.size,
                 mtime: file.stat.mtime,
                 isDirectory: file.stat.isDirectory(),
-                isFile: file.stat.isFile()
+                isFile: file.stat.isFile(),
+                mimeType: file.stat.isDirectory() ? 'inode/directory' : mime(file.name)
             };
         });
     } catch (error) {
@@ -121,6 +123,7 @@ async function getDirectory(fullFilePath, filePath, stats) {
         mtime: stats.mtime,
         isDirectory: true,
         isFile: false,
+        mimeType: 'inode/directory',
         files: files
     };
 }
@@ -137,7 +140,8 @@ async function getFile(fullFilePath, filePath, stats) {
         size: stats.size,
         mtime: stats.mtime,
         isDirectory: stats.isDirectory(),
-        isFile: stats.isFile()
+        isFile: stats.isFile(),
+        mimeType: stats.isDirectory() ? 'inode/directory' : mime(filePath)
     };
 
     return file;

@@ -1,21 +1,25 @@
 <template>
     <div class="container" :class="{ 'visible': visible }">
-        <div class="p-d-flex p-jc-between header" style="padding-bottom: 10px;">
-          Details
-        </div>
-        <center>
-          <Button class="p-button-sm p-button-outlined" v-show="entry.isFile" label="Download" icon="pi pi-download" style="margin: 10px;" @click="onDownload(entry)"/>
-          <a :href="entry.filePath" target="_blank">
-            <Button class="p-button-sm p-button-outlined" label="Open" icon="pi pi-external-link" style="margin: 10px;"/>
-          </a>
-          <Button class="p-button-sm p-button-outlined" label="Copy Link" icon="pi pi-copy" style="margin: 10px;" @click="onCopyLink(entry)"/>
-        </center>
+      <div class="p-d-flex p-jc-between header" style="padding-bottom: 10px;">Details</div>
+      <div class="preview" :style="{ backgroundImage: 'url(' + entry.previewUrl + ')' }"></div>
+      <div class="detail">
+        <p>Owner</p>
+        <span>Admin</span>
+      </div>
+      <div class="detail">
+        <p>Updated</p>
+        <span>{{ prettyLongDate(entry.mtime) }}</span>
+      </div>
+      <div class="detail">
+        <p>Size</p>
+        <span>{{ prettyFileSize(entry.size) }}</span>
+      </div>
     </div>
 </template>
 
 <script>
 
-import { download, encode, copyToClipboard } from '../utils.js';
+import { download, encode, copyToClipboard, prettyLongDate, prettyFileSize } from '../utils.js';
 
 export default {
     name: 'SideBar',
@@ -33,6 +37,8 @@ export default {
         }
     },
     methods: {
+        prettyLongDate,
+        prettyFileSize,
         onDownload: function (entry) {
             download(entry);
         },
@@ -67,9 +73,26 @@ export default {
     min-width: 200px;
 }
 
+.preview {
+    width: 100%;
+    height: 250px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+
 .header {
     text-align: left;
     border-bottom: solid 2px #2196f3;
+}
+
+.detail > p {
+    color: #888;
+    margin-bottom: 5px;
+}
+
+.detail {
+    margin-bottom: 15px;
 }
 
 @media only screen and (max-width: 767px)  {

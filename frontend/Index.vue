@@ -317,7 +317,7 @@ export default {
 
                 if (result.body.isDirectory) {
                     result.body.files.forEach(function (entry) {
-                        entry.previewUrl = getPreviewUrl(entry, '/');
+                        entry.previewUrl = getPreviewUrl(entry);
                         entry.extension = getExtension(entry);
                         entry.rename = false;
                         entry.filePathNew = entry.fileName;
@@ -326,7 +326,12 @@ export default {
                     result.body.files = [];
                 }
 
+                result.body.previewUrl = getPreviewUrl(result.body);
+
                 that.entry = result.body;
+
+                // also set active entry for now maybe wrong
+                that.activeEntry = that.entry;
             });
         },
         openEntry(entry) {

@@ -23,11 +23,15 @@ function prettyDate(value) {
 }
 
 function prettyLongDate(value) {
+    if (!value) return 'unkown';
+
     var date = new Date(value);
     return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
 }
 
 function prettyFileSize(value) {
+    if (!value) return 'unkown';
+
     return filesize(value);
 }
 
@@ -73,19 +77,22 @@ const MIME_TYPES = {
     video: [ '.mp4', '.mpg', '.mpeg', '.mkv', '.avi', '.mov' ]
 };
 
-function getPreviewUrl(entry/*, basePath*/) {
-    var path = '/mime-types/';
+function getPreviewUrl(entry) {
+    // var path = '/mime-types/';
 
-    if (entry.isDirectory) return path + 'directory.png';
+    // if (entry.isDirectory) return path + 'directory.png';
 
-    if (MIME_TYPES.image.some(function (e) { return entry.fileName.endsWith(e); })) return path +'image.png';
-    if (MIME_TYPES.text.some(function (e) { return entry.fileName.endsWith(e); })) return path +'text.png';
-    if (MIME_TYPES.pdf.some(function (e) { return entry.fileName.endsWith(e); })) return path + 'pdf.png';
-    if (MIME_TYPES.html.some(function (e) { return entry.fileName.endsWith(e); })) return path + 'html.png';
-    if (MIME_TYPES.music.some(function (e) { return entry.fileName.endsWith(e); })) return path + 'music.png';
-    if (MIME_TYPES.video.some(function (e) { return entry.fileName.endsWith(e); })) return path + 'video.png';
+    // if (MIME_TYPES.image.some(function (e) { return entry.fileName.endsWith(e); })) return path +'image.png';
+    // if (MIME_TYPES.text.some(function (e) { return entry.fileName.endsWith(e); })) return path +'text.png';
+    // if (MIME_TYPES.pdf.some(function (e) { return entry.fileName.endsWith(e); })) return path + 'pdf.png';
+    // if (MIME_TYPES.html.some(function (e) { return entry.fileName.endsWith(e); })) return path + 'html.png';
+    // if (MIME_TYPES.music.some(function (e) { return entry.fileName.endsWith(e); })) return path + 'music.png';
+    // if (MIME_TYPES.video.some(function (e) { return entry.fileName.endsWith(e); })) return path + 'video.png';
 
-    return path + 'unknown.png';
+    var mime = entry.mimeType.split('/');
+    console.log(entry.mimeType)
+
+    return '/mime-types/' + mime[0] + '-' + mime[1] + '.svg';
 }
 
 function getFileType(entry) {
