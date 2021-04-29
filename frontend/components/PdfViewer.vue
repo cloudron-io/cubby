@@ -27,6 +27,7 @@ export default {
     emits: [ 'close' ],
     data() {
         return {
+            entry: null
         };
     },
     props: {
@@ -38,6 +39,8 @@ export default {
         },
         async open(entry) {
             if (!entry || entry.isDirectory || !this.canHandle(entry)) return false;
+
+            this.entry = entry;
 
             const url = '/api/v1/files?type=raw&access_token=' + localStorage.accessToken + '&path=' + encode(entry.filePath);
             var loadingTask = pdfjsLib.getDocument(url);
