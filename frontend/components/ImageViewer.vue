@@ -25,15 +25,13 @@ export default {
             return getFileTypeGroup(entry) === 'image';
         },
         open(entry) {
-            if (!entry || entry.isDirectory || !this.canHandle(entry)) return false;
+            if (!entry || entry.isDirectory || !this.canHandle(entry)) return;
 
             this.$refs.image.style.backgroundImage = 'url("' + getDirectLink(entry) + '")';
             this.currentIndex = this.entries.filter(function (e) { return getFileTypeGroup(e) === 'image'; }).findIndex(function (e) { return e.fileName === entry.fileName; });
 
             // TODO come up with something better here
             setTimeout(() => this.$refs.imageContainer.focus(), 1000);
-
-            return true;
         },
         onClose() {
             this.$emit('close');

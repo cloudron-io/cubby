@@ -43,7 +43,7 @@ export default {
         open(entry) {
             var that = this;
 
-            if (!entry || entry.isDirectory || !this.canHandle(entry)) return false;
+            if (!entry || entry.isDirectory || !this.canHandle(entry)) return;
 
             this.entry = entry;
 
@@ -52,8 +52,6 @@ export default {
 
                 that.editor.setModel(editor.createModel(result.text, getLanguage(entry.fileName)));
             });
-
-            return true;
         },
         onClose() {
             this.editor.setModel(editor.createModel(''));

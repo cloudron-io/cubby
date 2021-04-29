@@ -38,7 +38,7 @@ export default {
             return entry.mimeType === 'application/pdf';
         },
         async open(entry) {
-            if (!entry || entry.isDirectory || !this.canHandle(entry)) return false;
+            if (!entry || entry.isDirectory || !this.canHandle(entry)) return;
 
             this.entry = entry;
 
@@ -46,8 +46,6 @@ export default {
             var loadingTask = pdfjsLib.getDocument(url);
             var pdf = await loadingTask.promise;
             this.pdfViewer.setDocument(pdf);
-
-            return true;
         },
         onClose() {
             this.$emit('close');

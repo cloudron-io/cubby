@@ -344,13 +344,17 @@ export default {
         openEntry(entry) {
             if (entry.isDirectory) return this.refresh(entry.filePath);
 
-            if (this.$refs.imageViewer.open(entry)) {
+            if (this.$refs.imageViewer.canHandle(entry)) {
+                this.$refs.imageViewer.open(entry)
                 this.viewer = 'image';
-            } else if (this.$refs.textEditor.open(entry)) {
+            } else if (this.$refs.textEditor.canHandle(entry)) {
+                this.$refs.textEditor.open(entry)
                 this.viewer = 'text';
-            } else if (this.$refs.pdfViewer.open(entry)) {
+            } else if (this.$refs.pdfViewer.canHandle(entry)) {
+                this.$refs.pdfViewer.open(entry)
                 this.viewer = 'pdf';
             } else {
+                this.viewer = '';
                 console.log('TODO implement viewer');
                 window.open(getDirectLink(entry));
             }
