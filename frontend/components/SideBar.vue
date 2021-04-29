@@ -14,6 +14,10 @@
         <p>Size</p>
         <span>{{ prettyFileSize(entry.size) }}</span>
       </div>
+      <div class="detail">
+        <p>Type</p>
+        <span>{{ entry.mimeType }}</span>
+      </div>
     </div>
 </template>
 

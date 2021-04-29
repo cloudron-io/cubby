@@ -76,7 +76,8 @@
     </template>
   </Dialog>
 
-  <ImageViewer :entry="activeEntry" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'image'" />
+  <ImageViewer :entry="viewers.image.entry" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'image'" />
+  <TextEditor :entry="viewers.text.entry" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'text'" />
 </template>
 
 <script>
@@ -98,6 +99,10 @@ export default {
                 username: '',
                 displayName: '',
                 email: ''
+            },
+            viewers: {
+                image: { entry: null },
+                text: { entry: null }
             },
             uploadStatus: {
                 busy: false,
@@ -343,9 +348,15 @@ export default {
 
             const fileTypeGroup = getFileTypeGroup(entry);
 
+            this.viewers['image'].entry = null;
+            this.viewers['text'].entry = null;
+
             if (fileTypeGroup === 'image') {
                 this.viewer = 'image';
-                this.activeEntry = entry;
+                this.viewers['image'].entry = entry;
+            } else if (fileTypeGroup === 'text') {
+                this.viewer = 'text';
+                this.viewers['text'].entry = entry;
             } else {
                 console.log('TODO implement viewer');
                 window.open(getDirectLink(entry));

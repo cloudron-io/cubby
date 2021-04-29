@@ -99,3 +99,7 @@ a:hover {
 .p-button:focus, .p-inputtext:enabled:focus {
     box-shadow: none;
 }
+
+.p-toolbar {
+    border-radius: 0;
+}

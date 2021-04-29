@@ -31,6 +31,7 @@ import SideBar from './components/SideBar.vue';
 import Login from './components/Login.vue';
 import MainToolbar from './components/MainToolbar.vue';
 import ImageViewer from './components/ImageViewer.vue';
+import TextEditor from './components/TextEditor.vue';
 
 const app = createApp(Index);
 
@@ -60,5 +61,6 @@ app.component('MainToolbar', MainToolbar);
 app.component('EntryList', EntryList);
 app.component('SideBar', SideBar);
 app.component('ImageViewer', ImageViewer);
+app.component('TextEditor', TextEditor);
 
 app.mount('#app');

@@ -21,6 +21,7 @@
     "express": "^4.17.1",
     "fs-extra": "^9.1.0",
     "ldapjs": "^2.2.4",
+    "monaco-editor": "^0.23.0",
     "morgan": "^1.10.0",
     "multiparty": "^4.2.2",
     "once": "^1.4.0",

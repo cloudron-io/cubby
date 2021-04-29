@@ -1,5 +1,5 @@
 <template>
-    <div class="container" ref="imageContainer" tabindex="0" @keydown.escape="onClose" @keydown.right="onNext" @keydown.left="onPrev" @keydown.down="onNext" @keydown.up="onPrev">
+    <div class="container" ref="imageContainer" tabindex="0" @click="onClose" @keydown.escape="onClose" @keydown.right="onNext" @keydown.left="onPrev" @keydown.down="onNext" @keydown.up="onPrev">
         <div ref="image" class="image"></div>
         <Button class="p-button-rounded p-button-outlined p-button-secondary close-button" icon="pi pi-times" @click="onClose"/>
     </div>
@@ -11,7 +11,7 @@ import { getDirectLink, getFileTypeGroup } from '../utils.js';
 
 export default {
     name: 'ImageViewer',
-    emits: [],
+    emits: [ 'close' ],
     data() {
         return {
             currentIndex: 0
