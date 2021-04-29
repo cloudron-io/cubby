@@ -76,16 +76,16 @@
     </template>
   </Dialog>
 
-  <ImageViewer :entry="viewers.image.entry" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'image'" />
-  <TextEditor :entry="viewers.text.entry" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'text'" />
-  <PdfViewer :entry="viewers.pdf.entry" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'pdf'" />
+  <ImageViewer ref="imageViewer" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'image'" />
+  <TextEditor ref="textEditor" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'text'" />
+  <PdfViewer ref="pdfViewer" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'pdf'" />
 </template>
 
 <script>
 
 import superagent from 'superagent';
 import { eachLimit } from 'async';
-import { encode, getPreviewUrl, getExtension, sanitize, getFileTypeGroup, getDirectLink } from './utils.js';
+import { encode, getPreviewUrl, getExtension, sanitize, getDirectLink } from './utils.js';
 
 export default {
     name: 'Index',
@@ -101,11 +101,7 @@ export default {
                 displayName: '',
                 email: ''
             },
-            viewers: {
-                image: { entry: null },
-                text: { entry: null },
-                pdf: { entry: null }
-            },
+            viewers: [],
             uploadStatus: {
                 busy: false,
                 count: 0,
@@ -348,21 +344,12 @@ export default {
         openEntry(entry) {
             if (entry.isDirectory) return this.refresh(entry.filePath);
 
-            const fileTypeGroup = getFileTypeGroup(entry);
-
-            this.viewers['image'].entry = null;
-            this.viewers['text'].entry = null;
-            this.viewers['pdf'].entry = null;
-
-            if (fileTypeGroup === 'image') {
+            if (this.$refs.imageViewer.open(entry)) {
                 this.viewer = 'image';
-                this.viewers['image'].entry = entry;
-            } else if (fileTypeGroup === 'text') {
+            } else if (this.$refs.textEditor.open(entry)) {
                 this.viewer = 'text';
-                this.viewers['text'].entry = entry;
-            } else if (entry.mimeType === 'application/pdf') {
+            } else if (this.$refs.pdfViewer.open(entry)) {
                 this.viewer = 'pdf';
-                this.viewers['pdf'].entry = entry;
             } else {
                 console.log('TODO implement viewer');
                 window.open(getDirectLink(entry));

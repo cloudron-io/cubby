@@ -18,21 +18,23 @@ export default {
         };
     },
     props: {
-        entry: Object,
         entries: Array
     },
-    watch: {
-        entry(newEntry) {
-            if (!newEntry || newEntry.isDirectory) return;
+    methods: {
+        canHandle(entry) {
+            return getFileTypeGroup(entry) === 'image';
+        },
+        open(entry) {
+            if (!entry || entry.isDirectory || !this.canHandle(entry)) return false;
 
-            this.$refs.image.style.backgroundImage = 'url("' + getDirectLink(newEntry) + '")';
-            this.currentIndex = this.entries.filter(function (e) { return getFileTypeGroup(e) === 'image'; }).findIndex(function (e) { return e.fileName === newEntry.fileName; });
+            this.$refs.image.style.backgroundImage = 'url("' + getDirectLink(entry) + '")';
+            this.currentIndex = this.entries.filter(function (e) { return getFileTypeGroup(e) === 'image'; }).findIndex(function (e) { return e.fileName === entry.fileName; });
 
             // TODO come up with something better here
             setTimeout(() => this.$refs.imageContainer.focus(), 1000);
-        }
-    },
-    methods: {
+
+            return true;
+        },
         onClose() {
             this.$emit('close');
         },

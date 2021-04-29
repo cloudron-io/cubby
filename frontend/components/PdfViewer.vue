@@ -30,19 +30,22 @@ export default {
         };
     },
     props: {
-        entry: Object,
         entries: Array
     },
-    watch: {
-        async entry(newEntry) {
-            if (!newEntry || newEntry.isDirectory) return;
+    methods: {
+        canHandle(entry) {
+            return entry.mimeType === 'application/pdf';
+        },
+        async open(entry) {
+            if (!entry || entry.isDirectory || !this.canHandle(entry)) return false;
 
-            var loadingTask = pdfjsLib.getDocument('/api/v1/files?type=raw&access_token=' + localStorage.accessToken + '&path=' + encode(newEntry.filePath));
+            const url = '/api/v1/files?type=raw&access_token=' + localStorage.accessToken + '&path=' + encode(entry.filePath);
+            var loadingTask = pdfjsLib.getDocument(url);
             var pdf = await loadingTask.promise;
             this.pdfViewer.setDocument(pdf);
-        }
-    },
-    methods: {
+
+            return true;
+        },
         onClose() {
             this.$emit('close');
         }

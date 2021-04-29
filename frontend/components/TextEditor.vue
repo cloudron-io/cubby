@@ -17,7 +17,7 @@
 
 import { editor, languages } from 'monaco-editor';
 import superagent from 'superagent';
-import { encode } from '../utils.js';
+import { encode, getFileTypeGroup } from '../utils.js';
 
 function getLanguage(filename) {
     var ext = '.' + filename.split('.').pop();
@@ -30,26 +30,31 @@ export default {
     emits: [ 'close' ],
     data() {
         return {
+            entry: {}
         };
     },
     props: {
-        entry: Object,
         entries: Array
     },
-    watch: {
-        entry(newEntry) {
+    methods: {
+        canHandle(entry) {
+            return getFileTypeGroup(entry) === 'text' || entry.mimeType === 'application/json' || entry.mimeType === 'application/javascript' || entry.mimeType === 'application/x-shellscript';
+        },
+        open(entry) {
             var that = this;
 
-            if (!newEntry || newEntry.isDirectory) return;
+            if (!entry || entry.isDirectory || !this.canHandle(entry)) return false;
 
-            superagent.get('/api/v1/files').query({ type: 'raw', path: encode(newEntry.filePath), access_token: localStorage.accessToken }).end(function (error, result) {
+            this.entry = entry;
+
+            superagent.get('/api/v1/files').query({ type: 'raw', path: encode(entry.filePath), access_token: localStorage.accessToken }).end(function (error, result) {
                 if (error) return console.error(error);
 
-                that.editor.setModel(editor.createModel(result.text, getLanguage(newEntry.fileName)));
+                that.editor.setModel(editor.createModel(result.text, getLanguage(entry.fileName)));
             });
-        }
-    },
-    methods: {
+
+            return true;
+        },
         onClose() {
             this.editor.setModel(editor.createModel(''));
 
