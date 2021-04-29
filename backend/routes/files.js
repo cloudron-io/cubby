@@ -148,7 +148,7 @@ async function recent(req, res, next) {
         mtime: Date.now(),
         isDirectory: true,
         isFile: false,
-        mimeType: 'inode/directory',
+        mimeType: 'inode/recent',
         files: result
     };
 

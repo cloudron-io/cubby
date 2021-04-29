@@ -58,6 +58,8 @@ function download(entry) {
 }
 
 function getPreviewUrl(entry) {
+    if (entry.mimeType === 'inode/recent') return '/folder-temp.svg';
+
     var mime = entry.mimeType.split('/');
     return '/mime-types/' + mime[0] + '-' + mime[1] + '.svg';
 }
