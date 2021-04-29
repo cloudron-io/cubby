@@ -32,6 +32,7 @@ import Login from './components/Login.vue';
 import MainToolbar from './components/MainToolbar.vue';
 import ImageViewer from './components/ImageViewer.vue';
 import TextEditor from './components/TextEditor.vue';
+import PdfViewer from './components/PdfViewer.vue';
 
 const app = createApp(Index);
 
@@ -62,5 +63,6 @@ app.component('EntryList', EntryList);
 app.component('SideBar', SideBar);
 app.component('ImageViewer', ImageViewer);
 app.component('TextEditor', TextEditor);
+app.component('PdfViewer', PdfViewer);
 
 app.mount('#app');

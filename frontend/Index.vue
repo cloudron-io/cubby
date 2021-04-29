@@ -78,6 +78,7 @@
 
   <ImageViewer :entry="viewers.image.entry" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'image'" />
   <TextEditor :entry="viewers.text.entry" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'text'" />
+  <PdfViewer :entry="viewers.pdf.entry" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'pdf'" />
 </template>
 
 <script>
@@ -102,7 +103,8 @@ export default {
             },
             viewers: {
                 image: { entry: null },
-                text: { entry: null }
+                text: { entry: null },
+                pdf: { entry: null }
             },
             uploadStatus: {
                 busy: false,
@@ -350,6 +352,7 @@ export default {
 
             this.viewers['image'].entry = null;
             this.viewers['text'].entry = null;
+            this.viewers['pdf'].entry = null;
 
             if (fileTypeGroup === 'image') {
                 this.viewer = 'image';
@@ -357,6 +360,9 @@ export default {
             } else if (fileTypeGroup === 'text') {
                 this.viewer = 'text';
                 this.viewers['text'].entry = entry;
+            } else if (entry.mimeType === 'application/pdf') {
+                this.viewer = 'pdf';
+                this.viewers['pdf'].entry = entry;
             } else {
                 console.log('TODO implement viewer');
                 window.open(getDirectLink(entry));
