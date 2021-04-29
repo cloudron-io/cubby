@@ -5,14 +5,18 @@ exports = module.exports = {
     addFile,
     get,
     move,
-    remove
+    remove,
+    recent
 };
 
 var assert = require('assert'),
     constants = require('./constants.js'),
-    debug = require('debug')('cubby:fs'),
+    debug = require('debug')('cubby:files'),
     fs = require('fs-extra'),
+    async = require('async'),
     path = require('path'),
+    util = require('util'),
+    exec = util.promisify(require('child_process').exec),
     mime = require('./mime.js'),
     MainError = require('./mainerror.js');
 
@@ -135,6 +139,8 @@ async function getFile(fullFilePath, filePath, stats) {
     assert.strictEqual(typeof filePath, 'string');
     assert.strictEqual(typeof stats, 'object');
 
+    debug('getFile:', fullFilePath);
+
     var file = {
         _fullFilePath: fullFilePath,
         fileName: path.basename(fullFilePath),
@@ -201,4 +207,36 @@ async function remove(username, filePath) {
     } catch (error) {
         throw new MainError(MainError.FS_ERROR, error);
     }
+}
+
+async function recent(username) {
+    assert.strictEqual(typeof username, 'string');
+
+    const fullFilePath = getValidFullPath(username, '/');
+    if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);
+
+    let filePaths = [];
+    try {
+        // -mtime 3 == 3 days ago
+        const { stdout } = await exec(`find ${fullFilePath} -type f -mtime 2`);
+        filePaths = stdout.toString().split('\n').map(function (f) { return f.trim(); }).filter(function (f) { return !!f; });
+    } catch (error) {
+        throw new MainError(MainError.INTERNAL_ERROR, error);
+    }
+
+    let result = [];
+
+    const localResolvedPrefix = path.join(constants.DATA_ROOT, username);
+    await async.each(filePaths, async function (filePath) {
+        console.log(filePath, localResolvedPrefix, filePath.slice(localResolvedPrefix.length));
+        try {
+            const stat = await fs.stat(filePath);
+            if (!stat.isFile()) throw new MainError(MainError.FS_ERROR, 'recent should only list files');
+            result.push(await getFile(filePath, filePath.slice(localResolvedPrefix.length), stat));
+        } catch (error) {
+            console.error('error in getting recents:', error);
+        }
+    });
+
+    return result;
 }

@@ -13,7 +13,7 @@
       <h1 style="margin-bottom: 50px;">Cubby</h1>
 
       <Button icon="pi pi-folder-open" class="" label="All Files" @click="showAllFiles"/>
-      <Button icon="pi pi-clock" class="" label="Recent"/>
+      <Button icon="pi pi-clock" class="" label="Recent" @click="onRecent"/>
       <Button icon="pi pi-share-alt" class="" label="Shared"/>
 
       <div style="flex-grow: 1">&nbsp;</div>
@@ -299,6 +299,42 @@ export default {
                 that.refresh();
             });
         },
+        onRecent() {
+            var that = this;
+
+            window.location.hash = 'recent';
+
+            that.busy = true;
+            superagent.get('/api/v1/recent').query({ access_token: that.accessToken }).end(function (error, result) {
+                that.busy = false;
+
+                if (error) {
+                    that.entries = [];
+
+                    if (error.status === 401) that.onLogout();
+                    else if (error.status === 404) that.error = 'Does not exist';
+                    else console.error(error);
+
+                    return;
+                }
+
+                that.currentPath = 'recent';
+
+                result.body.files.forEach(function (entry) {
+                    entry.previewUrl = getPreviewUrl(entry);
+                    entry.extension = getExtension(entry);
+                    entry.rename = false;
+                    entry.filePathNew = entry.fileName;
+                });
+
+                result.body.previewUrl = getPreviewUrl(result.body);
+
+                that.entry = result.body;
+
+                // also set active entry for now maybe wrong
+                that.activeEntry = that.entry;
+            });
+        },
         refresh(path) {
             var that = this;
 
@@ -345,13 +381,13 @@ export default {
             if (entry.isDirectory) return this.refresh(entry.filePath);
 
             if (this.$refs.imageViewer.canHandle(entry)) {
-                this.$refs.imageViewer.open(entry)
+                this.$refs.imageViewer.open(entry);
                 this.viewer = 'image';
             } else if (this.$refs.textEditor.canHandle(entry)) {
-                this.$refs.textEditor.open(entry)
+                this.$refs.textEditor.open(entry);
                 this.viewer = 'text';
             } else if (this.$refs.pdfViewer.canHandle(entry)) {
-                this.$refs.pdfViewer.open(entry)
+                this.$refs.pdfViewer.open(entry);
                 this.viewer = 'pdf';
             } else {
                 this.viewer = '';
@@ -375,9 +411,13 @@ export default {
             that.uploadFiles(that.$refs.uploadFolder.files || []);
         });
 
-        window.addEventListener('hashchange', function () {
-            that.refresh(window.location.hash.slice(1));
-        }, false);
+        function hashChange() {
+            const hash = window.location.hash.slice(1);
+            if (hash === 'recent') that.onRecent();
+            else that.refresh(hash);
+        }
+
+        window.addEventListener('hashchange', hashChange, false);
 
         if (!localStorage.accessToken) {
             this.ready = true;
@@ -399,7 +439,7 @@ export default {
 
             that.ready = true;
 
-            that.refresh(window.location.hash.slice(1));
+            hashChange();
         });
     }
 };

@@ -4,11 +4,12 @@ exports = module.exports = {
     add,
     get,
     update,
-    remove
+    remove,
+    recent
 };
 
 var assert = require('assert'),
-    debug = require('debug')('cubby:routes:fs'),
+    debug = require('debug')('cubby:routes:files'),
     files = require('../files.js'),
     util = require('util'),
     MainError = require('../mainerror.js'),
@@ -125,4 +126,31 @@ async function remove(req, res, next) {
     }
 
     next(new HttpSuccess(200, {}));
+}
+
+async function recent(req, res, next) {
+    assert.strictEqual(typeof req.user, 'object');
+
+    debug('recent');
+
+    let result = [];
+
+    try {
+        result = await files.recent(req.user.username);
+    } catch (error) {
+        return next(new HttpError(500, error));
+    }
+
+    const entry = {
+        fileName: 'Recent',
+        filePath: '/',
+        size: 0,
+        mtime: Date.now(),
+        isDirectory: true,
+        isFile: false,
+        mimeType: 'inode/directory',
+        files: result
+    };
+
+    next(new HttpSuccess(200, entry));
 }
