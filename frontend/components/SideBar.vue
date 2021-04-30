@@ -1,7 +1,7 @@
 <template>
     <div class="container" :class="{ 'visible': visible }">
       <div class="p-d-flex p-jc-between header" style="padding-bottom: 10px;">Details</div>
-      <div class="preview" :style="{ backgroundImage: 'url(' + entry.previewUrl + ')' }"></div>
+      <div class="preview" :style="{ backgroundImage: entry && entry.previewUrl ? 'url(' + entry.previewUrl + ')' : 'none' }"></div>
       <div class="detail">
         <p>Owner</p>
         <span>Admin</span>
