@@ -103,7 +103,7 @@ async function getDirectory(fullFilePath, filePath, stats) {
                 var stat = fs.statSync(path.join(fullFilePath, file));
                 return { name: file, stat: stat };
             } catch (e) {
-                debug(`files: cannot stat ${path.join(fullFilePath, file)}`, e);
+                debug(`getDirectory: cannot stat ${path.join(fullFilePath, file)}`, e);
                 return null;
             }
         }).filter(function (file) { return file && (file.stat.isDirectory() || file.stat.isFile()); }).map(function (file) {
@@ -159,7 +159,7 @@ async function get(username, filePath) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof filePath, 'string');
 
-    debug(`file: get ${username} ${filePath}`);
+    debug(`get ${username} ${filePath}`);
 
     const fullFilePath = getValidFullPath(username, filePath);
     if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);
@@ -185,7 +185,7 @@ function move(username, filePath, newFilePath) {
     const fullNewFilePath = getValidFullPath(username, newFilePath);
     if (!fullNewFilePath) throw new MainError(MainError.INVALID_PATH);
 
-    debug(`file: move ${fullFilePath} -> ${fullNewFilePath}`);
+    debug(`move ${fullFilePath} -> ${fullNewFilePath}`);
 
     try {
         // TODO add option for overwrite
