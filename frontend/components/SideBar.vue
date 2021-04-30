@@ -61,15 +61,12 @@ export default {
     height: 100%;
     overflow: hidden;
     width: 0;
-    transition: width 200ms;
-    padding: 0;
+    transition: width ease-in 300ms;
     border-left: 1px solid #f8f9fa;
 }
 
 .container.visible {
-    padding: 10px 10px 0px 10px;
-    width: 20%;
-    min-width: 200px;
+    width: 350px;
 }
 
 .preview {
@@ -81,6 +78,7 @@ export default {
 }
 
 .header {
+    padding: 10px;
     text-align: left;
     border-bottom: solid 2px #2196f3;
 }
