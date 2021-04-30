@@ -14,7 +14,7 @@
 
       <Button icon="pi pi-folder-open" class="" label="All Files" @click="showAllFiles"/>
       <Button icon="pi pi-clock" class="" label="Recent" @click="onRecent"/>
-      <Button icon="pi pi-share-alt" class="" label="Shared"/>
+      <Button icon="pi pi-share-alt" class="" label="Shared" @click="onShares"/>
 
       <div style="flex-grow: 1">&nbsp;</div>
 
@@ -335,6 +335,42 @@ export default {
                 that.activeEntry = that.entry;
             });
         },
+        onShares() {
+            var that = this;
+
+            window.location.hash = 'shares';
+
+            that.busy = true;
+            superagent.get('/api/v1/shares').query({ access_token: that.accessToken }).end(function (error, result) {
+                that.busy = false;
+
+                if (error) {
+                    that.entries = [];
+
+                    if (error.status === 401) that.onLogout();
+                    else if (error.status === 404) that.error = 'Does not exist';
+                    else console.error(error);
+
+                    return;
+                }
+
+                that.currentPath = 'shares';
+
+                result.body.files.forEach(function (entry) {
+                    entry.previewUrl = getPreviewUrl(entry);
+                    entry.extension = getExtension(entry);
+                    entry.rename = false;
+                    entry.filePathNew = entry.fileName;
+                });
+
+                result.body.previewUrl = getPreviewUrl(result.body);
+
+                that.entry = result.body;
+
+                // also set active entry for now maybe wrong
+                that.activeEntry = that.entry;
+            });
+        },
         refresh(path) {
             var that = this;
 
@@ -414,6 +450,7 @@ export default {
         function hashChange() {
             const hash = window.location.hash.slice(1);
             if (hash === 'recent') that.onRecent();
+            if (hash === 'shares') that.onShares();
             else that.refresh(hash);
         }
 

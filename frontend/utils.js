@@ -59,6 +59,7 @@ function download(entry) {
 
 function getPreviewUrl(entry) {
     if (entry.mimeType === 'inode/recent') return '/folder-temp.svg';
+    if (entry.mimeType === 'inode/share') return '/folder-network.svg';
 
     var mime = entry.mimeType.split('/');
     return '/mime-types/' + mime[0] + '-' + mime[1] + '.svg';
