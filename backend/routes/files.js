@@ -98,7 +98,7 @@ async function update(req, res, next) {
         if (!newFilePath) return next(new HttpError(400, 'move action requires new_path argument'));
 
         try {
-            files.move(req.user.username, filePath, newFilePath);
+            await files.move(req.user.username, filePath, newFilePath);
         } catch (error) {
             if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'not found'));
             return next(new HttpError(500, error));
