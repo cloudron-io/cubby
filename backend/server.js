@@ -16,11 +16,6 @@ exports = module.exports = {
     init
 };
 
-// function tokenAuth(req, res, next) {
-//     next();
-// }
-
-
 function init(callback) {
     var app = express();
     var router = new express.Router();
