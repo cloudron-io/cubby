@@ -31,7 +31,7 @@ export default {
     data() {
         return {
             entry: null,
-            wopiToken: '',
+            wopiToken: '',  //  in our case this is the same as accesstoken
             wopiUrl: ''
         };
     },
@@ -49,13 +49,16 @@ export default {
 
             this.entry = entry;
 
-            superagent.get('/api/v1/office/handle').query({ access_token: localStorage.accessToken }).end(function (error, result) {
+            superagent.get('/api/v1/office/handle').query({ access_token: localStorage.accessToken, filePath: entry.filePath }).end(function (error, result) {
                 if (error) return console.error('Failed to get office handle.', error);
 
-                var wopiSrc = window.location.origin + '/api/v1/office/wopi/files/1';
+                var wopiSrc = window.location.origin + '/api/v1/office/wopi/files/' + result.body.shareId;
                 that.wopiUrl = result.body.url + 'WOPISrc=' + wopiSrc;
-                that.wopiToken = result.body.token;
-                that.$refs.wopiForm.submit();
+                that.wopiToken = localStorage.accessToken;
+
+                setTimeout(function () {
+                    that.$refs.wopiForm.submit();
+                }, 500);
             });
         },
         onClose() {

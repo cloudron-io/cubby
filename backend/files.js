@@ -1,6 +1,7 @@
 'use strict';
 
 exports = module.exports = {
+    getValidFullPath,
     addDirectory,
     addFile,
     get,

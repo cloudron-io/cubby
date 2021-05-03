@@ -256,7 +256,7 @@ export default {
                     that.uploadStatus.percentDone = tmp > 100 ? 100 : tmp;
                 }).end(function (error, result) {
                     if (result && result.statusCode === 401) return that.logout();
-                    if (result && result.statusCode !== 201) return callback('Error uploading file: ', result.statusCode);
+                    if (result && result.statusCode !== 200) return callback('Error uploading file: ', result.statusCode);
                     if (error) return callback(error);
 
                     callback();

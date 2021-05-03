@@ -1,7 +1,7 @@
 'use strict';
 
 exports = module.exports = {
-    get
+    list
 };
 
 var assert = require('assert'),
@@ -20,15 +20,15 @@ function boolLike(arg) {
     return true;
 }
 
-async function get(req, res, next) {
+async function list(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
-    debug('get');
+    debug('list');
 
     let result = [];
 
     try {
-        result = await shares.get(req.user.username);
+        result = await shares.list(req.user.username);
     } catch (error) {
         return next(new HttpError(500, error));
     }

@@ -57,12 +57,12 @@ function init(callback) {
     router.put ('/api/v1/files', users.tokenAuth, files.update);
     router.del ('/api/v1/files', users.tokenAuth, files.remove);
 
-    router.get ('/api/v1/shares', users.tokenAuth, shares.get);
+    router.get ('/api/v1/shares', users.tokenAuth, shares.list);
 
     router.get ('/api/v1/office/handle', users.tokenAuth, office.getHandle);
-    router.get ('/api/v1/office/wopi/files/:fileId', office.checkFileInfo);
-    router.get ('/api/v1/office/wopi/files/:fileId/contents', office.getFile);
-    router.post('/api/v1/office/wopi/files/:fileId/contents', office.putFile);
+    router.get ('/api/v1/office/wopi/files/:shareId', users.tokenAuth, office.checkFileInfo);
+    router.get ('/api/v1/office/wopi/files/:shareId/contents', users.tokenAuth, office.getFile);
+    router.post('/api/v1/office/wopi/files/:shareId/contents', users.tokenAuth, office.putFile);
 
     app.use('/api/healthcheck', function (req, res) { res.status(200).send(); });
     app.use('/api', bodyParser.json());
