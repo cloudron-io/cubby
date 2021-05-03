@@ -30,7 +30,9 @@
     "primeicons": "^4.1.0",
     "primevue": "^3.4.0",
     "superagent": "^6.1.0",
-    "vue": "^3.0.0"
+    "vue": "^3.0.0",
+    "xmldom": "^0.6.0",
+    "xpath": "0.0.32"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.12",

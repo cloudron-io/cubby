@@ -79,6 +79,7 @@
   <ImageViewer ref="imageViewer" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'image'" />
   <TextEditor ref="textEditor" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'text'" />
   <PdfViewer ref="pdfViewer" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'pdf'" />
+  <OfficeViewer ref="officeViewer" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'office'" />
 </template>
 
 <script>
@@ -425,6 +426,9 @@ export default {
             } else if (this.$refs.pdfViewer.canHandle(entry)) {
                 this.$refs.pdfViewer.open(entry);
                 this.viewer = 'pdf';
+            } else if (this.$refs.officeViewer.canHandle(entry)) {
+                this.$refs.officeViewer.open(entry);
+                this.viewer = 'office';
             } else {
                 this.viewer = '';
                 console.log('TODO implement viewer');

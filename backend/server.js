@@ -7,6 +7,7 @@ var express = require('express'),
     users = require('./routes/users.js'),
     files = require('./routes/files.js'),
     shares = require('./routes/shares.js'),
+    office = require('./routes/office.js'),
     multipart = require('./routes/multipart.js'),
     morgan = require('morgan'),
     HttpError = require('connect-lastmile').HttpError,
@@ -57,6 +58,11 @@ function init(callback) {
     router.del ('/api/v1/files', users.tokenAuth, files.remove);
 
     router.get ('/api/v1/shares', users.tokenAuth, shares.get);
+
+    router.get ('/api/v1/office/handle', users.tokenAuth, office.getHandle);
+    router.get ('/api/v1/office/wopi/files/:fileId', office.checkFileInfo);
+    router.get ('/api/v1/office/wopi/files/:fileId/contents', office.getFile);
+    router.post('/api/v1/office/wopi/files/:fileId/contents', office.putFile);
 
     app.use('/api/healthcheck', function (req, res) { res.status(200).send(); });
     app.use('/api', bodyParser.json());
