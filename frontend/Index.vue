@@ -16,14 +16,14 @@
       <Button icon="pi pi-clock" class="" label="Recent" @click="onRecent"/>
       <Button icon="pi pi-share-alt" class="" label="Shared" @click="onShares"/>
 
-      <div style="flex-grow: 1">&nbsp;</div>
+      <!-- <div style="flex-grow: 1">&nbsp;</div>
 
       <div class="p-fluid">
         <span class="p-input-icon-left">
           <i class="pi pi-search" />
           <InputText type="text" v-model="search" placeholder="Search" />
         </span>
-      </div>
+      </div> -->
     </div>
     <div class="content">
       <MainToolbar :currentPath="currentPath" :displayName="profile.displayName" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @new-folder="onNewFolder"/>
