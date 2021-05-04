@@ -52,13 +52,8 @@ async function login(username, password) {
 
     debug('login: ', username);
 
-    var user;
-    try {
-        user = await getByUsername(username);
-        if (!user) return null;
-    } catch (error) {
-        throw error;
-    }
+    const user = await getByUsername(username);
+    if (!user) return null;
 
     if (user.source === constants.USER_SOURCE_LOCAL && await localLogin(username, password)) return user;
     else if (user.source === constants.USER_SOURCE_LDAP && await ldap.login(username, password)) return user;
