@@ -14,4 +14,5 @@ echo "=> Ensure admin account with admin:admin"
 /app/code/cli.js user-add --username admin --password admin --email admin@server.local --display-name Admin || true
 
 echo "=> Start the server"
+export DEBUG="cubby:*"
 exec /usr/local/bin/gosu cloudron:cloudron node /app/code/app.js

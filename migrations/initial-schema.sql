@@ -20,9 +20,14 @@ CREATE TABLE IF NOT EXISTS tokens(
 
 CREATE TABLE IF NOT EXISTS shares(
     id VARCHAR(128) NOT NULL UNIQUE,
-    user_id VARCHAR(128) NOT NULL,
+    owner_id VARCHAR(128) NOT NULL,
     file_path VARCHAR(256) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP,
+    readonly BOOLEAN NOT NULL DEFAULT FALSE,
+    receiver_user_id VARCHAR(128),
+    receiver_email VARCHAR(128),
 
-    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(receiver_user_id) REFERENCES users(id),
+    FOREIGN KEY(owner_id) REFERENCES users(id),
     PRIMARY KEY(id));

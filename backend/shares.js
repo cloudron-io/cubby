@@ -7,22 +7,30 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
-    constants = require('./constants.js'),
     debug = require('debug')('cubby:shares'),
     files = require('./files.js'),
     database = require('./database.js'),
     crypto = require('crypto'),
-    util = require('util'),
-    exec = util.promisify(require('child_process').exec),
-    mime = require('./mime.js'),
     MainError = require('./mainerror.js');
 
 function postProcess(data) {
-    data.userId = data.user_id;
-    delete data.user_id;
+    data.ownerId = data.owner_id;
+    delete data.owner_id;
 
     data.filePath = data.file_path;
     delete data.file_path;
+
+    data.createdAt = data.created_at;
+    delete data.created_at;
+
+    data.expiresAt = data.expires_at;
+    delete data.expires_at;
+
+    data.receiverUserId = data.receiver_user_id;
+    delete data.receiver_user_id;
+
+    data.receiverEmail = data.receiver_email;
+    delete data.receiver_email;
 
     return data;
 }
@@ -35,11 +43,18 @@ async function list(username) {
     return [];
 }
 
-async function create(user, filePath) {
+async function create({ user, filePath, receiverUserId, receiverEmail, readonly, expiresAt = 0 }) {
     assert.strictEqual(typeof user, 'object');
     assert.strictEqual(typeof filePath, 'string');
+    assert(typeof receiverUserId === 'string' || !receiverUserId);
+    assert(typeof receiverEmail === 'string' || !receiverEmail);
+    assert((receiverUserId && !receiverEmail) || (!receiverUserId && receiverEmail));
+    assert(typeof readonly === 'undefined' || typeof readonly === 'boolean');
 
-    debug(`create: ${user.username} ${filePath}`);
+    // ensure we have a bool with false as fallback
+    readonly = !!readonly;
+
+    debug(`create: ${user.username} ${filePath} receiver:${receiverUserId || receiverEmail} readonly:${readonly} expiresAt:${expiresAt}`);
 
     const fullFilePath = files.getValidFullPath(user.username, filePath);
     if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);
@@ -47,7 +62,9 @@ async function create(user, filePath) {
     const shareId = 'sid-' + crypto.randomBytes(32).toString('hex');
 
     try {
-        await database.query('INSERT INTO shares (id, user_id, file_path) VALUES ($1, $2, $3)', [ shareId, user.id, filePath ]);
+        await database.query('INSERT INTO shares (id, owner_id, file_path, receiver_email, receiver_user_id, readonly, expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7)', [
+            shareId, user.id, filePath, receiverEmail || null, receiverUserId || null, readonly, expiresAt || null
+        ]);
     } catch (error) {
         throw new MainError(MainError.DATABASE_ERROR, error);
     }

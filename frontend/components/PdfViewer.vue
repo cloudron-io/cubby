@@ -58,6 +58,15 @@ export default {
 
 </script>
 
+<style>
+
+.pdfViewer .page {
+    margin-bottom: 20px;
+    border-image: none;
+}
+
+</style>
+
 <style scoped>
 
 .container {
@@ -66,7 +75,7 @@ export default {
     left: 0;
     width: 100%;
     height: 100%;
-    background: black;
+    background: #cacaca;
     display: flex;
     flex-direction: column;
 }
