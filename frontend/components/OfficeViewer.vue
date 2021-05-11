@@ -40,7 +40,9 @@ export default {
     },
     methods: {
         canHandle(entry) {
-            return entry.mimeType === 'application/vnd.oasis.opendocument.presentation' || entry.mimeType === 'application/vnd.oasis.opendocument.text';
+            return entry.mimeType === 'application/vnd.oasis.opendocument.presentation' ||
+                entry.mimeType === 'application/vnd.oasis.opendocument.text' ||
+                entry.mimeType === 'application/vnd.oasis.opendocument.spreadsheet';
         },
         async open(entry) {
             var that = this;
