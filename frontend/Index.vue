@@ -81,14 +81,18 @@
     <form @submit="onSaveShareDialog" @submit.prevent>
       <div class="p-fluid">
         <div class="p-field">
-          <Dropdown v-model="shareDialog.receipientId" :options="shareDialog.users" optionLabel="username" placeholder="Select a user" />
+          <Dropdown v-model="shareDialog.receiverUserId" :options="shareDialog.users" optionLabel="userAndDisplayName" placeholder="Select a user" />
           <small class="p-invalid" v-show="shareDialog.error">{{ shareDialog.error }}</small>
+        </div>
+        <div class="p-field-checkbox">
+          <Checkbox id="binary" v-model="shareDialog.readonly" :binary="true" />
+          <label for="binary">Share read-only</label>
         </div>
       </div>
     </form>
     <template #footer>
       <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="shareDialog.visible = false"/>
-      <Button label="Share" icon="pi pi-check" class="p-button-text p-button-success" @click="onSaveShareDialog" :disabled="!shareDialog.receipientId"/>
+      <Button label="Create share" icon="pi pi-check" class="p-button-text p-button-success" @click="onSaveShareDialog" :disabled="!shareDialog.receiverUserId"/>
     </template>
   </Dialog>
 
@@ -146,7 +150,8 @@ export default {
             shareDialog: {
                 visible: false,
                 error: '',
-                receipientId: '',
+                receiverUserId: '',
+                readonly: false,
                 users: [],
                 entry: {}
             }
@@ -365,13 +370,19 @@ export default {
         onShare(entry) {
             var that = this;
 
+            that.shareDialog.error = '';
+            that.shareDialog.receiverUserId = '';
+            that.shareDialog.readonly = false;
+            that.shareDialog.entry = entry;
+
             superagent.get('/api/v1/users').query({ access_token: that.accessToken }).end(function (error, result) {
                 if (error) return console.error('Failed to get user list.', error);
 
-                that.shareDialog.error = '';
-                that.shareDialog.receipientId = '';
-                that.shareDialog.entry = entry;
                 that.shareDialog.users = result.body.users.filter(function (u) { return u.username !== that.profile.username; });
+                that.shareDialog.users.forEach(function (u) {
+                    u.userAndDisplayName = u.displayName + ' ( ' + u.username + ' )';
+                });
+
                 that.shareDialog.visible = true;
             });
         },
