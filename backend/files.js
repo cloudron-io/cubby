@@ -210,8 +210,9 @@ async function remove(username, filePath) {
     }
 }
 
-async function recent(username) {
+async function recent(username, daysAgo = 3) {
     assert.strictEqual(typeof username, 'string');
+    assert.strictEqual(typeof daysAgo, 'number');
 
     const fullFilePath = getValidFullPath(username, '/');
     if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);
@@ -219,7 +220,7 @@ async function recent(username) {
     let filePaths = [];
     try {
         // -mtime 3 == 3 days ago
-        const { stdout } = await exec(`find ${fullFilePath} -type f -mtime 2`);
+        const { stdout } = await exec(`find ${fullFilePath} -type f -mtime -${daysAgo}`);
         filePaths = stdout.toString().split('\n').map(function (f) { return f.trim(); }).filter(function (f) { return !!f; });
     } catch (error) {
         throw new MainError(MainError.INTERNAL_ERROR, error);
