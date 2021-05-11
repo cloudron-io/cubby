@@ -496,7 +496,7 @@ export default {
         function hashChange() {
             const hash = window.location.hash.slice(1);
             if (hash === 'recent') that.onRecent();
-            if (hash === 'shares') that.onShares();
+            else if (hash === 'shares') that.onShares();
             else that.refresh(hash);
         }
 
