@@ -127,7 +127,10 @@ async function getByAccessToken(accessToken) {
 
 async function list() {
     const users = await database.query('SELECT * FROM users');
-    return users.forEach(postProcess);
+
+    users.rows.forEach(postProcess);
+
+    return users.rows;
 }
 
 async function update(userId, user) {

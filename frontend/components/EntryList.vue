@@ -8,7 +8,7 @@
       <div class="td hand" style="flex-grow: 2;" @click="onSort('fileName')">Name <i class="pi" :class="{'pi-sort-alpha-down': sort.desc, 'pi-sort-alpha-up-alt': !sort.desc }" v-show="sort.prop === 'fileName'"></i></div>
       <div class="td hand" style="max-width: 150px;" @click="onSort('mtime')">Updated <i class="pi" :class="{'pi-sort-numeric-down': sort.desc, 'pi-sort-numeric-up-alt': !sort.desc }" v-show="sort.prop === 'mtime'"></i></div>
       <div class="td hand" style="max-width: 100px;" @click="onSort('size')">Size <i class="pi" :class="{'pi-sort-numeric-down': sort.desc, 'pi-sort-numeric-up-alt': !sort.desc }" v-show="sort.prop === 'size'"></i></div>
-      <div class="td" style="max-width: 150px; justify-content: flex-end;"></div>
+      <div class="td" style="min-width: 180px; justify-content: flex-end;"></div>
     </div>
     <div class="tbody">
       <div class="tr-placeholder" v-show="entries.length === 0">Folder is empty</div>
@@ -22,13 +22,14 @@
         </div>
         <div class="td p-d-none p-d-md-flex" style="max-width: 150px;"><span v-tooltip.top="prettyLongDate(entry.mtime)">{{ prettyDate(entry.mtime) }}</span></div>
         <div class="td p-d-none p-d-md-flex" style="max-width: 100px;">{{ prettyFileSize(entry.size) }}</div>
-        <div class="td" style="max-width: 150px; justify-content: flex-end;">
+        <div class="td" style="min-width: 180px; justify-content: flex-end;">
           <span class="action-buttons">
               <Button class="p-button-sm p-button-rounded p-button-text" icon="pi pi-download" v-tooltip.top="'Download'" v-show="!entry.rename && entry.isFile" @click.stop="onDownload(entry)"/>
               <Button class="p-button-sm p-button-rounded p-button-text" icon="pi pi-copy" v-tooltip.top="'Copy Link'" v-show="!entry.rename && entry.isFile" @click.stop="onCopyLink(entry)"/>
               <a :href="getDirectLink(entry)" target="_blank" @click.stop v-show="!entry.rename && entry.isFile">
                 <Button class="p-button-sm p-button-rounded p-button-text" icon="pi pi-external-link" v-tooltip.top="'Open'" v-show="!entry.rename"/>
               </a>
+              <Button class="p-button-sm p-button-rounded p-button-text" icon="pi pi-share-alt" v-tooltip.top="'Share'" v-show="!entry.rename" @click.stop="onShare(entry)"/>
               <Button class="p-button-sm p-button-rounded p-button-danger p-button-text" icon="pi pi-trash" v-tooltip.top="'Delete'" v-show="editable && !entry.rename" @click.stop="onDelete(entry)"/>
           </span>
         </div>
@@ -44,7 +45,7 @@ import { prettyDate, prettyLongDate, prettyFileSize, download, copyToClipboard, 
 
 export default {
     name: 'EntryList',
-    emits: [ 'selection-changed', 'entry-activated', 'entry-renamed', 'entry-delete', 'dropped' ],
+    emits: [ 'selection-changed', 'entry-activated', 'entry-renamed', 'entry-delete', 'dropped', 'entry-shared' ],
     data() {
         return {
             active: {},
@@ -171,6 +172,9 @@ export default {
                 },
                 reject: () => {}
             });
+        },
+        onShare: function (entry) {
+            this.$emit('entry-shared', entry);
         },
         dragExit: function () {
             this.dragActive = '';

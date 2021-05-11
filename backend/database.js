@@ -41,7 +41,7 @@ function init() {
 
 async function query(sql, args) {
     assert.strictEqual(typeof sql, 'string');
-    assert(Array.isArray(args));
+    assert(typeof args === 'undefined' || Array.isArray(args));
 
     if (!gConnectionPool) throw new MainError(MainError.DATABASE_ERROR, 'database.js not initialized');
 

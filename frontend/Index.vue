@@ -30,7 +30,7 @@
       <div class="container">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
-          <EntryList :entries="entry.files" sort-folders-first="true" @entry-renamed="onRename" @entry-activated="openEntry" @entry-delete="onDelete" @selection-changed="onSelectionChanged" editable/>
+          <EntryList :entries="entry.files" sort-folders-first="true" @entry-shared="onShare" @entry-renamed="onRename" @entry-activated="openEntry" @entry-delete="onDelete" @selection-changed="onSelectionChanged" editable/>
         </div>
         <SideBar :entry="activeEntry" :visible="sideBarVisible"/>
       </div>
@@ -76,6 +76,22 @@
     </template>
   </Dialog>
 
+  <!-- Share Dialog -->
+  <Dialog :header="'Share ' + shareDialog.entry.fileName" v-model:visible="shareDialog.visible" :dismissableMask="true" :closable="true" :style="{width: '500px'}" :modal="true">
+    <form @submit="onSaveShareDialog" @submit.prevent>
+      <div class="p-fluid">
+        <div class="p-field">
+          <Dropdown v-model="shareDialog.receipientId" :options="shareDialog.users" optionLabel="username" placeholder="Select a user" />
+          <small class="p-invalid" v-show="shareDialog.error">{{ shareDialog.error }}</small>
+        </div>
+      </div>
+    </form>
+    <template #footer>
+      <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="shareDialog.visible = false"/>
+      <Button label="Create" icon="pi pi-check" class="p-button-text p-button-success" @click="onSaveShareDialog" :disabled="!shareDialog.receipientId"/>
+    </template>
+  </Dialog>
+
   <ImageViewer ref="imageViewer" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'image'" />
   <TextEditor ref="textEditor" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'text'" />
   <PdfViewer ref="pdfViewer" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'pdf'" />
@@ -114,6 +130,7 @@ export default {
             entry: {
                 files: []
             },
+            users: [],
             currentPath: '/',
             activeEntry: {},
             sideBarVisible: true,
@@ -126,6 +143,13 @@ export default {
                 visible: false,
                 error: '',
                 folderName: ''
+            },
+            shareDialog: {
+                visible: false,
+                error: '',
+                receipientId: '',
+                users: [],
+                entry: {}
             }
         };
     },
@@ -336,6 +360,15 @@ export default {
                 that.activeEntry = that.entry;
             });
         },
+        onShare(entry) {
+            var that = this;
+
+            this.shareDialog.error = '';
+            this.shareDialog.receipientId = '';
+            this.shareDialog.entry = entry;
+            this.shareDialog.users = this.users.filter(function (u) { return u.username !== that.profile.username; });
+            this.shareDialog.visible = true;
+        },
         onShares() {
             var that = this;
 
@@ -437,6 +470,15 @@ export default {
         },
         onViewerClose() {
             this.viewer = null;
+        },
+        refreshUsers() {
+            var that = this;
+
+            superagent.get('/api/v1/users').query({ access_token: that.accessToken }).end(function (error, result) {
+                if (error) return console.error('Failed to get user list.', error);
+
+                that.users = result.body.users;
+            });
         }
     },
     mounted() {
@@ -480,6 +522,7 @@ export default {
 
             that.ready = true;
 
+            that.refreshUsers();
             hashChange();
         });
     }

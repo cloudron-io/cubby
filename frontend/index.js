@@ -2,6 +2,7 @@ import { createApp } from 'vue';
 
 import PrimeVue from 'primevue/config';
 import Dialog from 'primevue/dialog';
+import Dropdown from 'primevue/dropdown';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
@@ -42,6 +43,7 @@ app.use(ConfirmationService);
 app.use(ToastService);
 
 app.component('Dialog', Dialog);
+app.component('Dropdown', Dropdown);
 app.component('Button', Button);
 app.component('RadioButton', RadioButton);
 app.component('InputText', InputText);
