@@ -93,4 +93,8 @@ export default {
     width: 35px;
 }
 
+.p-toolbar {
+    padding: 5px 1rem;
+}
+
 </style>
