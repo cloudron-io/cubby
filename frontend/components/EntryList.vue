@@ -11,7 +11,7 @@
       <div class="td" style="min-width: 180px; justify-content: flex-end;"></div>
     </div>
     <div class="tbody">
-      <div class="tr-placeholder" v-show="entries.length === 0">Folder is empty</div>
+      <div class="tr-placeholder" v-show="entries.length === 0">Nothing found</div>
       <div class="tr-placeholder" v-show="entries.length !== 0 && filteredAndSortedEntries.length === 0">Nothing found</div>
       <div class="tr" v-for="entry in filteredAndSortedEntries" :key="entry.fileName" @dblclick="onEntryOpen(entry, false)" @click="onEntrySelect(entry)" @drop.stop.prevent="drop(entry)" @dragover.stop.prevent="dragOver(entry)" :class="{ 'selected': selected.includes(entry.filePath), 'drag-active': entry === dragActive }">
         <div class="td" style="max-width: 50px;"><img :src="entry.previewUrl" style="width: 32px; height: 32px; vertical-align: middle;"/></div>
