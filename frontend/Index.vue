@@ -81,7 +81,7 @@
     <form @submit="onSaveShareDialog" @submit.prevent>
       <div class="p-fluid">
         <div class="p-field">
-          <Dropdown v-model="shareDialog.receiverUserId" :options="shareDialog.users" optionLabel="userAndDisplayName" placeholder="Select a user" />
+          <Dropdown v-model="shareDialog.receiverUserId" :options="shareDialog.users" optionValue="id" optionLabel="userAndDisplayName" placeholder="Select a user" />
           <small class="p-invalid" v-show="shareDialog.error">{{ shareDialog.error }}</small>
         </div>
         <div class="p-field-checkbox">
@@ -118,6 +118,7 @@ export default {
             search: '',
             viewer: '',
             profile: {
+                id: '',
                 username: '',
                 displayName: '',
                 email: ''
@@ -163,6 +164,7 @@ export default {
         },
         onLogout() {
             this.accessToken = '';
+            this.profile.id = '';
             this.profile.username = '';
             this.profile.email = '';
             this.profile.displayName = '';
@@ -172,6 +174,7 @@ export default {
         onLoggedIn(accessToken, profile) {
             this.accessToken = accessToken;
 
+            this.profile.id = profile.id;
             this.profile.username = profile.username;
             this.profile.displayName = profile.displayName;
             this.profile.email = profile.email;
@@ -182,7 +185,19 @@ export default {
             this.refresh(window.location.hash.slice(1));
         },
         onSaveShareDialog() {
-            console.log('TBD');
+            var that = this;
+
+            var path = this.shareDialog.entry.filePath;
+            var readonly = this.shareDialog.readonly;
+            var receiver_user_id = this.shareDialog.receiverUserId;
+
+            superagent.post('/api/v1/shares').query({ path, readonly, receiver_user_id, access_token: localStorage.accessToken }).end(function (error, result) {
+                if (result && result.statusCode === 401) return that.onLogout();
+                if (result && result.statusCode !== 200) return that.shareDialog.error = 'Error creating share: ' + result.statusCode;
+                if (error) return console.error(error.message);
+
+                that.shareDialog.visible = false;
+            });
         },
         onUploadFile() {
             // reset the form first to make the change handler retrigger even on the same file selected
@@ -378,7 +393,9 @@ export default {
             superagent.get('/api/v1/users').query({ access_token: that.accessToken }).end(function (error, result) {
                 if (error) return console.error('Failed to get user list.', error);
 
-                that.shareDialog.users = result.body.users.filter(function (u) { return u.username !== that.profile.username; });
+                that.shareDialog.users = result.body.users.filter(function (u) { return u.id !== that.profile.id; });
+
+                // TODO this is just to be prettier, should be in UI code though
                 that.shareDialog.users.forEach(function (u) {
                     u.userAndDisplayName = u.displayName + ' ( ' + u.username + ' )';
                 });
@@ -524,6 +541,7 @@ export default {
                 return;
             }
 
+            that.profile.id = result.body.id;
             that.profile.username = result.body.username;
             that.profile.email = result.body.email;
             that.profile.displayName = result.body.displayName;

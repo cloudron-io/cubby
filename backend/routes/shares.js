@@ -1,7 +1,8 @@
 'use strict';
 
 exports = module.exports = {
-    list
+    list,
+    create
 };
 
 var assert = require('assert'),
@@ -28,7 +29,7 @@ async function list(req, res, next) {
     let result = [];
 
     try {
-        result = await shares.list(req.user.username);
+        result = await shares.list(req.user.id);
     } catch (error) {
         return next(new HttpError(500, error));
     }
@@ -45,4 +46,28 @@ async function list(req, res, next) {
     };
 
     next(new HttpSuccess(200, entry));
+}
+
+async function create(req, res, next) {
+    assert.strictEqual(typeof req.user, 'object');
+
+    const filePath = decodeURIComponent(req.query.path);
+    const receiverUserId = req.query.receiver_user_id || null;
+    const receiverEmail = req.query.receiver_email || null;
+    const readonly = boolLike(req.query.readonly);
+
+    if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
+    if (!receiverUserId && !receiverEmail) return next(new HttpError(400, 'either receiver_user_id or receiver_email must be a non-empty string'));
+    if (receiverUserId && receiverEmail) return next(new HttpError(400, 'only one of receiver_user_id or receiver_email can be provided'));
+
+    debug(`create: ${filePath} receiver:${receiverUserId || receiverEmail}`);
+
+    let shareId;
+    try {
+        shareId = await shares.create({ user: req.user, filePath, receiverUserId, receiverEmail, readonly });
+    } catch (error) {
+        return next(new HttpError(500, error));
+    }
+
+    next(new HttpSuccess(200, { shareId }));
 }

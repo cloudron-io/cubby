@@ -58,7 +58,7 @@ async function get(req, res, next) {
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
     if (type && (type !== 'raw' && type !== 'download')) return next(new HttpError(400, 'type must be either empty, "download" or "raw"'));
 
-    debug(`get: ${filePath} type:${type}`);
+    debug(`get: ${filePath} type:${type || 'json'}`);
 
     let result;
 

@@ -58,6 +58,7 @@ function init(callback) {
     router.del ('/api/v1/files', users.tokenAuth, files.remove);
 
     router.get ('/api/v1/shares', users.tokenAuth, shares.list);
+    router.post('/api/v1/shares', users.tokenAuth, shares.create);
 
     router.get ('/api/v1/office/handle', users.tokenAuth, office.getHandle);
     router.get ('/api/v1/office/wopi/files/:shareId', users.tokenAuth, office.checkFileInfo);

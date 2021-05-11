@@ -35,12 +35,21 @@ function postProcess(data) {
     return data;
 }
 
-async function list(username) {
-    assert.strictEqual(typeof username, 'string');
+async function list(userId) {
+    assert.strictEqual(typeof userId, 'string');
 
-    debug(`list: ${username}`);
+    debug(`list: ${userId}`);
 
-    return [];
+    let result;
+    try {
+        result = await database.query('SELECT * FROM shares WHERE receiver_user_id = $1', [ userId ]);
+    } catch (error) {
+        throw new MainError(MainError.DATABASE_ERROR, error);
+    }
+
+    result.rows.forEach(postProcess);
+
+    return result.rows;
 }
 
 async function create({ user, filePath, receiverUserId, receiverEmail, readonly, expiresAt = 0 }) {
