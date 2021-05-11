@@ -90,6 +90,7 @@ export default {
 
 .detail {
     margin-bottom: 15px;
+    padding-left: 10px;
 }
 
 @media only screen and (max-width: 767px)  {
