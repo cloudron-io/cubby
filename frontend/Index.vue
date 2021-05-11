@@ -81,7 +81,7 @@
     <form @submit="onSaveShareDialog" @submit.prevent>
       <div class="p-fluid">
         <div class="p-field">
-          <Dropdown v-model="shareDialog.receiverUserId" :options="shareDialog.users" optionValue="id" optionLabel="userAndDisplayName" placeholder="Select a user" />
+          <Dropdown v-model="shareDialog.receiverUsername" :options="shareDialog.users" optionValue="username" optionLabel="userAndDisplayName" placeholder="Select a user" />
           <small class="p-invalid" v-show="shareDialog.error">{{ shareDialog.error }}</small>
         </div>
         <div class="p-field-checkbox">
@@ -92,7 +92,7 @@
     </form>
     <template #footer>
       <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="shareDialog.visible = false"/>
-      <Button label="Create share" icon="pi pi-check" class="p-button-text p-button-success" @click="onSaveShareDialog" :disabled="!shareDialog.receiverUserId"/>
+      <Button label="Create share" icon="pi pi-check" class="p-button-text p-button-success" @click="onSaveShareDialog" :disabled="!shareDialog.receiverUsername"/>
     </template>
   </Dialog>
 
@@ -118,7 +118,6 @@ export default {
             search: '',
             viewer: '',
             profile: {
-                id: '',
                 username: '',
                 displayName: '',
                 email: ''
@@ -151,7 +150,7 @@ export default {
             shareDialog: {
                 visible: false,
                 error: '',
-                receiverUserId: '',
+                receiverUsername: '',
                 readonly: false,
                 users: [],
                 entry: {}
@@ -164,7 +163,6 @@ export default {
         },
         onLogout() {
             this.accessToken = '';
-            this.profile.id = '';
             this.profile.username = '';
             this.profile.email = '';
             this.profile.displayName = '';
@@ -174,7 +172,6 @@ export default {
         onLoggedIn(accessToken, profile) {
             this.accessToken = accessToken;
 
-            this.profile.id = profile.id;
             this.profile.username = profile.username;
             this.profile.displayName = profile.displayName;
             this.profile.email = profile.email;
@@ -189,9 +186,9 @@ export default {
 
             var path = this.shareDialog.entry.filePath;
             var readonly = this.shareDialog.readonly;
-            var receiver_user_id = this.shareDialog.receiverUserId;
+            var receiver_username = this.shareDialog.receiverUsername;
 
-            superagent.post('/api/v1/shares').query({ path, readonly, receiver_user_id, access_token: localStorage.accessToken }).end(function (error, result) {
+            superagent.post('/api/v1/shares').query({ path, readonly, receiver_username, access_token: localStorage.accessToken }).end(function (error, result) {
                 if (result && result.statusCode === 401) return that.onLogout();
                 if (result && result.statusCode !== 200) return that.shareDialog.error = 'Error creating share: ' + result.statusCode;
                 if (error) return console.error(error.message);
@@ -386,14 +383,14 @@ export default {
             var that = this;
 
             that.shareDialog.error = '';
-            that.shareDialog.receiverUserId = '';
+            that.shareDialog.receiverUsername = '';
             that.shareDialog.readonly = false;
             that.shareDialog.entry = entry;
 
             superagent.get('/api/v1/users').query({ access_token: that.accessToken }).end(function (error, result) {
                 if (error) return console.error('Failed to get user list.', error);
 
-                that.shareDialog.users = result.body.users.filter(function (u) { return u.id !== that.profile.id; });
+                that.shareDialog.users = result.body.users.filter(function (u) { return u.username !== that.profile.username; });
 
                 // TODO this is just to be prettier, should be in UI code though
                 that.shareDialog.users.forEach(function (u) {
@@ -541,7 +538,6 @@ export default {
                 return;
             }
 
-            that.profile.id = result.body.id;
             that.profile.username = result.body.username;
             that.profile.email = result.body.email;
             that.profile.displayName = result.body.displayName;

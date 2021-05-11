@@ -14,8 +14,8 @@ var assert = require('assert'),
     MainError = require('./mainerror.js');
 
 function postProcess(data) {
-    data.ownerId = data.owner_id;
-    delete data.owner_id;
+    data.owner = data.owner;
+    delete data.owner;
 
     data.filePath = data.file_path;
     delete data.file_path;
@@ -26,8 +26,8 @@ function postProcess(data) {
     data.expiresAt = data.expires_at;
     delete data.expires_at;
 
-    data.receiverUserId = data.receiver_user_id;
-    delete data.receiver_user_id;
+    data.receiverUsername = data.receiver_username;
+    delete data.receiver_username;
 
     data.receiverEmail = data.receiver_email;
     delete data.receiver_email;
@@ -35,14 +35,14 @@ function postProcess(data) {
     return data;
 }
 
-async function list(userId) {
-    assert.strictEqual(typeof userId, 'string');
+async function list(username) {
+    assert.strictEqual(typeof username, 'string');
 
-    debug(`list: ${userId}`);
+    debug(`list: ${username}`);
 
     let result;
     try {
-        result = await database.query('SELECT * FROM shares WHERE receiver_user_id = $1', [ userId ]);
+        result = await database.query('SELECT * FROM shares WHERE receiver_username = $1', [ username ]);
     } catch (error) {
         throw new MainError(MainError.DATABASE_ERROR, error);
     }
@@ -52,18 +52,18 @@ async function list(userId) {
     return result.rows;
 }
 
-async function create({ user, filePath, receiverUserId, receiverEmail, readonly, expiresAt = 0 }) {
+async function create({ user, filePath, receiverUsername, receiverEmail, readonly, expiresAt = 0 }) {
     assert.strictEqual(typeof user, 'object');
     assert.strictEqual(typeof filePath, 'string');
-    assert(typeof receiverUserId === 'string' || !receiverUserId);
+    assert(typeof receiverUsername === 'string' || !receiverUsername);
     assert(typeof receiverEmail === 'string' || !receiverEmail);
-    assert((receiverUserId && !receiverEmail) || (!receiverUserId && receiverEmail));
+    assert((receiverUsername && !receiverEmail) || (!receiverUsername && receiverEmail));
     assert(typeof readonly === 'undefined' || typeof readonly === 'boolean');
 
     // ensure we have a bool with false as fallback
     readonly = !!readonly;
 
-    debug(`create: ${user.username} ${filePath} receiver:${receiverUserId || receiverEmail} readonly:${readonly} expiresAt:${expiresAt}`);
+    debug(`create: ${user.username} ${filePath} receiver:${receiverUsername || receiverEmail} readonly:${readonly} expiresAt:${expiresAt}`);
 
     const fullFilePath = files.getValidFullPath(user.username, filePath);
     if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);
@@ -71,8 +71,8 @@ async function create({ user, filePath, receiverUserId, receiverEmail, readonly,
     const shareId = 'sid-' + crypto.randomBytes(32).toString('hex');
 
     try {
-        await database.query('INSERT INTO shares (id, owner_id, file_path, receiver_email, receiver_user_id, readonly, expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7)', [
-            shareId, user.id, filePath, receiverEmail || null, receiverUserId || null, readonly, expiresAt || null
+        await database.query('INSERT INTO shares (id, owner, file_path, receiver_email, receiver_username, readonly, expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7)', [
+            shareId, user.username, filePath, receiverEmail || null, receiverUsername || null, readonly, expiresAt || null
         ]);
     } catch (error) {
         throw new MainError(MainError.DATABASE_ERROR, error);

@@ -47,7 +47,7 @@ async function getHandle(req, res, next) {
         shareId = await shares.create({
             user: req.user,
             filePath: req.query.filePath,
-            receiverUserId: req.user.id
+            receiverUser: req.user.username
         });
     } catch (error) {
         return next(new HttpError(500, error));
@@ -87,7 +87,7 @@ async function checkFileInfo(req, res, next) {
     }
 
     // TODO check if shared with others
-    if (result.receiverUserId !== req.user.id) return next(new HttpError(404, 'not found'));
+    if (result.receiverUser !== req.user.username) return next(new HttpError(404, 'not found'));
 
     try {
         result = await files.get(req.user.username, result.filePath);
@@ -130,7 +130,7 @@ async function getFile(req, res, next) {
     }
 
     // TODO check if shared with others
-    if (result.receiverUserId !== req.user.id) return next(new HttpError(404, 'not found'));
+    if (result.receiverUser !== req.user.username) return next(new HttpError(404, 'not found'));
 
     try {
         result = await files.get(req.user.username, result.filePath);

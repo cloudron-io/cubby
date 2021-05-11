@@ -23,7 +23,7 @@ async function login(req, res, next) {
     const user = await users.login(req.body.username, req.body.password);
     if (!user) return next(new HttpError(403, 'invalid username or password'));
 
-    const accessToken = await tokens.add(user.id);
+    const accessToken = await tokens.add(user.username);
 
     next(new HttpSuccess(200, { user, accessToken }));
 }

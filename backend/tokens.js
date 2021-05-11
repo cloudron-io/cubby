@@ -13,18 +13,15 @@ var assert = require('assert'),
     MainError = require('./mainerror.js');
 
 function postProcess(data) {
-    data.userId = data.user_id;
-    delete data.user_id;
-
     return data;
 }
 
-async function add(userId) {
-    assert.strictEqual(typeof userId, 'string');
+async function add(username) {
+    assert.strictEqual(typeof username, 'string');
 
     const token = crypto.randomBytes(32).toString('hex');
 
-    await database.query('INSERT INTO tokens (id, user_id) VALUES ($1, $2)', [ token, userId ]);
+    await database.query('INSERT INTO tokens (id, username) VALUES ($1, $2)', [ token, username ]);
 
     return token;
 }

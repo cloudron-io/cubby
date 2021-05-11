@@ -4,7 +4,6 @@ exports = module.exports = {
     login,
     add,
     get,
-    getByUsername,
     getByAccessToken,
     list,
     update,
@@ -36,7 +35,7 @@ async function localLogin(username, password) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof password, 'string');
 
-    const user = await getByUsername(username);
+    const user = await get(username);
     const saltBinary = Buffer.from(user.salt, 'hex');
     const derivedKey = crypto.pbkdf2Sync(password, saltBinary, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, CRYPTO_DIGEST);
     const derivedKeyHex = Buffer.from(derivedKey, 'binary').toString('hex');
@@ -52,7 +51,7 @@ async function login(username, password) {
 
     debug('login: ', username);
 
-    const user = await getByUsername(username);
+    const user = await get(username);
     if (!user) return null;
 
     if (user.source === constants.USER_SOURCE_LOCAL && await localLogin(username, password)) return user;
@@ -68,7 +67,6 @@ async function add(user, source) {
 
     if (source !== constants.USER_SOURCE_LDAP && source !== constants.USER_SOURCE_LOCAL) throw new MainError(MainError.BAD_FIELD, `source must be "${constants.USER_SOURCE_LOCAL}" or "${constants.USER_SOURCE_LDAP}"`);
 
-    var userId = 'uid-' + crypto.randomBytes(32).toString('hex');
     var username = user.username;
     var email = user.email;
     var displayName = user.displayName;
@@ -88,7 +86,7 @@ async function add(user, source) {
     }
 
     try {
-        const result = await database.query('INSERT INTO users (id, username, email, display_name, source, password, salt) VALUES ($1, $2, $3, $4, $5, $6, $7)', [ userId, username, email, displayName, source, password, salt ]);
+        const result = await database.query('INSERT INTO users (username, email, display_name, source, password, salt) VALUES ($1, $2, $3, $4, $5, $6)', [ username, email, displayName, source, password, salt ]);
         if (result.rowCount !== 1) throw new MainError(MainError.DATABASE_ERROR, 'failed to insert');
     } catch (error) {
         if (error.nestedError && error.nestedError.detail && error.nestedError.detail.indexOf('already exists') !== -1 && error.nestedError.detail.indexOf('email') !== -1) throw new MainError(MainError.ALREADY_EXISTS, 'email already exists');
@@ -98,16 +96,7 @@ async function add(user, source) {
     }
 }
 
-async function get(userId) {
-    assert.strictEqual(typeof userId, 'string');
-
-    const result = await database.query('SELECT * FROM users WHERE id = $1', [ userId ]);
-    if (result.rows.length === 0) return null;
-
-    return postProcess(result.rows[0]);
-}
-
-async function getByUsername(username) {
+async function get(username) {
     assert.strictEqual(typeof username, 'string');
 
     const result = await database.query('SELECT * FROM users WHERE username = $1', [ username ]);
@@ -122,7 +111,7 @@ async function getByAccessToken(accessToken) {
     const token = await tokens.get(accessToken);
     if (!token) return null;
 
-    return await get(token.userId);
+    return await get(token.username);
 }
 
 async function list() {
@@ -133,13 +122,13 @@ async function list() {
     return users.rows;
 }
 
-async function update(userId, user) {
-    assert.strictEqual(typeof userId, 'string');
+async function update(username, user) {
+    assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof user, 'object');
 }
 
-async function remove(userId) {
-    assert.strictEqual(typeof userId, 'string');
+async function remove(username) {
+    assert.strictEqual(typeof username, 'string');
 
-    await database.query('DELETE FROM users WHERE id = $1', [ userId ]);
+    await database.query('DELETE FROM users WHERE username = $1', [ username ]);
 }
