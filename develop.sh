@@ -65,5 +65,8 @@ DATABASE_URL="postgres://${CLOUDRON_POSTGRESQL_USERNAME}:${CLOUDRON_POSTGRESQL_P
 echo "=> Ensure admin account with admin:admin"
 ./cli.js user-add --username admin --password admin --email admin@server.local --display-name Admin || true
 
+echo "=> Ensure test account with test:test"
+./cli.js user-add --username test --password test --email test@server.local --display-name Tester || true
+
 echo "=> Start cubby"
 ./app.js
