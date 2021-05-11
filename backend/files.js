@@ -19,6 +19,7 @@ var assert = require('assert'),
     util = require('util'),
     exec = util.promisify(require('child_process').exec),
     mime = require('./mime.js'),
+    Entry = require('./entry.js'),
     MainError = require('./mainerror.js');
 
 function getValidFullPath(username, filePath) {
@@ -102,13 +103,14 @@ async function getDirectory(fullFilePath, filePath, stats) {
         files = contents.map(function (file) {
             try {
                 var stat = fs.statSync(path.join(fullFilePath, file));
-                return { name: file, stat: stat };
+                return { name: file, stat: stat, fullFilePath: path.join(fullFilePath, file) };
             } catch (e) {
                 debug(`getDirectory: cannot stat ${path.join(fullFilePath, file)}`, e);
                 return null;
             }
         }).filter(function (file) { return file && (file.stat.isDirectory() || file.stat.isFile()); }).map(function (file) {
-            return {
+            return new Entry({
+                fullFilePath: file.fullFilePath,
                 fileName: file.name,
                 filePath: path.join(filePath, file.name),
                 size: file.stat.size,
@@ -116,14 +118,14 @@ async function getDirectory(fullFilePath, filePath, stats) {
                 isDirectory: file.stat.isDirectory(),
                 isFile: file.stat.isFile(),
                 mimeType: file.stat.isDirectory() ? 'inode/directory' : mime(file.name)
-            };
+            });
         });
     } catch (error) {
         throw new MainError(MainError.FS_ERROR, error);
     }
 
-    return {
-        _fullFilePath: fullFilePath,
+    return new Entry({
+        fullFilePath: fullFilePath,
         fileName: path.basename(filePath),
         filePath: filePath,
         size: stats.size,
@@ -132,7 +134,7 @@ async function getDirectory(fullFilePath, filePath, stats) {
         isFile: false,
         mimeType: 'inode/directory',
         files: files
-    };
+    });
 }
 
 async function getFile(fullFilePath, filePath, stats) {
@@ -142,8 +144,8 @@ async function getFile(fullFilePath, filePath, stats) {
 
     debug('getFile:', fullFilePath);
 
-    var file = {
-        _fullFilePath: fullFilePath,
+    return new Entry({
+        fullFilePath: fullFilePath,
         fileName: path.basename(fullFilePath),
         filePath: filePath,
         size: stats.size,
@@ -151,9 +153,7 @@ async function getFile(fullFilePath, filePath, stats) {
         isDirectory: stats.isDirectory(),
         isFile: stats.isFile(),
         mimeType: stats.isDirectory() ? 'inode/directory' : mime(filePath)
-    };
-
-    return file;
+    });
 }
 
 async function get(username, filePath) {

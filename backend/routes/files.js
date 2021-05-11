@@ -11,6 +11,7 @@ exports = module.exports = {
 var assert = require('assert'),
     debug = require('debug')('cubby:routes:files'),
     files = require('../files.js'),
+    Entry = require('../entry.js'),
     util = require('util'),
     MainError = require('../mainerror.js'),
     HttpError = require('connect-lastmile').HttpError,
@@ -78,9 +79,9 @@ async function get(req, res, next) {
     }
 
     // remove private fields
-    delete result._fullFilePath;
+    // delete result._fullFilePath;
 
-    next(new HttpSuccess(200, result));
+    next(new HttpSuccess(200, result.withoutPrivate()));
 }
 
 async function update(req, res, next) {
@@ -143,16 +144,15 @@ async function recent(req, res, next) {
         return next(new HttpError(500, error));
     }
 
-    const entry = {
+    const entry = new Entry({
+        fullFilePath: '/recent',
         fileName: 'Recent',
         filePath: '/',
-        size: 0,
-        mtime: Date.now(),
         isDirectory: true,
         isFile: false,
         mimeType: 'inode/recent',
         files: result
-    };
+    });
 
-    next(new HttpSuccess(200, entry));
+    next(new HttpSuccess(200, entry.withoutPrivate()));
 }

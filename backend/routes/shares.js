@@ -10,6 +10,7 @@ var assert = require('assert'),
     debug = require('debug')('cubby:routes:shares'),
     shares = require('../shares.js'),
     files = require('../files.js'),
+    Entry = require('../entry.js'),
     util = require('util'),
     MainError = require('../mainerror.js'),
     HttpError = require('connect-lastmile').HttpError,
@@ -43,7 +44,10 @@ async function list(req, res, next) {
             let file = await files.get(share.owner, share.filePath);
 
             // remove private fields
-            delete file._fullFilePath;
+            // delete file._fullFilePath;
+
+            file.share = share;
+            // TODO fill in sharedWith info, if any?
 
             sharedFiles.push(file);
         });
@@ -51,18 +55,17 @@ async function list(req, res, next) {
         return next(new HttpError(500, error));
     }
 
-    const entry = {
+    const entry = new Entry({
+        fullFilePath: '/shares',
         fileName: 'Shares',
         filePath: '/',
-        size: 0,
-        mtime: Date.now(),
         isDirectory: true,
         isFile: false,
         mimeType: 'inode/share',
         files: sharedFiles
-    };
+    });
 
-    next(new HttpSuccess(200, entry));
+    next(new HttpSuccess(200, entry.withoutPrivate()));
 }
 
 async function create(req, res, next) {
