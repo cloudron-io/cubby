@@ -1,7 +1,7 @@
 'use strict';
 
 exports = module.exports = {
-    list,
+    get,
     create
 };
 
@@ -24,10 +24,10 @@ function boolLike(arg) {
     return true;
 }
 
-async function list(req, res, next) {
+async function get(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
-    debug('list');
+    debug('get');
 
     let result = [];
 
@@ -42,9 +42,6 @@ async function list(req, res, next) {
     try {
         await async.each(result, async function (share) {
             let file = await files.get(share.owner, share.filePath);
-
-            // remove private fields
-            // delete file._fullFilePath;
 
             file.share = share;
             // TODO fill in sharedWith info, if any?

@@ -53,8 +53,8 @@ async function add(req, res, next) {
 async function get(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
-    var type = req.query.type;
-    var filePath = decodeURIComponent(req.query.path);
+    const type = req.query.type;
+    const filePath = decodeURIComponent(req.query.path);
 
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
     if (type && (type !== 'raw' && type !== 'download')) return next(new HttpError(400, 'type must be either empty, "download" or "raw"'));
@@ -77,9 +77,6 @@ async function get(req, res, next) {
         if (result.isDirectory) return next(new HttpError(417, 'type "download" is not supported for directories'));
         return res.download(result._fullFilePath);
     }
-
-    // remove private fields
-    // delete result._fullFilePath;
 
     next(new HttpSuccess(200, result.withoutPrivate()));
 }
