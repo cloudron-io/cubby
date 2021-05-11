@@ -9,6 +9,7 @@ var assert = require('assert'),
     async = require('async'),
     debug = require('debug')('cubby:routes:shares'),
     shares = require('../shares.js'),
+    files = require('../files.js'),
     util = require('util'),
     MainError = require('../mainerror.js'),
     HttpError = require('connect-lastmile').HttpError,
@@ -36,11 +37,16 @@ async function list(req, res, next) {
     }
 
     // Collect all file entries from shares
-    let files = [];
+    let sharedFiles = [];
     try {
-        // await async.each(result, async function (share) {
-        //     const file = await files.get(share.)
-        // });
+        await async.each(result, async function (share) {
+            let file = await files.get(share.owner, share.filePath);
+
+            // remove private fields
+            delete file._fullFilePath;
+
+            sharedFiles.push(file);
+        });
     } catch (error) {
         return next(new HttpError(500, error));
     }
@@ -53,7 +59,7 @@ async function list(req, res, next) {
         isDirectory: true,
         isFile: false,
         mimeType: 'inode/share',
-        files: files
+        files: sharedFiles
     };
 
     next(new HttpSuccess(200, entry));

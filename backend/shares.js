@@ -14,9 +14,6 @@ var assert = require('assert'),
     MainError = require('./mainerror.js');
 
 function postProcess(data) {
-    data.owner = data.owner;
-    delete data.owner;
-
     data.filePath = data.file_path;
     delete data.file_path;
 
