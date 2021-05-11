@@ -130,7 +130,6 @@ export default {
             entry: {
                 files: []
             },
-            users: [],
             currentPath: '/',
             activeEntry: {},
             sideBarVisible: true,
@@ -369,12 +368,10 @@ export default {
             superagent.get('/api/v1/users').query({ access_token: that.accessToken }).end(function (error, result) {
                 if (error) return console.error('Failed to get user list.', error);
 
-                that.users = result.body.users;
-
                 that.shareDialog.error = '';
                 that.shareDialog.receipientId = '';
                 that.shareDialog.entry = entry;
-                that.shareDialog.users = that.users.filter(function (u) { return u.username !== that.profile.username; });
+                that.shareDialog.users = result.body.users.filter(function (u) { return u.username !== that.profile.username; });
                 that.shareDialog.visible = true;
             });
         },
