@@ -58,7 +58,12 @@ function getDirectLink(entry) {
 
 function download(entry) {
     if (entry.isDirectory) return;
-    window.location.href = '/api/v1/files?type=download&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(entry.filePath);
+
+    if (entry.share) {
+        window.location.href = '/api/v1/shares/' + entry.share.id + '?type=download&access_token=' + localStorage.accessToken;
+    } else {
+        window.location.href = '/api/v1/files?type=download&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(entry.filePath);
+    }
 }
 
 function getPreviewUrl(entry) {
