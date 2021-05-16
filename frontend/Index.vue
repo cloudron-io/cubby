@@ -13,8 +13,8 @@
       <h1 style="margin-bottom: 50px; padding-left: 15px;">Cubby</h1>
 
       <Button icon="pi pi-folder-open" class="" label="All Files" @click="showAllFiles"/>
-      <Button icon="pi pi-clock" class="" label="Recent" @click="onRecent"/>
-      <Button icon="pi pi-share-alt" class="" label="Shared" @click="onShares"/>
+      <Button icon="pi pi-clock" class="" label="Recent" @click="showAllRecent"/>
+      <Button icon="pi pi-share-alt" class="" label="Shared" @click="showAllShares"/>
 
       <!-- <div style="flex-grow: 1">&nbsp;</div>
 
@@ -179,7 +179,7 @@ export default {
             // stash locally
             localStorage.accessToken = accessToken;
 
-            this.refresh(window.location.hash.slice(1));
+            this.loadPath(window.location.hash.slice(1));
         },
         onSaveShareDialog() {
             var that = this;
@@ -226,7 +226,7 @@ export default {
                 if (result && result.statusCode !== 200) return that.newFileDialog.error = 'Error creating file: ' + result.statusCode;
                 if (error) return console.error(error.message);
 
-                that.refresh();
+                that.loadPath();
 
                 that.newFileDialog.visible = false;
             });
@@ -243,7 +243,7 @@ export default {
                 if (result && result.statusCode !== 200) return that.newFolderDialog.error = 'Error creating folder: ' + result.statusCode;
                 if (error) return console.error(error.message);
 
-                that.refresh();
+                that.loadPath();
 
                 that.newFolderDialog.visible = false;
             });
@@ -313,7 +313,7 @@ export default {
                 that.uploadStatus.done = 0;
                 that.uploadStatus.percentDone = 100;
 
-                that.refresh();
+                that.loadPath();
             });
         },
         onDelete(entry) {
@@ -326,7 +326,7 @@ export default {
                 if (result && result.statusCode !== 200) return console.error('Error deleting file or folder');
                 if (error) return console.error(error.message);
 
-                that.refresh();
+                that.loadPath();
             });
         },
         onRename(entry, newFileName) {
@@ -340,13 +340,14 @@ export default {
                 if (result && result.statusCode !== 200) return console.error('Error moving file or folder');
                 if (error) return console.error(error.message);
 
-                that.refresh();
+                that.loadPath();
             });
+        },
+        showAllRecent() {
+            window.location.hash = 'recent/';
         },
         onRecent() {
             var that = this;
-
-            window.location.hash = 'recent/';
 
             that.busy = true;
             superagent.get('/api/v1/recent').query({ access_token: that.accessToken }).end(function (error, result) {
@@ -379,6 +380,9 @@ export default {
                 that.activeEntry = that.entry;
             });
         },
+        showAllShares() {
+            window.location.hash = 'shares/';
+        },
         onShare(entry) {
             var that = this;
 
@@ -402,6 +406,9 @@ export default {
         },
         onShares() {
             var that = this;
+            const hash = window.location.hash.slice(1);
+
+            if (hash.indexOf('shares/') !== 0) return console.error('invalid call for this URI');
 
             window.location.hash = 'shares/';
 
@@ -436,7 +443,14 @@ export default {
                 that.activeEntry = that.entry;
             });
         },
-        refresh(path) {
+        onFiles() {
+            const hash = window.location.hash.slice(1);
+
+            if (hash.indexOf('files/') !== 0) return console.error('invalid call for this URI');
+
+            this.loadPath(hash.slice('files'.length));
+        },
+        loadPath(path) {
             var that = this;
 
             var filePath = path || that.currentPath || '/';
@@ -479,7 +493,7 @@ export default {
             });
         },
         openEntry(entry) {
-            if (entry.isDirectory) return this.refresh(entry.filePath);
+            if (entry.isDirectory) return this.loadPath(entry.filePath);
 
             if (this.$refs.imageViewer.canHandle(entry)) {
                 this.$refs.imageViewer.open(entry);
@@ -518,7 +532,7 @@ export default {
         function hashChange() {
             const hash = window.location.hash.slice(1);
 
-            if (hash.indexOf('files/') === 0) that.refresh(hash.slice('files'.length));
+            if (hash.indexOf('files/') === 0) that.onFiles();
             else if (hash.indexOf('recent/') === 0) that.onRecent();
             else if (hash.indexOf('shares/') === 0) that.onShares();
             else window.location.hash = 'files/';
