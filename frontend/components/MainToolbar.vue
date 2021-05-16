@@ -49,7 +49,7 @@ export default {
             this.breadCrumbs.items = sanitize(newCurrentPath).split('/').slice(1).map(function (e, i, a) {
                 return {
                     label: e,
-                    url: '#' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
+                    url: '#files' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
                 };
             });
         },
@@ -64,7 +64,7 @@ export default {
                 visible: false
             },
             breadCrumbs: {
-                home: { icon: 'pi pi-home', url: '#/' },
+                home: { icon: 'pi pi-home', url: '#files/' },
                 items: []
             },
             mainMenu: [{

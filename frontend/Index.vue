@@ -159,7 +159,7 @@ export default {
     },
     methods: {
         showAllFiles() {
-            window.location.hash = '/';
+            window.location.hash = 'files/';
         },
         onLogout() {
             this.accessToken = '';
@@ -346,7 +346,7 @@ export default {
         onRecent() {
             var that = this;
 
-            window.location.hash = 'recent';
+            window.location.hash = 'recent/';
 
             that.busy = true;
             superagent.get('/api/v1/recent').query({ access_token: that.accessToken }).end(function (error, result) {
@@ -362,7 +362,7 @@ export default {
                     return;
                 }
 
-                that.currentPath = 'recent';
+                that.currentPath = '/';
 
                 result.body.files.forEach(function (entry) {
                     entry.previewUrl = getPreviewUrl(entry);
@@ -403,7 +403,7 @@ export default {
         onShares() {
             var that = this;
 
-            window.location.hash = 'shares';
+            window.location.hash = 'shares/';
 
             that.busy = true;
             superagent.get('/api/v1/shares').query({ access_token: that.accessToken }).end(function (error, result) {
@@ -419,7 +419,7 @@ export default {
                     return;
                 }
 
-                that.currentPath = 'shares';
+                that.currentPath = '/';
 
                 result.body.files.forEach(function (entry) {
                     entry.previewUrl = getPreviewUrl(entry);
@@ -441,7 +441,7 @@ export default {
 
             var filePath = path || that.currentPath || '/';
 
-            window.location.hash = filePath;
+            window.location.hash = 'files' + filePath;
 
             that.busy = true;
             superagent.get('/api/v1/files').query({ path: encode(filePath), access_token: that.accessToken }).end(function (error, result) {
@@ -481,8 +481,6 @@ export default {
         openEntry(entry) {
             if (entry.isDirectory) return this.refresh(entry.filePath);
 
-            console.log(entry)
-
             if (this.$refs.imageViewer.canHandle(entry)) {
                 this.$refs.imageViewer.open(entry);
                 this.viewer = 'image';
@@ -519,9 +517,11 @@ export default {
 
         function hashChange() {
             const hash = window.location.hash.slice(1);
-            if (hash === 'recent') that.onRecent();
-            else if (hash === 'shares') that.onShares();
-            else that.refresh(hash);
+
+            if (hash.indexOf('files/') === 0) that.refresh(hash.slice('files'.length));
+            else if (hash.indexOf('recent/') === 0) that.onRecent();
+            else if (hash.indexOf('shares/') === 0) that.onShares();
+            else window.location.hash = 'files/';
         }
 
         window.addEventListener('hashchange', hashChange, false);
