@@ -481,6 +481,8 @@ export default {
         openEntry(entry) {
             if (entry.isDirectory) return this.refresh(entry.filePath);
 
+            console.log(entry)
+
             if (this.$refs.imageViewer.canHandle(entry)) {
                 this.$refs.imageViewer.open(entry);
                 this.viewer = 'image';

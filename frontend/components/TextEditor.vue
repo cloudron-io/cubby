@@ -17,7 +17,7 @@
 
 import { editor, languages } from 'monaco-editor';
 import superagent from 'superagent';
-import { encode, getFileTypeGroup } from '../utils.js';
+import { getFileTypeGroup, getDirectLink } from '../utils.js';
 
 function getLanguage(filename) {
     var ext = '.' + filename.split('.').pop();
@@ -47,7 +47,7 @@ export default {
 
             this.entry = entry;
 
-            superagent.get('/api/v1/files').query({ type: 'raw', path: encode(entry.filePath), access_token: localStorage.accessToken }).end(function (error, result) {
+            superagent.get(getDirectLink(entry)).end(function (error, result) {
                 if (error) return console.error(error);
 
                 that.editor.setModel(editor.createModel(result.text, getLanguage(entry.fileName)));

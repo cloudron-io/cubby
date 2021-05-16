@@ -20,7 +20,7 @@
 import pdfjsLib from "pdfjs-dist/build/pdf";
 import { PDFViewer } from "pdfjs-dist/web/pdf_viewer";
 import "pdfjs-dist/web/pdf_viewer.css";
-import { encode } from '../utils.js';
+import { getDirectLink } from '../utils.js';
 
 export default {
     name: 'PdfViewer',
@@ -42,8 +42,7 @@ export default {
 
             this.entry = entry;
 
-            const url = '/api/v1/files?type=raw&access_token=' + localStorage.accessToken + '&path=' + encode(entry.filePath);
-            var loadingTask = pdfjsLib.getDocument(url);
+            var loadingTask = pdfjsLib.getDocument(getDirectLink(entry));
             var pdf = await loadingTask.promise;
             this.pdfViewer.setDocument(pdf);
         },

@@ -1,6 +1,7 @@
 'use strict';
 
 exports = module.exports = {
+    list,
     get,
     create
 };
@@ -24,7 +25,7 @@ function boolLike(arg) {
     return true;
 }
 
-async function get(req, res, next) {
+async function list(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
     debug('get');
@@ -63,6 +64,46 @@ async function get(req, res, next) {
     });
 
     next(new HttpSuccess(200, entry.withoutPrivate()));
+}
+
+async function get(req, res, next) {
+    assert.strictEqual(typeof req.user, 'object');
+    assert.strictEqual(typeof req.params.shareId, 'string');
+
+    const type = req.query.type;
+    const shareId = req.params.shareId;
+
+    if (type && (type !== 'raw' && type !== 'download')) return next(new HttpError(400, 'type must be either empty, "download" or "raw"'));
+
+    debug(`get: ${shareId} type:${type || 'json'}`);
+
+    let share;
+    try {
+        share = await shares.get(shareId);
+    } catch (error) {
+        if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'share not found'));
+        return next(new HttpError(500, error));
+    }
+
+    if (share.receiverUsername !== req.user.username) return next(new HttpError(403, 'not allowed'));
+
+    let file;
+    try {
+        file = await files.get(share.owner, share.filePath);
+    } catch (error) {
+        if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'file not found'));
+        return next(new HttpError(500, error));
+    }
+
+    if (type === 'raw') {
+        if (file.isDirectory) return next(new HttpError(417, 'type "raw" is not supported for directories'));
+        return res.sendFile(file._fullFilePath);
+    } else if (type === 'download') {
+        if (file.isDirectory) return next(new HttpError(417, 'type "download" is not supported for directories'));
+        return res.download(file._fullFilePath);
+    }
+
+    next(new HttpSuccess(200, file.withoutPrivate()));
 }
 
 async function create(req, res, next) {

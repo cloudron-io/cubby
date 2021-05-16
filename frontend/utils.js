@@ -49,7 +49,11 @@ function decode(path) {
 }
 
 function getDirectLink(entry) {
-    return window.location.origin + '/api/v1/files?type=raw&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(entry.filePath);
+    if (entry.share) {
+        return window.location.origin + '/api/v1/shares/' + entry.share.id + '?type=raw&access_token=' + localStorage.accessToken;
+    } else {
+        return window.location.origin + '/api/v1/files?type=raw&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(entry.filePath);
+    }
 }
 
 function download(entry) {
