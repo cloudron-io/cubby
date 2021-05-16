@@ -20,6 +20,7 @@ var assert = require('assert'),
     exec = util.promisify(require('child_process').exec),
     mime = require('./mime.js'),
     Entry = require('./entry.js'),
+    shares = require('./shares.js'),
     MainError = require('./mainerror.js');
 
 function getValidFullPath(username, filePath) {
@@ -91,7 +92,8 @@ async function addFile(username, filePath, sourceFilePath, mtime) {
     }
 }
 
-async function getDirectory(fullFilePath, filePath, stats) {
+async function getDirectory(username, fullFilePath, filePath, stats) {
+    assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof fullFilePath, 'string');
     assert.strictEqual(typeof filePath, 'string');
     assert.strictEqual(typeof stats, 'object');
@@ -124,6 +126,18 @@ async function getDirectory(fullFilePath, filePath, stats) {
         throw new MainError(MainError.FS_ERROR, error);
     }
 
+    await async.each(files, async function (file) {
+        let result;
+        try {
+            result = await shares.getByOwnerAndFilePath(username, filePath);
+        } catch (error) {
+            // TODO not sure what to do here
+            console.error(error);
+        }
+
+        if (result) file.share = result[0];
+    });
+
     return new Entry({
         fullFilePath: fullFilePath,
         fileName: path.basename(filePath),
@@ -137,12 +151,21 @@ async function getDirectory(fullFilePath, filePath, stats) {
     });
 }
 
-async function getFile(fullFilePath, filePath, stats) {
+async function getFile(username, fullFilePath, filePath, stats) {
+    assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof fullFilePath, 'string');
     assert.strictEqual(typeof filePath, 'string');
     assert.strictEqual(typeof stats, 'object');
 
-    debug('getFile:', fullFilePath);
+    debug(`getFile: ${username} ${fullFilePath}`);
+
+    let result;
+    try {
+        result = await shares.getByOwnerAndFilePath(username, filePath);
+    } catch (error) {
+        // TODO not sure what to do here
+        console.error(error);
+    }
 
     return new Entry({
         fullFilePath: fullFilePath,
@@ -152,6 +175,7 @@ async function getFile(fullFilePath, filePath, stats) {
         mtime: stats.mtime,
         isDirectory: stats.isDirectory(),
         isFile: stats.isFile(),
+        share: result ? result[0] : null,
         mimeType: stats.isDirectory() ? 'inode/directory' : mime(filePath)
     });
 }
@@ -167,8 +191,8 @@ async function get(username, filePath) {
 
     try {
         const stat = await fs.stat(fullFilePath);
-        if (stat.isDirectory()) return await getDirectory(fullFilePath, filePath, stat);
-        if (stat.isFile()) return await getFile(fullFilePath, filePath, stat);
+        if (stat.isDirectory()) return await getDirectory(username, fullFilePath, filePath, stat);
+        if (stat.isFile()) return await getFile(username, fullFilePath, filePath, stat);
     } catch (error) {
         if (error.code === 'ENOENT') throw new MainError(MainError.NOT_FOUND);
         throw new MainError(MainError.FS_ERROR, error);
@@ -234,7 +258,7 @@ async function recent(username, daysAgo = 3) {
         try {
             const stat = await fs.stat(filePath);
             if (!stat.isFile()) throw new MainError(MainError.FS_ERROR, 'recent should only list files');
-            result.push(await getFile(filePath, filePath.slice(localResolvedPrefix.length), stat));
+            result.push(await getFile(username, filePath, filePath.slice(localResolvedPrefix.length), stat));
         } catch (error) {
             console.error('error in getting recents:', error);
         }

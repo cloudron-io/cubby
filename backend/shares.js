@@ -3,7 +3,8 @@
 exports = module.exports = {
     list,
     get,
-    create
+    create,
+    getByOwnerAndFilePath
 };
 
 var assert = require('assert'),
@@ -79,4 +80,17 @@ async function get(shareId) {
     if (result.rows.length === 0) return null;
 
     return postProcess(result.rows[0]);
+}
+
+async function getByOwnerAndFilePath(username, filePath) {
+    assert.strictEqual(typeof username, 'string');
+    assert.strictEqual(typeof filePath, 'string');
+
+    const result = await database.query('SELECT * FROM shares WHERE owner = $1 AND file_path ~ $2', [ username, `(^)${filePath}(.*$)` ]);
+
+    if (result.rows.length === 0) return null;
+
+    result.rows.forEach(postProcess);
+
+    return result.rows;
 }
