@@ -410,10 +410,10 @@ export default {
 
             if (hash.indexOf('shares/') !== 0) return console.error('invalid call for this URI');
 
-            window.location.hash = 'shares/';
+            const shareId = hash.slice('shares/'.length).split('/')[0] || '';
 
             that.busy = true;
-            superagent.get('/api/v1/shares').query({ access_token: that.accessToken }).end(function (error, result) {
+            superagent.get('/api/v1/shares/' + shareId).query({ access_token: that.accessToken }).end(function (error, result) {
                 that.busy = false;
 
                 if (error) {
@@ -426,7 +426,7 @@ export default {
                     return;
                 }
 
-                that.currentPath = '/';
+                that.currentPath = '/' + shareId + '/';
 
                 result.body.files.forEach(function (entry) {
                     entry.previewUrl = getPreviewUrl(entry);
@@ -492,8 +492,12 @@ export default {
                 that.activeEntry = that.entry;
             });
         },
+        openDirectory(entry) {
+            if (entry.share && entry.share.id) window.location.hash = 'shares/' + entry.share.id;
+            else window.location.hash = 'files/' + entry.filePath;
+        },
         openEntry(entry) {
-            if (entry.isDirectory) return this.loadPath(entry.filePath);
+            if (entry.isDirectory) return this.openDirectory(entry);
 
             if (this.$refs.imageViewer.canHandle(entry)) {
                 this.$refs.imageViewer.open(entry);
