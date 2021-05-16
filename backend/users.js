@@ -125,6 +125,8 @@ async function list() {
 async function update(username, user) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof user, 'object');
+
+    await database.query('UPDATE users SET email = $1, display_name = $2 WHERE username = $3', [ user.email, user.displayName, username ]);
 }
 
 async function remove(username) {
