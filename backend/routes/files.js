@@ -28,8 +28,8 @@ function boolLike(arg) {
 async function add(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
-    var directory = boolLike(req.query.directory);
-    var filePath = decodeURIComponent(req.query.path);
+    const directory = boolLike(req.query.directory);
+    const filePath = req.query.path ? decodeURIComponent(req.query.path) : '';
 
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
     if (!(req.files && req.files.file) && !directory) return next(new HttpError(400, 'missing file or directory'));
@@ -54,7 +54,7 @@ async function get(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
     const type = req.query.type;
-    const filePath = decodeURIComponent(req.query.path);
+    const filePath = req.query.path ? decodeURIComponent(req.query.path) : '';
 
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
     if (type && (type !== 'raw' && type !== 'download')) return next(new HttpError(400, 'type must be either empty, "download" or "raw"'));
@@ -84,7 +84,7 @@ async function get(req, res, next) {
 async function update(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
-    const filePath = decodeURIComponent(req.query.path);
+    const filePath = req.query.path ? decodeURIComponent(req.query.path) : '';
     const action = req.query.action;
 
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
@@ -111,7 +111,7 @@ async function update(req, res, next) {
 async function remove(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
-    var filePath = decodeURIComponent(req.query.path);
+    const filePath = req.query.path ? decodeURIComponent(req.query.path) : '';
 
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
 
