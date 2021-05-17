@@ -50,7 +50,7 @@ function decode(path) {
 
 function getDirectLink(entry) {
     if (entry.share) {
-        return window.location.origin + '/api/v1/shares/' + entry.share.id + '?type=raw&access_token=' + localStorage.accessToken;
+        return window.location.origin + '/api/v1/shares/' + entry.share.id + '?type=raw&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(entry.filePath)
     } else {
         return window.location.origin + '/api/v1/files?type=raw&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(entry.filePath);
     }

@@ -411,15 +411,17 @@ export default {
             if (hash.indexOf('shares/') !== 0) return console.error('invalid call for this URI');
 
             const shareId = hash.slice('shares/'.length).split('/')[0] || '';
+            const filePath = hash.slice(`shares/${shareId}`.length) || '/';
 
             that.busy = true;
-            superagent.get('/api/v1/shares/' + shareId).query({ access_token: that.accessToken }).end(function (error, result) {
+            superagent.get('/api/v1/shares/' + shareId).query({ access_token: that.accessToken, path: filePath }).end(function (error, result) {
                 that.busy = false;
 
                 if (error) {
                     that.entries = [];
 
                     if (error.status === 401) that.onLogout();
+                    else if (error.status === 403) that.error = 'Not allowed';
                     else if (error.status === 404) that.error = 'Does not exist';
                     else console.error(error);
 
@@ -493,7 +495,7 @@ export default {
             });
         },
         openDirectory(entry) {
-            if (entry.share && entry.share.id) window.location.hash = 'shares/' + entry.share.id;
+            if (entry.share && entry.share.id) window.location.hash = 'shares/' + entry.share.id + entry.filePath;
             else window.location.hash = 'files/' + entry.filePath;
         },
         openEntry(entry) {

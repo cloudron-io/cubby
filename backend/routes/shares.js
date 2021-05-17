@@ -70,12 +70,15 @@ async function get(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
     assert.strictEqual(typeof req.params.shareId, 'string');
 
+    const filePath = req.query.path ? decodeURIComponent(req.query.path) : '';
     const type = req.query.type;
     const shareId = req.params.shareId;
 
+    if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
+
     if (type && (type !== 'raw' && type !== 'download')) return next(new HttpError(400, 'type must be either empty, "download" or "raw"'));
 
-    debug(`get: ${shareId} type:${type || 'json'}`);
+    debug(`get: ${shareId} path:${filePath} type:${type || 'json'}`);
 
     let share;
     try {
@@ -86,10 +89,11 @@ async function get(req, res, next) {
     }
 
     if (share.receiverUsername !== req.user.username) return next(new HttpError(403, 'not allowed'));
+    if (filePath.indexOf(share.filePath) !== 0) return next(new HttpError(403, 'not allowed'));
 
     let file;
     try {
-        file = await files.get(share.owner, share.filePath);
+        file = await files.get(share.owner, filePath);
     } catch (error) {
         if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'file not found'));
         return next(new HttpError(500, error));
