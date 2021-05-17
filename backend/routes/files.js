@@ -78,7 +78,7 @@ async function get(req, res, next) {
         return res.download(result._fullFilePath);
     }
 
-    next(new HttpSuccess(200, result.withoutPrivate()));
+    next(new HttpSuccess(200, result.withoutPrivate(req.user.username)));
 }
 
 async function update(req, res, next) {
@@ -151,5 +151,5 @@ async function recent(req, res, next) {
         files: result
     });
 
-    next(new HttpSuccess(200, entry.withoutPrivate()));
+    next(new HttpSuccess(200, entry.withoutPrivate(req.user.username)));
 }

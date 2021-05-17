@@ -119,6 +119,7 @@ async function getDirectory(username, fullFilePath, filePath, stats) {
                 mtime: file.stat.mtime,
                 isDirectory: file.stat.isDirectory(),
                 isFile: file.stat.isFile(),
+                owner: username,
                 mimeType: file.stat.isDirectory() ? 'inode/directory' : mime(file.name)
             });
         });
@@ -135,7 +136,7 @@ async function getDirectory(username, fullFilePath, filePath, stats) {
             console.error(error);
         }
 
-        if (result) file.share = result[0];
+        if (result) file.shares = result;
     });
 
     return new Entry({
@@ -146,6 +147,7 @@ async function getDirectory(username, fullFilePath, filePath, stats) {
         mtime: stats.mtime,
         isDirectory: true,
         isFile: false,
+        owner: username,
         mimeType: 'inode/directory',
         files: files
     });
@@ -175,7 +177,8 @@ async function getFile(username, fullFilePath, filePath, stats) {
         mtime: stats.mtime,
         isDirectory: stats.isDirectory(),
         isFile: stats.isFile(),
-        share: result ? result[0] : null,
+        shares: result || [],
+        owner: username,
         mimeType: stats.isDirectory() ? 'inode/directory' : mime(filePath)
     });
 }

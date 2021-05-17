@@ -44,8 +44,7 @@ async function list(req, res, next) {
         await async.each(result, async function (share) {
             let file = await files.get(share.owner, share.filePath);
 
-            file.share = share;
-            // TODO fill in sharedWith info, if any?
+            file.shares = [ share ];
 
             sharedFiles.push(file);
         });
@@ -59,11 +58,12 @@ async function list(req, res, next) {
         filePath: '/',
         isDirectory: true,
         isFile: false,
+        owner: req.user.username,
         mimeType: 'inode/share',
         files: sharedFiles
     });
 
-    next(new HttpSuccess(200, entry.withoutPrivate()));
+    next(new HttpSuccess(200, entry.withoutPrivate(req.user.username)));
 }
 
 async function get(req, res, next) {
@@ -107,7 +107,7 @@ async function get(req, res, next) {
         return res.download(file._fullFilePath);
     }
 
-    next(new HttpSuccess(200, file.withoutPrivate()));
+    next(new HttpSuccess(200, file.withoutPrivate(req.user.username)));
 }
 
 async function create(req, res, next) {

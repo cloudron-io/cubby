@@ -428,7 +428,7 @@ export default {
                     return;
                 }
 
-                that.currentPath = '/' + shareId + '/';
+                that.currentPath = '/' + result.body.owner + filePath;
 
                 result.body.files.forEach(function (entry) {
                     entry.previewUrl = getPreviewUrl(entry);
@@ -496,7 +496,7 @@ export default {
         },
         openDirectory(entry) {
             if (entry.share && entry.share.id) window.location.hash = 'shares/' + entry.share.id + entry.filePath;
-            else window.location.hash = 'files/' + entry.filePath;
+            else window.location.hash = 'files' + entry.filePath;
         },
         openEntry(entry) {
             if (entry.isDirectory) return this.openDirectory(entry);
