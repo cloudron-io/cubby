@@ -17,7 +17,7 @@
     </Toolbar>
 
     <!-- About Dialog -->
-    <Dialog header="About Cubby" v-model:visible="aboutDialog.visible" :dismissableMask="true" :closable="true" :style="{width: '450px'}" :modal="true">
+    <Dialog header="About cubby" v-model:visible="aboutDialog.visible" :dismissableMask="true" :closable="true" :style="{width: '450px'}" :modal="true">
         <div>
             Some info here!!!
             <br/><br/>

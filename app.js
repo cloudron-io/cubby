@@ -27,5 +27,5 @@ server.init(function (error) {
     if (error) exit(error);
 
     console.log(`Using data folder at: ${constants.DATA_ROOT}`);
-    console.log('Cubby running.');
+    console.log('cubby running.');
 });

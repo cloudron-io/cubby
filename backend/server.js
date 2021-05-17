@@ -28,7 +28,6 @@ function init(callback) {
 
     app.use(morgan(function (tokens, req, res) {
         return [
-            'Cubby',
             tokens.method(req, res),
             tokens.url(req, res).replace(/(access_token=)[^&]+/, '$1' + '<redacted>'),
             tokens.status(req, res),
