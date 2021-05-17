@@ -30,7 +30,7 @@ function prettyLongDate(value) {
 }
 
 function prettyFileSize(value) {
-    if (!value) return 'unkown';
+    if (typeof value !== 'number') return 'unkown';
 
     return filesize(value);
 }
