@@ -18,6 +18,8 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ConfirmDialog from 'primevue/confirmdialog';
 import ToastService from 'primevue/toastservice';
 import Toast from 'primevue/toast';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
 
 import 'primevue/resources/themes/saga-blue/theme.css';
 import 'primevue/resources/primevue.min.css';
@@ -56,6 +58,8 @@ app.component('Checkbox', Checkbox);
 app.component('Toolbar', Toolbar);
 app.component('ConfirmDialog', ConfirmDialog);
 app.component('Toast', Toast);
+app.component('DataTable', DataTable);
+app.component('Column', Column);
 
 app.directive('tooltip', Tooltip);
 

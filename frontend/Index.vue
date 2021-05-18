@@ -84,15 +84,45 @@
           <Dropdown v-model="shareDialog.receiverUsername" :options="shareDialog.users" optionValue="username" optionLabel="userAndDisplayName" placeholder="Select a user" />
           <small class="p-invalid" v-show="shareDialog.error">{{ shareDialog.error }}</small>
         </div>
-        <div class="p-field-checkbox">
-          <Checkbox id="binary" v-model="shareDialog.readonly" :binary="true" />
-          <label for="binary">Share read-only</label>
+      </div>
+      <div class="p-grid p-jc-between">
+        <div class="p-col-4">
+          <div class="p-field-checkbox">
+            <Checkbox id="binary" v-model="shareDialog.readonly" :binary="true" />
+            <label for="binary">Share read-only</label>
+          </div>
+        </div>
+        <div class="p-col-4">
+          <Button label="Create share" icon="pi pi-check" class="p-button-text p-button-success" @click="onSaveShareDialog" :disabled="!shareDialog.receiverUsername"/>
         </div>
       </div>
     </form>
+
+    <hr/>
+    <h3>Shared with</h3>
+    <DataTable :value="shareDialog.entry.sharedWith" class="p-datatable-sm" responsiveLayout="scroll">
+      <template #empty>
+        Not shared with anyone yet
+      </template>
+      <Column header="User">
+        <template #body="slotProps">
+          {{ slotProps.data.receiverUsername || slotProps.data.receiverEmail }}
+        </template>
+      </Column>
+      <Column header="Readonly" headerClass="share-readonly-column" :style="{ textAlign: 'center' }">
+        <template #body="slotProps">
+          <Checkbox v-model="slotProps.data.readonly" :binary="true" readonly/>
+        </template>
+      </Column>
+      <Column header="" :style="{ textAlign: 'right' }">
+        <template #body>
+          <Button class="p-button-sm p-button-rounded p-button-danger p-button-text" icon="pi pi-trash" v-tooltip.top="'Delete'" />
+        </template>
+      </Column>
+    </DataTable>
+
     <template #footer>
-      <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="shareDialog.visible = false"/>
-      <Button label="Create share" icon="pi pi-check" class="p-button-text p-button-success" @click="onSaveShareDialog" :disabled="!shareDialog.receiverUsername"/>
+      <Button label="Close" icon="pi pi-times" class="p-button-text" @click="shareDialog.visible = false"/>
     </template>
   </Dialog>
 
@@ -153,6 +183,7 @@ export default {
                 receiverUsername: '',
                 readonly: false,
                 users: [],
+                sharedWith: [],
                 entry: {}
             }
         };
@@ -627,6 +658,15 @@ label {
     position: absolute;
     right: 10px;
     top: 10px;
+}
+
+</style>
+
+<style>
+
+.share-readonly-column .p-column-title {
+    text-align: center;
+    width: 100%;
 }
 
 </style>
