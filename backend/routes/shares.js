@@ -3,7 +3,8 @@
 exports = module.exports = {
     list,
     get,
-    create
+    create,
+    remove
 };
 
 var assert = require('assert'),
@@ -132,4 +133,18 @@ async function create(req, res, next) {
     }
 
     next(new HttpSuccess(200, { shareId }));
+}
+
+async function remove(req, res, next) {
+    assert.strictEqual(typeof req.user, 'object');
+
+    debug(`remove: ${req.params.shareId}`);
+
+    try {
+        await shares.remove(req.params.shareId);
+    } catch (error) {
+        return next(new HttpError(500, error));
+    }
+
+    next(new HttpSuccess(200, {}));
 }

@@ -78,7 +78,7 @@
 
   <!-- Share Dialog -->
   <Dialog :header="'Share ' + shareDialog.entry.fileName" v-model:visible="shareDialog.visible" :dismissableMask="true" :closable="true" :style="{width: '500px'}" :modal="true">
-    <form @submit="onSaveShareDialog" @submit.prevent>
+    <form @submit="onCreateShare" @submit.prevent>
       <div class="p-fluid">
         <div class="p-field">
           <Dropdown v-model="shareDialog.receiverUsername" :options="shareDialog.users" optionValue="username" optionLabel="userAndDisplayName" placeholder="Select a user" />
@@ -93,7 +93,7 @@
           </div>
         </div>
         <div class="p-col-4">
-          <Button label="Create share" icon="pi pi-check" class="p-button-text p-button-success" @click="onSaveShareDialog" :disabled="!shareDialog.receiverUsername"/>
+          <Button label="Create share" icon="pi pi-check" class="p-button-text p-button-success" @click="onCreateShare" :disabled="!shareDialog.receiverUsername"/>
         </div>
       </div>
     </form>
@@ -115,8 +115,8 @@
         </template>
       </Column>
       <Column header="" :style="{ textAlign: 'right' }">
-        <template #body>
-          <Button class="p-button-sm p-button-rounded p-button-danger p-button-text" icon="pi pi-trash" v-tooltip.top="'Delete'" />
+        <template #body="slotProps">
+          <Button class="p-button-sm p-button-rounded p-button-danger p-button-text" icon="pi pi-trash" v-tooltip.top="'Delete'" @click="onDeleteShare(slotProps.data)"/>
         </template>
       </Column>
     </DataTable>
@@ -211,21 +211,6 @@ export default {
             localStorage.accessToken = accessToken;
 
             this.loadPath(window.location.hash.slice(1));
-        },
-        onSaveShareDialog() {
-            var that = this;
-
-            var path = this.shareDialog.entry.filePath;
-            var readonly = this.shareDialog.readonly;
-            var receiver_username = this.shareDialog.receiverUsername;
-
-            superagent.post('/api/v1/shares').query({ path, readonly, receiver_username, access_token: localStorage.accessToken }).end(function (error, result) {
-                if (result && result.statusCode === 401) return that.onLogout();
-                if (result && result.statusCode !== 200) return that.shareDialog.error = 'Error creating share: ' + result.statusCode;
-                if (error) return console.error(error.message);
-
-                that.shareDialog.visible = false;
-            });
         },
         onUploadFile() {
             // reset the form first to make the change handler retrigger even on the same file selected
@@ -433,6 +418,49 @@ export default {
                 });
 
                 that.shareDialog.visible = true;
+            });
+        },
+        onCreateShare() {
+            var that = this;
+
+            var path = this.shareDialog.entry.filePath;
+            var readonly = this.shareDialog.readonly;
+            var receiver_username = this.shareDialog.receiverUsername;
+
+            superagent.post('/api/v1/shares').query({ path, readonly, receiver_username, access_token: localStorage.accessToken }).end(function (error, result) {
+                if (result && result.statusCode === 401) return that.onLogout();
+                if (result && result.statusCode !== 200) return that.shareDialog.error = 'Error creating share: ' + result.statusCode;
+                if (error) return console.error(error.message);
+
+                // reset the form
+                that.shareDialog.error = '';
+                that.shareDialog.receiverUsername = '';
+                that.shareDialog.readonly = false;
+
+                superagent.get('/api/v1/files').query({ path: that.shareDialog.entry.filePath, access_token: localStorage.accessToken }).end(function (error, result) {
+                    if (result && result.statusCode === 401) return that.logout();
+                    if (result && result.statusCode !== 200) return console.error('Error getting file or folder');
+                    if (error) return console.error(error.message);
+
+                    that.shareDialog.entry = result.body;
+                });
+            });
+        },
+        onDeleteShare(share) {
+            var that = this;
+
+            superagent.delete('/api/v1/shares/' + share.id).query({ access_token: localStorage.accessToken }).end(function (error, result) {
+                if (result && result.statusCode === 401) return that.logout();
+                if (result && result.statusCode !== 200) return console.error('Error deleting share');
+                if (error) return console.error(error.message);
+
+                superagent.get('/api/v1/files').query({ path: that.shareDialog.entry.filePath, access_token: localStorage.accessToken }).end(function (error, result) {
+                    if (result && result.statusCode === 401) return that.logout();
+                    if (result && result.statusCode !== 200) return console.error('Error getting file or folder');
+                    if (error) return console.error(error.message);
+
+                    that.shareDialog.entry = result.body;
+                });
             });
         },
         onShares() {

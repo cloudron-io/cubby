@@ -139,6 +139,14 @@ async function getDirectory(username, fullFilePath, filePath, stats) {
         if (result) file.shares = result;
     });
 
+    let result;
+    try {
+        result = await shares.getByOwnerAndFilePath(username, filePath);
+    } catch (error) {
+        // TODO not sure what to do here
+        console.error(error);
+    }
+
     return new Entry({
         fullFilePath: fullFilePath,
         fileName: path.basename(filePath),
@@ -148,6 +156,7 @@ async function getDirectory(username, fullFilePath, filePath, stats) {
         isDirectory: true,
         isFile: false,
         owner: username,
+        shares: result || [],
         mimeType: 'inode/directory',
         files: files
     });

@@ -4,7 +4,8 @@ exports = module.exports = {
     list,
     get,
     create,
-    getByOwnerAndFilePath
+    getByOwnerAndFilePath,
+    remove
 };
 
 var assert = require('assert'),
@@ -86,6 +87,8 @@ async function getByOwnerAndFilePath(username, filePath) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof filePath, 'string');
 
+    debug(`getByOwnerAndFilePath: username:${username} filePath:${filePath}`);
+
     const result = await database.query('SELECT * FROM shares WHERE owner = $1 AND file_path ~ $2', [ username, `(^)${filePath}(.*$)` ]);
 
     if (result.rows.length === 0) return null;
@@ -93,4 +96,12 @@ async function getByOwnerAndFilePath(username, filePath) {
     result.rows.forEach(postProcess);
 
     return result.rows;
+}
+
+async function remove(shareId) {
+    assert.strictEqual(typeof shareId, 'string');
+
+    debug(`remove: ${shareId}`);
+
+    await database.query('DELETE FROM shares WHERE id = $1', [ shareId ]);
 }
