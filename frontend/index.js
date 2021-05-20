@@ -26,6 +26,8 @@ import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
 
+import '@fontsource/roboto';
+
 import './style.css';
 
 import Index from './Index.vue';

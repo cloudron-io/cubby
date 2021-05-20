@@ -8,7 +8,7 @@ html, body {
   --primary-color: #2196F3;
   --primary-color-text: #ffffff;
   --hover-background-color: #e9ecef;
-  --font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;
+  --font-family: Roboto;
 
   margin: 0;
   padding: 0;
