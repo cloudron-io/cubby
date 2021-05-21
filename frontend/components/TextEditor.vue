@@ -2,6 +2,7 @@
     <div class="container">
         <Toolbar>
             <template #left>
+                <Button icon="pi pi-save" class="p-mr-2 p-button-sm" label="Save" @click="onSave" :disabled="!isChanged"/>
                 <div>{{ entry ? entry.fileName : '' }}</div>
             </template>
 
@@ -27,10 +28,12 @@ function getLanguage(filename) {
 
 export default {
     name: 'TextEditor',
-    emits: [ 'close' ],
+    emits: [ 'close', 'saved' ],
     data() {
         return {
-            entry: {}
+            entry: {},
+            isChanged: false,
+            busySave: false
         };
     },
     props: {
@@ -51,12 +54,23 @@ export default {
                 if (error) return console.error(error);
 
                 that.editor.setModel(editor.createModel(result.text, getLanguage(entry.fileName)));
+                that.editor.getModel().onDidChangeContent(function () { that.isChanged = true; });
             });
         },
         onClose() {
             this.editor.setModel(editor.createModel(''));
 
             this.$emit('close');
+        },
+        onSave() {
+            var that = this;
+
+            this.isChanged = false;
+            this.busySave = true;
+
+            this.$emit('saved', this.entry, this.editor.getValue(), function () {
+                that.busySave = false;
+            });
         }
     },
     mounted() {

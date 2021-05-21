@@ -3,7 +3,7 @@
 exports = module.exports = {
     getValidFullPath,
     addDirectory,
-    addFile,
+    addOrOverwriteFile,
     get,
     move,
     remove,
@@ -55,16 +55,17 @@ async function addDirectory(username, filePath) {
     }
 }
 
-async function addFile(username, filePath, sourceFilePath, mtime) {
+async function addOrOverwriteFile(username, filePath, sourceFilePath, mtime, overwrite) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof filePath, 'string');
     assert.strictEqual(typeof mtime, 'object');
+    assert.strictEqual(typeof overwrite, 'boolean');
     assert.strictEqual(typeof sourceFilePath, 'string');
 
     const fullFilePath = getValidFullPath(username, filePath);
     if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);
 
-    debug('addFile:', fullFilePath);
+    debug(`addOrOverwriteFile: ${username} ${fullFilePath} mtime:${mtime} overwrite:${overwrite}`);
 
     var stat;
     try {
@@ -73,7 +74,7 @@ async function addFile(username, filePath, sourceFilePath, mtime) {
         if (error.code !== 'ENOENT') throw new MainError(MainError.FS_ERROR, error);
     }
 
-    if (stat) throw new MainError(MainError.ALREADY_EXISTS);
+    if (stat && !overwrite) throw new MainError(MainError.ALREADY_EXISTS);
 
     try {
         await fs.ensureDir(path.dirname(fullFilePath));

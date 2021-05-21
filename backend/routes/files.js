@@ -29,6 +29,7 @@ async function add(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
     const directory = boolLike(req.query.directory);
+    const overwrite = boolLike(req.query.overwrite);
     const filePath = req.query.path ? decodeURIComponent(req.query.path) : '';
 
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
@@ -41,7 +42,7 @@ async function add(req, res, next) {
 
     try {
         if (directory) await files.addDirectory(req.user.username, filePath);
-        else await files.addFile(req.user.username, filePath, req.files.file.path, mtime);
+        else await files.addOrOverwriteFile(req.user.username, filePath, req.files.file.path, mtime, overwrite);
     } catch (error) {
         if (error.reason === MainError.ALREADY_EXISTS) return next(new HttpError(409, 'already exists'));
         return next(new HttpError(500, error));

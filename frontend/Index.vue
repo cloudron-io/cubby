@@ -127,7 +127,7 @@
   </Dialog>
 
   <ImageViewer ref="imageViewer" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'image'" />
-  <TextEditor ref="textEditor" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'text'" />
+  <TextEditor ref="textEditor" :entries="entry.files" @close="onViewerClose" @saved="onFileSaved" v-show="viewer === 'text'" />
   <PdfViewer ref="pdfViewer" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'pdf'" />
   <OfficeViewer ref="officeViewer" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'office'" />
 </template>
@@ -274,6 +274,22 @@ export default {
         },
         onToggleSideBar() {
             this.sideBarVisible = !this.sideBarVisible;
+        },
+        onFileSaved(entry, content, done) {
+            var that = this;
+
+            console.log('onFileSaved', entry, content, done);
+
+            var formData = new FormData();
+            formData.append('file', new File([ content ], 'file'));
+
+            superagent.post('/api/v1/files').query({ path: entry.filePath, access_token: localStorage.accessToken, overwrite: true }).send(formData).end(function (error, result) {
+                if (result && result.statusCode === 401) return that.logout();
+                if (result && result.statusCode !== 200) return console.error('Error saving file: ', result.statusCode);
+                if (error) return console.error(error);
+
+                if (typeof done === 'function') done();
+            });
         },
         uploadFiles(files, targetPath) {
             var that = this;
