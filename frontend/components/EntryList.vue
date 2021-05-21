@@ -29,7 +29,7 @@
               <a :href="getDirectLink(entry)" target="_blank" @click.stop v-show="!entry.rename && entry.isFile">
                 <Button class="p-button-sm p-button-rounded p-button-text" icon="pi pi-external-link" v-tooltip.top="'Open'" v-show="!entry.rename"/>
               </a>
-              <Button class="p-button-sm p-button-rounded p-button-text" icon="pi pi-share-alt" v-tooltip.top="'Share'" v-show="!entry.rename" @click.stop="onShare(entry)"/>
+              <Button class="p-button-sm p-button-rounded p-button-text" icon="pi pi-share-alt" v-tooltip.top="'Share'" v-show="shareable && !entry.rename" @click.stop="onShare(entry)"/>
               <Button class="p-button-sm p-button-rounded p-button-danger p-button-text" icon="pi pi-trash" v-tooltip.top="'Delete'" v-show="editable && !entry.rename" @click.stop="onDelete(entry)"/>
           </span>
         </div>
@@ -61,6 +61,10 @@ export default {
         editable: {
             type: Boolean,
             default: false
+        },
+        shareable: {
+            type: Boolean,
+            default: true
         },
         entries: Array,
         sortFoldersFirst: {
