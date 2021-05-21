@@ -27,7 +27,7 @@
     </div>
     <div class="content">
       <MainToolbar :currentPath="currentPath" :displayName="profile.displayName" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @new-folder="onNewFolder"/>
-      <div class="container">
+      <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
           <EntryList :entries="entry.files" sort-folders-first="true" @entry-shared="onShare" @entry-renamed="onRename" @entry-activated="openEntry" @entry-delete="onDelete" @selection-changed="onSelectionChanged" editable/>
@@ -157,7 +157,7 @@ export default {
                 busy: false,
                 count: 0,
                 done: 0,
-                percentDone: 50,
+                percentDone: 0,
                 uploadListCount: 0
             },
             error: '',
