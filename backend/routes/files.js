@@ -146,6 +146,7 @@ async function recent(req, res, next) {
         fullFilePath: '/recent',
         fileName: 'Recent',
         filePath: '/',
+        owner: req.user.username,
         isDirectory: true,
         isFile: false,
         mimeType: 'inode/recent',
