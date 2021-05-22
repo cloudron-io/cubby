@@ -278,8 +278,6 @@ export default {
         onFileSaved(entry, content, done) {
             var that = this;
 
-            console.log('onFileSaved', entry, content, done);
-
             var formData = new FormData();
             formData.append('file', new File([ content ], 'file'));
 
