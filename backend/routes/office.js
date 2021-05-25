@@ -10,7 +10,6 @@ exports = module.exports = {
 var assert = require('assert'),
     debug = require('debug')('cubby:routes:office'),
     superagent = require('superagent'),
-    util = require('util'),
     MainError = require('../mainerror.js'),
     files = require('../files.js'),
     shares = require('../shares.js'),
