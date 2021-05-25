@@ -13,22 +13,23 @@ var assert = require('assert'),
     MainError = require('../mainerror.js'),
     files = require('../files.js'),
     shares = require('../shares.js'),
+    config = require('../config.js'),
     Dom = require('xmldom').DOMParser,
     xpath = require('xpath'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
-
-// TODO make it configurable
-const COLLABORA_ONLINE_HOST = 'https://office.nebulon.space';
 
 async function getHandle(req, res, next) {
     var filePath = decodeURIComponent(req.query.path);
 
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
 
+    const collaboraHost = config.get('collabora.host', '');
+    if (!collaboraHost) return next(new HttpError(412, 'collabora office not configured'));
+
     let result;
     try {
-        result = await superagent.get(COLLABORA_ONLINE_HOST + '/hosting/discovery');
+        result = await superagent.get(`${collaboraHost}/hosting/discovery`);
     } catch (error) {
         return next(new HttpError(500, error));
     }

@@ -5,6 +5,7 @@
 var constants = require('./backend/constants.js'),
     database = require('./backend/database.js'),
     ldap = require('./backend/ldap.js'),
+    config = require('./backend/config.js'),
     server = require('./backend/server.js');
 
 function exit(error) {
@@ -21,6 +22,8 @@ function sync() {
 }
 
 database.init();
+config.init(process.env.CLOUDRON ? '/app/data/config.json' : 'config.json');
+
 sync();
 
 server.init(function (error) {

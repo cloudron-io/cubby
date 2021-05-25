@@ -4,6 +4,11 @@ set -eu
 
 export NODE_ENV=production
 
+if [[ ! -f "/app/data/config.json" ]]; then
+    echo "=> Create initial config.json"
+    echo "{}" > "/app/data/config.json"
+fi
+
 echo "=> Ensure permissions"
 chown -R cloudron:cloudron /app/data
 
