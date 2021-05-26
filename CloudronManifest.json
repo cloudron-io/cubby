@@ -6,11 +6,19 @@
   "version": "0.1.0",
   "healthCheckPath": "/",
   "icon": "file://logo.png",
+  "description": "Simple file sharing",
+  "website": "https://getcubby.org",
+  "contactEmail": "support@cloudron.io",
+  "tags": [ "files", "sharing", "documents", "file sharing" ],
+  "changelog": "file://CHANGELOG",
   "httpPort": 3000,
   "addons": {
     "localstorage": {},
     "postgresql": {},
     "ldap": {}
   },
+  "mediaLinks": [
+    "https://screenshots.cloudron.io/io.cloudron.cubby/cubby_01.png"
+  ],
   "manifestVersion": 2
 }
