@@ -4,7 +4,8 @@ exports = module.exports = {
     list,
     get,
     create,
-    getByOwnerAndFilePath,
+    getByOwnerAndFilepath,
+    getByReceiverAndFilepath,
     remove
 };
 
@@ -83,13 +84,28 @@ async function get(shareId) {
     return postProcess(result.rows[0]);
 }
 
-async function getByOwnerAndFilePath(username, filePath) {
+async function getByOwnerAndFilepath(username, filepath) {
     assert.strictEqual(typeof username, 'string');
-    assert.strictEqual(typeof filePath, 'string');
+    assert.strictEqual(typeof filepath, 'string');
 
-    debug(`getByOwnerAndFilePath: username:${username} filePath:${filePath}`);
+    debug(`getByOwnerAndFilepath: username:${username} filepath:${filepath}`);
 
-    const result = await database.query('SELECT * FROM shares WHERE owner = $1 AND file_path ~ $2', [ username, `(^)${filePath}(.*$)` ]);
+    const result = await database.query('SELECT * FROM shares WHERE owner = $1 AND file_path ~ $2', [ username, `(^)${filepath}(.*$)` ]);
+
+    if (result.rows.length === 0) return null;
+
+    result.rows.forEach(postProcess);
+
+    return result.rows;
+}
+
+async function getByReceiverAndFilepath(receiver, filepath) {
+    assert.strictEqual(typeof receiver, 'string');
+    assert.strictEqual(typeof filepath, 'string');
+
+    debug(`getByReceiverAndFilepath: receiver:${receiver} filepath:${filepath}`);
+
+    const result = await database.query('SELECT * FROM shares WHERE (receiver_email = $1 OR receiver_username = $1) AND file_path ~ $2', [ receiver, `(^)${filepath}(.*$)` ]);
 
     if (result.rows.length === 0) return null;
 
