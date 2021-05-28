@@ -30,7 +30,7 @@
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
-          <EntryList :entries="entry.files" sort-folders-first="true" @entry-shared="onShare" @entry-renamed="onRename" @entry-activated="openEntry" @entry-delete="onDelete" @selection-changed="onSelectionChanged" editable/>
+          <EntryList :entries="entry.files" sort-folders-first="true" @entry-shared="onShare" @entry-renamed="onRename" @entry-activated="openEntry" @entry-delete="onDelete" @selection-changed="onSelectionChanged" :editable="!isShares()"/>
         </div>
         <SideBar :entry="activeEntry" :visible="sideBarVisible"/>
       </div>
@@ -412,6 +412,9 @@ export default {
         },
         showAllShares() {
             window.location.hash = 'shares/';
+        },
+        isShares() {
+            return window.location.hash.slice(1).startsWith('shares/');
         },
         onShare(entry) {
             var that = this;
