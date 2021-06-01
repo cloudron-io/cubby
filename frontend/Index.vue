@@ -78,7 +78,7 @@
     <form @submit="onCreateShare" @submit.prevent>
       <div class="p-fluid">
         <div class="p-field">
-          <Dropdown v-model="shareDialog.receiverUsername" :options="shareDialog.users" optionValue="username" optionLabel="userAndDisplayName" placeholder="Select a user" />
+          <Dropdown v-model="shareDialog.receiverUsername" :options="shareDialog.users" optionDisabled="alreadyUsed" optionValue="username" optionLabel="userAndDisplayName" placeholder="Select a user" />
           <small class="p-invalid" v-show="shareDialog.error">{{ shareDialog.error }}</small>
         </div>
       </div>
@@ -427,6 +427,10 @@ export default {
                 if (error) return console.error('Failed to get user list.', error);
 
                 that.shareDialog.users = result.body.users.filter(function (u) { return u.username !== that.profile.username; });
+
+                that.shareDialog.users.forEach(function (user) {
+                    if (entry.sharedWith.find(function (share) { return share.receiverUsername === user.username; })) user.alreadyUsed = true;
+                });
 
                 // TODO this is just to be prettier, should be in UI code though
                 that.shareDialog.users.forEach(function (u) {
