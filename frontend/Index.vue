@@ -35,11 +35,8 @@
         <SideBar :entry="activeEntry" :visible="sideBarVisible"/>
       </div>
       <div class="upload" v-show="uploadStatus.busy">
-        <div v-show="uploadStatus.uploadListCount">
-          <i class="pi pi-spin pi-spinner"></i> Fetching file information for upload <span class="p-badge">{{ uploadStatus.uploadListCount }}</span>
-        </div>
-        <div style="margin-right: 10px;" v-show="!uploadStatus.uploadListCount">Uploading {{ uploadStatus.count }} files ({{ Math.round(uploadStatus.done/1000/1000) }}MB / {{ Math.round(uploadStatus.size/1000/1000) }}MB)</div>
-        <ProgressBar :value="uploadStatus.percentDone" v-show="!uploadStatus.uploadListCount">{{uploadStatus.percentDone}}%</ProgressBar>
+        <div style="margin-right: 10px;">Uploading {{ uploadStatus.queue.length+1 }} files ({{ Math.round(uploadStatus.done/1000/1000) }}MB / {{ Math.round(uploadStatus.size/1000/1000) }}MB)</div>
+        <ProgressBar :value="uploadStatus.percentDone">{{uploadStatus.percentDone}}%</ProgressBar>
       </div>
     </div>
   </div>
@@ -135,7 +132,6 @@
 <script>
 
 import superagent from 'superagent';
-import { eachLimit } from 'async';
 import { encode, getPreviewUrl, getExtension, sanitize, getDirectLink } from './utils.js';
 
 export default {
@@ -155,10 +151,9 @@ export default {
             viewers: [],
             uploadStatus: {
                 busy: false,
-                count: 0,
+                queue: [],
                 done: 0,
-                percentDone: 0,
-                uploadListCount: 0
+                percentDone: 0
             },
             error: '',
             entry: {
@@ -289,6 +284,50 @@ export default {
                 if (typeof done === 'function') done();
             });
         },
+        uploadNext() {
+            var that = this;
+
+            if (that.uploadStatus.queue.length === 0) {
+                that.uploadStatus.busy = false;
+                that.uploadStatus.size = 0;
+                that.uploadStatus.done = 0;
+                that.uploadStatus.percentDone = 0;
+
+                return;
+            }
+
+            var file = that.uploadStatus.queue.pop();
+            var path = sanitize(file.targetPath + '/' + (file.webkitRelativePath || file.name));
+
+            var formData = new FormData();
+            formData.append('file', file);
+
+            var finishedUploadSize = 0;
+
+            superagent.post('/api/v1/files')
+              .query({ path: path, access_token: localStorage.accessToken })
+              .send(formData)
+              .on('progress', function (event) {
+                // only handle upload events
+                if (!(event.target instanceof XMLHttpRequestUpload)) return;
+
+                that.uploadStatus.done += event.loaded - finishedUploadSize;
+                // keep track of progress diff not absolute
+                finishedUploadSize = event.loaded;
+
+                var tmp = Math.round(that.uploadStatus.done / that.uploadStatus.size * 100);
+                that.uploadStatus.percentDone = tmp > 100 ? 100 : tmp;
+            }).end(function (error, result) {
+                if (result && result.statusCode === 401) return that.logout();
+                if (result && result.statusCode !== 200) console.error('Error uploading file:', result.statusCode);
+                if (error) console.error('Error uploading file:', error);
+
+                // TODO maybe smarter refresh
+                that.loadPath();
+
+                that.uploadNext();
+            });
+        },
         uploadFiles(files, targetPath) {
             var that = this;
 
@@ -297,54 +336,14 @@ export default {
             targetPath = targetPath || that.currentPath;
 
             that.uploadStatus.busy = true;
-            that.uploadStatus.count = files.length;
-            that.uploadStatus.size = 0;
-            that.uploadStatus.done = 0;
-            that.uploadStatus.percentDone = 0;
 
-            for (var i = 0; i < files.length; ++i) {
-                that.uploadStatus.size += files[i].size;
-            }
-
-            eachLimit(files, 10, function (file, callback) {
-                var path = sanitize(targetPath + '/' + (file.webkitRelativePath || file.name));
-
-                var formData = new FormData();
-                formData.append('file', file);
-
-                var finishedUploadSize = 0;
-
-                superagent.post('/api/v1/files')
-                  .query({ path: path, access_token: localStorage.accessToken })
-                  .send(formData)
-                  .on('progress', function (event) {
-                    // only handle upload events
-                    if (!(event.target instanceof XMLHttpRequestUpload)) return;
-
-                    that.uploadStatus.done += event.loaded - finishedUploadSize;
-                    // keep track of progress diff not absolute
-                    finishedUploadSize = event.loaded;
-
-                    var tmp = Math.round(that.uploadStatus.done / that.uploadStatus.size * 100);
-                    that.uploadStatus.percentDone = tmp > 100 ? 100 : tmp;
-                }).end(function (error, result) {
-                    if (result && result.statusCode === 401) return that.logout();
-                    if (result && result.statusCode !== 200) return callback('Error uploading file: ', result.statusCode);
-                    if (error) return callback(error);
-
-                    callback();
-                });
-            }, function (error) {
-                if (error) console.error(error);
-
-                that.uploadStatus.busy = false;
-                that.uploadStatus.count = 0;
-                that.uploadStatus.size = 0;
-                that.uploadStatus.done = 0;
-                that.uploadStatus.percentDone = 100;
-
-                that.loadPath();
+            files.forEach(function (file) {
+                file.targetPath = targetPath;
+                that.uploadStatus.queue.push(file);
+                that.uploadStatus.size += file.size;
             });
+
+            this.uploadNext();
         },
         onDelete(entry) {
             var that = this;
