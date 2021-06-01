@@ -111,6 +111,7 @@ async function get(req, res, next) {
     next(new HttpSuccess(200, file.withoutPrivate(req.user.username)));
 }
 
+// If a share for the receiver and filepath already exists, just reuse that
 async function create(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
@@ -124,6 +125,18 @@ async function create(req, res, next) {
     if (receiverUsername && receiverEmail) return next(new HttpError(400, 'only one of receiver_username or receiver_email can be provided'));
 
     debug(`create: ${filePath} receiver:${receiverUsername || receiverEmail}`);
+
+    let exisingShares;
+    try {
+        exisingShares = await shares.getByReceiverAndFilepath(receiverUsername || receiverEmail, filePath, true /* exact match */);
+    } catch (error) {
+        return next(new HttpError(500, error));
+    }
+
+    if (exisingShares.length) {
+        debug(`create: share already exists. Reusing ${exisingShares[0].id}`);
+        return next(new HttpSuccess(200, { shareId: exisingShares[0].id }));
+    }
 
     let shareId;
     try {
