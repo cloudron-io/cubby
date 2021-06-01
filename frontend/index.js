@@ -20,6 +20,7 @@ import ToastService from 'primevue/toastservice';
 import Toast from 'primevue/toast';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import BadgeDirective from 'primevue/badgedirective';
 
 import 'primevue/resources/themes/saga-blue/theme.css';
 import 'primevue/resources/primevue.min.css';
@@ -64,6 +65,7 @@ app.component('DataTable', DataTable);
 app.component('Column', Column);
 
 app.directive('tooltip', Tooltip);
+app.directive('badge', BadgeDirective);
 
 // custom components
 app.component('Login', Login);
