@@ -131,7 +131,7 @@ async function getDirectory(username, fullFilePath, filePath, stats) {
     await async.each(files, async function (file) {
         let result;
         try {
-            result = await shares.getByOwnerAndFilepath(username, filePath);
+            result = await shares.getByOwnerAndFilepath(username, file.filePath);
         } catch (error) {
             // TODO not sure what to do here
             console.error(error);
