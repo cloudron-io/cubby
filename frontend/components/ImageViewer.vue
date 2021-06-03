@@ -27,6 +27,8 @@ export default {
         open(entry) {
             if (!entry || entry.isDirectory || !this.canHandle(entry)) return;
 
+            console.log(entry)
+
             this.$refs.image.style.backgroundImage = 'url("' + getDirectLink(entry) + '")';
             this.currentIndex = this.entries.filter(function (e) { return getFileTypeGroup(e) === 'image'; }).findIndex(function (e) { return e.fileName === entry.fileName; });
 

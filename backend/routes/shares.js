@@ -45,7 +45,7 @@ async function list(req, res, next) {
         await async.each(result, async function (share) {
             let file = await files.get(share.owner, share.filePath);
 
-            file.shares = [ share ];
+            file.share = share;
 
             sharedFiles.push(file);
         });
@@ -108,6 +108,9 @@ async function get(req, res, next) {
         return res.download(file._fullFilePath);
     }
 
+    // those files are always part of this share
+    file.files.forEach(function (f) { f.share = share; });
+
     next(new HttpSuccess(200, file.withoutPrivate(req.user.username)));
 }
 
@@ -126,16 +129,16 @@ async function create(req, res, next) {
 
     debug(`create: ${filePath} receiver:${receiverUsername || receiverEmail}`);
 
-    let exisingShares;
+    let existingShares;
     try {
-        exisingShares = await shares.getByReceiverAndFilepath(receiverUsername || receiverEmail, filePath, true /* exact match */);
+        existingShares = await shares.getByReceiverAndFilepath(receiverUsername || receiverEmail, filePath, true /* exact match */);
     } catch (error) {
         return next(new HttpError(500, error));
     }
 
-    if (exisingShares.length) {
-        debug(`create: share already exists. Reusing ${exisingShares[0].id}`);
-        return next(new HttpSuccess(200, { shareId: exisingShares[0].id }));
+    if (existingShares && existingShares.length) {
+        debug(`create: share already exists. Reusing ${existingShares[0].id}`);
+        return next(new HttpSuccess(200, { shareId: existingShares[0].id }));
     }
 
     let shareId;

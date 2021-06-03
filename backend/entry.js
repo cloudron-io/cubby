@@ -4,7 +4,7 @@ const assert = require('assert');
 
 exports = module.exports = Entry;
 
-function Entry({ fullFilePath, filePath, fileName, owner, size = 0, mtime = new Date(), isDirectory, isFile, mimeType, files = [], shares = [] }) {
+function Entry({ fullFilePath, filePath, fileName, owner, size = 0, mtime = new Date(), isDirectory, isFile, mimeType, files = [], sharedWith = [], share = null }) {
     assert(fullFilePath && typeof fullFilePath === 'string');
     assert(filePath && typeof filePath === 'string');
     assert(owner && typeof owner === 'string');
@@ -13,7 +13,8 @@ function Entry({ fullFilePath, filePath, fileName, owner, size = 0, mtime = new 
     assert(mtime instanceof Date && !isNaN(mtime.valueOf()));
     assert.strictEqual(typeof isDirectory, 'boolean');
     assert(mimeType && typeof mimeType === 'string');
-    assert(Array.isArray(shares));
+    assert(Array.isArray(sharedWith));
+    assert.strictEqual(typeof share, 'object');
 
     // TODO check that files is an array of Entries
 
@@ -27,13 +28,11 @@ function Entry({ fullFilePath, filePath, fileName, owner, size = 0, mtime = new 
     this.isFile = isFile;
     this.mimeType = mimeType;
     this.files = files;
-    this.shares = shares;
+    this.sharedWith = sharedWith;
+    this.share = share;
 }
 
 Entry.prototype.withoutPrivate = function (username) {
-    const sharedBy = this.shares.filter(function (s) { return s.owner !== username; })[0];
-    const sharedWith = this.shares.filter(function (s) { return s.owner === username; });
-
     return {
         fileName: this.fileName,
         filePath: this.filePath,
@@ -44,7 +43,7 @@ Entry.prototype.withoutPrivate = function (username) {
         isFile: this.isFile,
         mimeType: this.mimeType,
         files: this.files.map(function (f) { return f.withoutPrivate(username); }),
-        share: sharedBy,
-        sharedWith: sharedWith
+        share: this.share,
+        sharedWith: this.sharedWith || []
     };
 };

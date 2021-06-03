@@ -131,18 +131,18 @@ async function getDirectory(username, fullFilePath, filePath, stats) {
     await async.each(files, async function (file) {
         let result;
         try {
-            result = await shares.getByOwnerAndFilepath(username, file.filePath);
+            result = await shares.getByReceiverAndFilepath(username, file.filePath);
         } catch (error) {
             // TODO not sure what to do here
             console.error(error);
         }
 
-        if (result) file.shares = result;
+        file.sharedWith = result || null;
     });
 
     let result;
     try {
-        result = await shares.getByOwnerAndFilepath(username, filePath);
+        result = await shares.getByReceiverAndFilepath(username, filePath);
     } catch (error) {
         // TODO not sure what to do here
         console.error(error);
@@ -173,7 +173,7 @@ async function getFile(username, fullFilePath, filePath, stats) {
 
     let result;
     try {
-        result = await shares.getByOwnerAndFilepath(username, filePath);
+        result = await shares.getByReceiverOrOwnerAndFilepath(username, filePath);
     } catch (error) {
         // TODO not sure what to do here
         console.error(error);
@@ -187,7 +187,7 @@ async function getFile(username, fullFilePath, filePath, stats) {
         mtime: stats.mtime,
         isDirectory: stats.isDirectory(),
         isFile: stats.isFile(),
-        shares: result || [],
+        shares: result,
         owner: username,
         mimeType: stats.isDirectory() ? 'inode/directory' : mime(filePath)
     });
@@ -267,7 +267,6 @@ async function recent(username, daysAgo = 3) {
 
     const localResolvedPrefix = path.join(constants.DATA_ROOT, username);
     await async.each(filePaths, async function (filePath) {
-        console.log(filePath, localResolvedPrefix, filePath.slice(localResolvedPrefix.length));
         try {
             const stat = await fs.stat(filePath);
             if (!stat.isFile()) throw new MainError(MainError.FS_ERROR, 'recent should only list files');

@@ -30,7 +30,7 @@
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
-          <EntryList :entries="entry.files" sort-folders-first="true" @entry-shared="onShare" @entry-renamed="onRename" @entry-activated="openEntry" @entry-delete="onDelete" @selection-changed="onSelectionChanged" :editable="!isShares()"/>
+          <EntryList :entries="entry.files" sort-folders-first="true" @entry-shared="onShare" @entry-renamed="onRename" @entry-activated="onOpen" @entry-delete="onDelete" @selection-changed="onSelectionChanged" :editable="!isShares()"/>
         </div>
         <SideBar :entry="activeEntry" :visible="sideBarVisible"/>
       </div>
@@ -577,7 +577,7 @@ export default {
             if (entry.share && entry.share.id) window.location.hash = 'shares/' + entry.share.id + entry.filePath;
             else window.location.hash = 'files' + entry.filePath;
         },
-        openEntry(entry) {
+        onOpen(entry) {
             if (entry.isDirectory) return this.openDirectory(entry);
 
             if (this.$refs.imageViewer.canHandle(entry)) {

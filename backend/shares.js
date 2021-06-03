@@ -6,6 +6,7 @@ exports = module.exports = {
     create,
     getByOwnerAndFilepath,
     getByReceiverAndFilepath,
+    getByReceiverOrOwnerAndFilepath,
     remove
 };
 
@@ -104,12 +105,31 @@ async function getByReceiverAndFilepath(receiver, filepath, exactMatch = false) 
     assert.strictEqual(typeof filepath, 'string');
     assert.strictEqual(typeof exactMatch, 'boolean');
 
-    debug(`getByReceiverAndFilepath: receiver:${receiver} filepath:${filepath} exactMatch:${exactMatch}`);
+    debug(`getByReceiverAndFilepath: receiver:${receiver} exactMatch:${exactMatch} filepath:${filepath}`);
 
     let result;
 
     if (exactMatch) result = await database.query('SELECT * FROM shares WHERE (receiver_email = $1 OR receiver_username = $1) AND file_path = $2', [ receiver, filepath ]);
     else result = await database.query('SELECT * FROM shares WHERE (receiver_email = $1 OR receiver_username = $1) AND file_path ~ $2', [ receiver, `(^)${filepath}(.*$)` ]);
+
+    if (result.rows.length === 0) return null;
+
+    result.rows.forEach(postProcess);
+
+    return result.rows;
+}
+
+async function getByReceiverOrOwnerAndFilepath(receiverOrOwner, filepath, exactMatch = false) {
+    assert.strictEqual(typeof receiverOrOwner, 'string');
+    assert.strictEqual(typeof filepath, 'string');
+    assert.strictEqual(typeof exactMatch, 'boolean');
+
+    debug(`getByReceiverOrOwnerAndFilepath: receiverOrOwner:${receiverOrOwner} exactMatch:${exactMatch} filepath:${filepath}`);
+
+    let result;
+
+    if (exactMatch) result = await database.query('SELECT * FROM shares WHERE (receiver_email = $1 OR receiver_username = $1 OR owner = $1) AND file_path = $2', [ receiverOrOwner, filepath ]);
+    else result = await database.query('SELECT * FROM shares WHERE (receiver_email = $1 OR receiver_username = $1 OR owner = $1) AND file_path ~ $2', [ receiverOrOwner, `(^)${filepath}(.*$)` ]);
 
     if (result.rows.length === 0) return null;
 
