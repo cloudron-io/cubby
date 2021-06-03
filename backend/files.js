@@ -173,7 +173,7 @@ async function getFile(username, fullFilePath, filePath, stats) {
 
     let result;
     try {
-        result = await shares.getByReceiverOrOwnerAndFilepath(username, filePath);
+        result = await shares.getByOwnerAndFilepath(username, filePath);
     } catch (error) {
         // TODO not sure what to do here
         console.error(error);
