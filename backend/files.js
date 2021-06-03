@@ -131,7 +131,7 @@ async function getDirectory(username, fullFilePath, filePath, stats) {
     await async.each(files, async function (file) {
         let result;
         try {
-            result = await shares.getByReceiverAndFilepath(username, file.filePath);
+            result = await shares.getByOwnerAndFilepath(username, file.filePath);
         } catch (error) {
             // TODO not sure what to do here
             console.error(error);
@@ -142,7 +142,7 @@ async function getDirectory(username, fullFilePath, filePath, stats) {
 
     let result;
     try {
-        result = await shares.getByReceiverAndFilepath(username, filePath);
+        result = await shares.getByOwnerAndFilepath(username, filePath);
     } catch (error) {
         // TODO not sure what to do here
         console.error(error);
@@ -157,7 +157,7 @@ async function getDirectory(username, fullFilePath, filePath, stats) {
         isDirectory: true,
         isFile: false,
         owner: username,
-        shares: result || [],
+        sharedWith: result || [],
         mimeType: 'inode/directory',
         files: files
     });
@@ -187,7 +187,7 @@ async function getFile(username, fullFilePath, filePath, stats) {
         mtime: stats.mtime,
         isDirectory: stats.isDirectory(),
         isFile: stats.isFile(),
-        shares: result,
+        sharedWith: result || [],
         owner: username,
         mimeType: stats.isDirectory() ? 'inode/directory' : mime(filePath)
     });
