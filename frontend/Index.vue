@@ -265,7 +265,8 @@ export default {
             this.$refs.uploadFolder.click();
         },
         onSelectionChanged(selectedEntries) {
-            this.activeEntry = selectedEntries[0];
+            if (selectedEntries.length) this.activeEntry = selectedEntries[0];
+            else this.activeEntry = this.entry; // reset to current folder/view
         },
         onToggleSideBar() {
             this.sideBarVisible = !this.sideBarVisible;

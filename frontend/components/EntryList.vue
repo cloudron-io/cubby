@@ -15,7 +15,7 @@
     <div class="tbody">
       <div class="tr-placeholder" v-show="entries.length === 0">Nothing found</div>
       <div class="tr-placeholder" v-show="entries.length !== 0 && filteredAndSortedEntries.length === 0">Nothing found</div>
-      <div class="tr" v-for="entry in filteredAndSortedEntries" :key="entry.fileName" @contextmenu="onContextMenu(entry, $event)" @dblclick="onEntryOpen(entry, false)" @click="onEntrySelect(entry)" @drop.stop.prevent="drop(entry)" @dragover.stop.prevent="dragOver(entry)" :class="{ 'selected': selected.includes(entry.filePath), 'drag-active': entry === dragActive }">
+      <div class="tr" v-for="entry in filteredAndSortedEntries" :key="entry.fileName" @contextmenu="onContextMenu(entry, $event)" @dblclick="onEntryOpen(entry, false)" @click="onEntrySelect(entry, $event)" @drop.stop.prevent="drop(entry)" @dragover.stop.prevent="dragOver(entry)" :class="{ 'selected': selected.includes(entry.filePath), 'drag-active': entry === dragActive }">
         <div class="td" style="max-width: 50px;"><img :src="entry.previewUrl" style="width: 32px; height: 32px; vertical-align: middle;"/></div>
         <div class="td" style="flex-grow: 2;">
           <InputText @click.stop @keyup.enter="onRenameSubmit(entry)" @keyup.esc="onRenameEnd(entry)" @blur="onRenameEnd(entry)" v-model="entry.filePathNew" :id="'filePathRenameInputId-' + entry.fileName" v-show="entry.rename" class="rename-input"/>
@@ -127,26 +127,32 @@ export default {
         prettyDate,
         prettyFileSize,
         prettyLongDate,
-        onContextMenu(entry, event) {
-            this.onEntrySelect(entry);
-            this.$refs.entryListContextMenu.show(event);
+        onContextMenu(entry, $event) {
+            this.onEntrySelect(entry, $event);
+            this.$refs.entryListContextMenu.show($event);
         },
         onSort: function (prop) {
             if (this.sort.prop === prop) this.sort.desc = !this.sort.desc;
             else this.sort.prop = prop;
         },
-        onEntrySelect: function (entry) {
-            var that = this;
-            // TODO handle multiselect here
+        onEntrySelect: function (entry, $event) {
+            // FIXME mac might not use ctrl Key
 
-            // this.selected = [];
-            // if (!this.selected.includes(entry.filePath)) this.selected.push(entry.filePath);
+            if ($event && $event.ctrlKey) {
+                let exists = this.selected.indexOf(entry.filePath);
+                if (exists === -1) {
+                    this.selected.push(entry.filePath);
+                    this.selectedEntries.push(entry);
+                } else {
+                    this.selected.splice(exists, 1);
+                    this.selectedEntries.splice(exists, 1);
+                }
+            } else {
+                this.selected = [ entry.filePath ];
+                this.selectedEntries = [ entry ];
+            }
 
-            this.selected = [ entry.filePath ];
-            this.selectedEntries = [ entry ];
-
-            var selectedEntries = this.entries.filter(function (e) { return that.selected.includes(e.filePath); });
-            this.$emit('selection-changed', selectedEntries);
+            this.$emit('selection-changed', this.selectedEntries);
         },
         onEntryOpen: function (entry, select) {
             clearSelection();
