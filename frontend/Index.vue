@@ -463,6 +463,8 @@ export default {
                     if (error) return console.error(error.message);
 
                     that.shareDialog.entry = result.body;
+
+                    that.loadPath();
                 });
             });
         },
@@ -480,6 +482,8 @@ export default {
                     if (error) return console.error(error.message);
 
                     that.shareDialog.entry = result.body;
+
+                    that.loadPath();
                 });
             });
         },
@@ -533,6 +537,8 @@ export default {
         },
         loadPath(path) {
             var that = this;
+
+            // FIXME rework this to not make the listview flicker that much
 
             var filePath = path || that.currentPath || '/';
 
