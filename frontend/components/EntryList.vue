@@ -1,4 +1,6 @@
 <template>
+  <ContextMenu ref="entryListContextMenu" :model="contextMenuItem" />
+
   <div class="loading" v-show="$parent.busy">
     <i class="pi pi-spin pi-spinner" style="fontSize: 2rem"></i>
   </div>
@@ -13,7 +15,7 @@
     <div class="tbody">
       <div class="tr-placeholder" v-show="entries.length === 0">Nothing found</div>
       <div class="tr-placeholder" v-show="entries.length !== 0 && filteredAndSortedEntries.length === 0">Nothing found</div>
-      <div class="tr" v-for="entry in filteredAndSortedEntries" :key="entry.fileName" @dblclick="onEntryOpen(entry, false)" @click="onEntrySelect(entry)" @drop.stop.prevent="drop(entry)" @dragover.stop.prevent="dragOver(entry)" :class="{ 'selected': selected.includes(entry.filePath), 'drag-active': entry === dragActive }">
+      <div class="tr" v-for="entry in filteredAndSortedEntries" :key="entry.fileName" @contextmenu="onContextMenu(entry, $event)" @dblclick="onEntryOpen(entry, false)" @click="onEntrySelect(entry)" @drop.stop.prevent="drop(entry)" @dragover.stop.prevent="dragOver(entry)" :class="{ 'selected': selected.includes(entry.filePath), 'drag-active': entry === dragActive }">
         <div class="td" style="max-width: 50px;"><img :src="entry.previewUrl" style="width: 32px; height: 32px; vertical-align: middle;"/></div>
         <div class="td" style="flex-grow: 2;">
           <InputText @click.stop @keyup.enter="onRenameSubmit(entry)" @keyup.esc="onRenameEnd(entry)" @blur="onRenameEnd(entry)" v-model="entry.filePathNew" :id="'filePathRenameInputId-' + entry.fileName" v-show="entry.rename" class="rename-input"/>
@@ -23,11 +25,11 @@
         <div class="td p-d-none p-d-md-flex" style="max-width: 150px;"><span v-tooltip.top="prettyLongDate(entry.mtime)">{{ prettyDate(entry.mtime) }}</span></div>
         <div class="td p-d-none p-d-md-flex" style="max-width: 100px;">{{ prettyFileSize(entry.size) }}</div>
         <div class="td" style="min-width: 180px; justify-content: flex-end;">
-          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-download" v-tooltip.top="'Download'" v-show="!entry.rename && entry.isFile" @click.stop="onDownload(entry)"/>
-          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-copy" v-tooltip.top="'Copy Link'" v-show="!entry.rename && entry.isFile" @click.stop="onCopyLink(entry)"/>
           <a :href="getDirectLink(entry)" target="_blank" @click.stop v-show="!entry.rename && entry.isFile">
             <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-external-link" v-tooltip.top="'Open'" v-show="!entry.rename"/>
           </a>
+          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-download" v-tooltip.top="'Download'" v-show="!entry.rename && entry.isFile" @click.stop="onDownload(entry)"/>
+          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-copy" v-tooltip.top="'Copy Link'" v-show="!entry.rename && entry.isFile" @click.stop="onCopyLink(entry)"/>
           <Button class="action-buttons p-button-sm p-button-rounded p-button-text" :class="{ 'action-buttons-visible': entry.sharedWith.length !== 0 }" icon="pi pi-share-alt" v-tooltip.top="'Share'" v-show="entry.sharedWith.length || (shareable && !entry.rename)" @click.stop="onShare(entry)"/>
           <Button class="action-buttons p-button-sm p-button-rounded p-button-text p-button-danger" icon="pi pi-trash" v-tooltip.top="'Delete'" v-show="editable && !entry.rename" @click.stop="onDelete(entry)"/>
         </div>
@@ -48,11 +50,37 @@ export default {
         return {
             active: {},
             selected: [],
+            selectedEntries: [],
             sort: {
                 prop: 'fileName',
                 desc: true
             },
-            dragActive: ''
+            dragActive: '',
+            contextMenuItem: [{
+                label:'Open',
+                icon:'pi pi-fw pi-external-link',
+                command: () => this.onEntryOpen(this.selectedEntries[0])
+            }, {
+                label:'Download',
+                icon:'pi pi-fw pi-download',
+                command: () => this.onDownload(this.selectedEntries[0])
+            }, {
+                label:'Copy Link',
+                icon:'pi pi-fw pi-copy',
+                command: () => this.onCopyLink(this.selectedEntries[0])
+            }, {
+                separator:true
+            }, {
+                label:'Share',
+                icon:'pi pi-fw pi-share-alt',
+                command: () => this.onShare(this.selectedEntries[0])
+            }, {
+                separator:true
+            }, {
+                label:'Delete',
+                icon:'pi pi-fw pi-trash',
+                command: () => this.onDelete(this.selectedEntries[0])
+            }]
         };
     },
     props: {
@@ -99,6 +127,10 @@ export default {
         prettyDate,
         prettyFileSize,
         prettyLongDate,
+        onContextMenu(entry, event) {
+            this.onEntrySelect(entry);
+            this.$refs.entryListContextMenu.show(event);
+        },
         onSort: function (prop) {
             if (this.sort.prop === prop) this.sort.desc = !this.sort.desc;
             else this.sort.prop = prop;
@@ -111,6 +143,7 @@ export default {
             // if (!this.selected.includes(entry.filePath)) this.selected.push(entry.filePath);
 
             this.selected = [ entry.filePath ];
+            this.selectedEntries = [ entry ];
 
             var selectedEntries = this.entries.filter(function (e) { return that.selected.includes(e.filePath); });
             this.$emit('selection-changed', selectedEntries);

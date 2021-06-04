@@ -16,6 +16,7 @@ import Tooltip from 'primevue/tooltip';
 import RadioButton from 'primevue/radiobutton';
 import ConfirmationService from 'primevue/confirmationservice';
 import ConfirmDialog from 'primevue/confirmdialog';
+import ContextMenu from 'primevue/contextmenu';
 import ToastService from 'primevue/toastservice';
 import Toast from 'primevue/toast';
 import DataTable from 'primevue/datatable';
@@ -63,6 +64,7 @@ app.component('ConfirmDialog', ConfirmDialog);
 app.component('Toast', Toast);
 app.component('DataTable', DataTable);
 app.component('Column', Column);
+app.component('ContextMenu', ContextMenu);
 
 app.directive('tooltip', Tooltip);
 app.directive('badge', BadgeDirective);
