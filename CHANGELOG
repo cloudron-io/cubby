@@ -3,3 +3,9 @@
 
 [0.1.1]
 * Fix various sharing things
+
+[0.1.2]
+* Fix multiselect
+* Add initial context menu
+* Update share info on change
+
