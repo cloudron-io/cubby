@@ -6,6 +6,7 @@ var constants = require('./backend/constants.js'),
     database = require('./backend/database.js'),
     ldap = require('./backend/ldap.js'),
     config = require('./backend/config.js'),
+    diskusage = require('./backend/diskusage.js'),
     server = require('./backend/server.js');
 
 function exit(error) {
@@ -23,6 +24,12 @@ function sync() {
 
 database.init();
 config.init(process.env.CLOUDRON ? '/app/data/config.json' : 'config.json');
+
+// we shall crash if this fails
+diskusage.calculate();
+
+// currently just update this every hour to put less strain on the disk
+setInterval(diskusage.calculate, 1000 * 60 * 60);
 
 sync();
 
