@@ -21,6 +21,7 @@ var assert = require('assert'),
     mime = require('./mime.js'),
     Entry = require('./entry.js'),
     shares = require('./shares.js'),
+    diskusage = require('./diskusage.js'),
     MainError = require('./mainerror.js');
 
 function getValidFullPath(username, filePath) {
@@ -128,6 +129,7 @@ async function getDirectory(username, fullFilePath, filePath, stats) {
         throw new MainError(MainError.FS_ERROR, error);
     }
 
+    // attach shares
     await async.each(files, async function (file) {
         let result;
         try {
@@ -140,11 +142,32 @@ async function getDirectory(username, fullFilePath, filePath, stats) {
         file.sharedWith = result || null;
     });
 
-    let result;
+    // attach diskusage
+    await async.each(files, async function (file) {
+        if (!file.isDirectory) return;
+
+        let result;
+        try {
+            result = await diskusage.getByUsernameAndDirectory(username, file.filePath);
+        } catch (error) {
+            // TODO not sure what to do here
+            console.error(error);
+        }
+
+        file.size = result;
+    });
+
+    let sharedWith;
     try {
-        result = await shares.getByOwnerAndFilepath(username, filePath);
+        sharedWith = await shares.getByOwnerAndFilepath(username, filePath);
     } catch (error) {
-        // TODO not sure what to do here
+        console.error(error);
+    }
+
+    let size = 0;
+    try {
+        size = await diskusage.getByUsernameAndDirectory(username, filePath);
+    } catch (error) {
         console.error(error);
     }
 
@@ -152,12 +175,12 @@ async function getDirectory(username, fullFilePath, filePath, stats) {
         fullFilePath: fullFilePath,
         fileName: path.basename(filePath),
         filePath: filePath,
-        size: stats.size,
+        size: size,
         mtime: stats.mtime,
         isDirectory: true,
         isFile: false,
         owner: username,
-        sharedWith: result || [],
+        sharedWith: sharedWith || [],
         mimeType: 'inode/directory',
         files: files
     });
@@ -179,11 +202,23 @@ async function getFile(username, fullFilePath, filePath, stats) {
         console.error(error);
     }
 
+    let size = 0;
+
+    if (stats.isDirectory()) {
+        try {
+            size = await diskusage.getByUsernameAndDirectory(username, filePath);
+        } catch (error) {
+            console.error(error);
+        }
+    } else {
+        size = stats.size;
+    }
+
     return new Entry({
         fullFilePath: fullFilePath,
         fileName: path.basename(fullFilePath),
         filePath: filePath,
-        size: stats.size,
+        size: size,
         mtime: stats.mtime,
         isDirectory: stats.isDirectory(),
         isFile: stats.isFile(),

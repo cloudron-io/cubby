@@ -32,6 +32,10 @@ async function getByUsernameAndDirectory(username, filepath) {
     assert.strictEqual(typeof filepath, 'string');
 
     debug(`getByUsernameAndDirectory: username:${username} directory:${filepath}`);
+
+    if (!gCache[username]) await calculateByUsername(username);
+
+    return gCache[username].directories[filepath] || 0;
 }
 
 async function calculateByUsername(username) {
@@ -52,14 +56,14 @@ async function calculateByUsername(username) {
 
             // we treat the empty folder size as 0 for display purpose
             const size = parseInt(parts[0]) === 4096 ? 0 : parseInt(parts[0]);
+            const filepath = parts[1].slice(path.join(constants.DATA_ROOT, username).length);
 
-            if (parts[1] === '') gCache[username].used = size;
-            else gCache[username].directories[parts[1]] = size;
+            if (filepath === '') gCache[username].used = size;
+            else gCache[username].directories[filepath] = size;
         });
     } catch (error) {
         console.error(`Failed to calculate usage for ${username}. Falling back to 0.`, error);
     }
-
 }
 
 async function calculate() {
