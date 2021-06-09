@@ -13,8 +13,10 @@ var assert = require('assert'),
     constants = require('./constants.js'),
     users = require('./users.js'),
     path = require('path'),
+    df = require('@sindresorhus/df'),
     MainError = require('./mainerror.js');
 
+// { username: { size: int, directories: { filepath: size }}
 const gCache = {};
 
 async function getByUsername(username) {
@@ -24,7 +26,14 @@ async function getByUsername(username) {
 
     if (!gCache[username]) await calculateByUsername(username);
 
+    // TODO use the quota if any set
+    const result = await df.file(constants.DATA_ROOT);
 
+    return {
+        used: gCache[username].size,
+        available: result.available,
+        size: result.size,
+    };
 }
 
 async function getByUsernameAndDirectory(username, filepath) {

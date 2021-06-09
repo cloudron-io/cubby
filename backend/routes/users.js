@@ -13,6 +13,7 @@ var assert = require('assert'),
     users = require('../users.js'),
     tokens = require('../tokens.js'),
     MainError = require('../mainerror.js'),
+    diskusage = require('../diskusage.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     webdavErrors = require('webdav-server').v2.Errors;
@@ -46,6 +47,10 @@ async function tokenAuth(req, res, next) {
 
 async function profile(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
+
+    const result = await diskusage.getByUsername(req.user.username);
+
+    req.user.diskusage = result;
 
     // TODO remove private fields
     next(new HttpSuccess(200, req.user));
