@@ -16,14 +16,12 @@
       <Button icon="pi pi-clock" class="" label="Recent" @click="showAllRecent"/>
       <Button icon="pi pi-share-alt" class="" label="Shared" @click="showAllShares"/>
 
-      <!-- <div style="flex-grow: 1">&nbsp;</div>
+      <div style="flex-grow: 1">&nbsp;</div>
 
       <div class="p-fluid">
-        <span class="p-input-icon-left">
-          <i class="pi pi-search" />
-          <InputText type="text" v-model="search" placeholder="Search" />
-        </span>
-      </div> -->
+        <span><b>{{ prettyFileSize(profile.diskusage.used) }}</b> of <b>{{ prettyFileSize(profile.diskusage.available) }}</b> used</span>
+        <ProgressBar class="diskusage" :value="(profile.diskusage.used / profile.diskusage.size) * 100" :showValue="false"/>
+      </div>
     </div>
     <div class="content">
       <MainToolbar :currentPath="currentPath" :displayName="profile.displayName" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @new-folder="onNewFolder"/>
@@ -132,7 +130,7 @@
 <script>
 
 import superagent from 'superagent';
-import { encode, getPreviewUrl, getExtension, sanitize, getDirectLink } from './utils.js';
+import { encode, getPreviewUrl, getExtension, sanitize, getDirectLink, prettyFileSize } from './utils.js';
 
 export default {
     name: 'Index',
@@ -146,7 +144,12 @@ export default {
             profile: {
                 username: '',
                 displayName: '',
-                email: ''
+                email: '',
+                diskusage: {
+                    used: 0,
+                    size: 0,
+                    available: 0
+                }
             },
             viewers: [],
             uploadStatus: {
@@ -184,6 +187,7 @@ export default {
         };
     },
     methods: {
+        prettyFileSize,
         showAllFiles() {
             window.location.hash = 'files/';
         },
@@ -192,6 +196,11 @@ export default {
             this.profile.username = '';
             this.profile.email = '';
             this.profile.displayName = '';
+            this.profile.diskusage = {
+                used: 0,
+                size: 0,
+                available: 0
+            };
 
             delete localStorage.accessToken;
         },
@@ -201,6 +210,7 @@ export default {
             this.profile.username = profile.username;
             this.profile.displayName = profile.displayName;
             this.profile.email = profile.email;
+            this.profile.diskusage = profile.diskusage;
 
             // stash locally
             localStorage.accessToken = accessToken;
@@ -649,6 +659,7 @@ export default {
             that.profile.username = result.body.username;
             that.profile.email = result.body.email;
             that.profile.displayName = result.body.displayName;
+            that.profile.diskusage = result.body.diskusage;
 
             that.ready = true;
 
@@ -679,7 +690,7 @@ label {
 .sidebar {
     display: flex;
     height: 100%;
-    width: 200px;
+    width: 250px;
     background-color: #2196f3;
     color: white;
     padding: 10px;
@@ -718,6 +729,15 @@ label {
 </style>
 
 <style>
+
+.diskusage.p-progressbar {
+    height: 10px;
+    margin-top: 5px;
+}
+
+.diskusage.p-progressbar .p-progressbar-value {
+    background: #fecb3e !important;
+}
 
 .share-readonly-column .p-column-title {
     text-align: center;
