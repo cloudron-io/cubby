@@ -16,7 +16,7 @@ var assert = require('assert'),
     df = require('@sindresorhus/df'),
     MainError = require('./mainerror.js');
 
-// { username: { size: int, directories: { filepath: size }}
+// { username: { used: int, directories: { filepath: size }}
 const gCache = {};
 
 async function getByUsername(username) {
@@ -30,7 +30,7 @@ async function getByUsername(username) {
     const result = await df.file(constants.DATA_ROOT);
 
     return {
-        used: gCache[username].size,
+        used: gCache[username].used,
         available: result.available,
         size: result.size,
     };
