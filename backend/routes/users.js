@@ -29,6 +29,8 @@ async function login(req, res, next) {
 
     const accessToken = await tokens.add(user.username);
 
+    user.diskusage = await diskusage.getByUsername(user.username);
+
     next(new HttpSuccess(200, { user, accessToken }));
 }
 
