@@ -7,8 +7,8 @@
 
         <template #right>
             <!-- file action buttons -->
-            <Button v-show="selectedEntries.length > 1" icon="pi pi-download" class="p-ml-2 p-button-outlined p-button-sm" v-tooltip="Download" @click="onDownload"/>
-            <Button v-show="selectedEntries.length > 1" icon="pi pi-trash" class="p-ml-2 p-mr-6 p-button-outlined p-button-sm p-button-danger" v-tooltip="Delete" @click="onDelete"/>
+            <Button v-show="selectedEntries.length > 1" icon="pi pi-download" class="p-ml-2 p-button-outlined p-button-sm" v-tooltip="'Download'" @click="onDownload"/>
+            <Button v-show="selectedEntries.length > 1" icon="pi pi-trash" class="p-ml-2 p-mr-6 p-button-outlined p-button-sm p-button-danger" v-tooltip="'Delete'" @click="onDelete"/>
 
             <!-- Always visible -->
             <Button icon="pi pi-upload" class="p-ml-2 p-button-sm" label="Upload" @click="onToggleMenuUpload"/>
