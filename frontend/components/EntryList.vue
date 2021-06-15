@@ -25,13 +25,14 @@
         <div class="td p-d-none p-d-md-flex" style="max-width: 150px;"><span v-tooltip.top="prettyLongDate(entry.mtime)">{{ prettyDate(entry.mtime) }}</span></div>
         <div class="td p-d-none p-d-md-flex" style="max-width: 100px;">{{ prettyFileSize(entry.size) }}</div>
         <div class="td" style="min-width: 180px; justify-content: flex-end;">
-          <a :href="getDirectLink(entry)" target="_blank" @click.stop v-show="!entry.rename && entry.isFile">
-            <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-external-link" v-tooltip.top="'Open'" v-show="!entry.rename"/>
+          <a :href="getDirectLink(entry)" target="_blank" @click.stop>
+            <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-external-link" v-tooltip.top="'Open'" v-show="!entry.rename && entry.isFile && selectedEntries.length === 1" />
           </a>
-          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-download" v-tooltip.top="'Download'" v-show="!entry.rename && entry.isFile" @click.stop="onDownload(entry)"/>
-          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-copy" v-tooltip.top="'Copy Link'" v-show="!entry.rename && entry.isFile" @click.stop="onCopyLink(entry)"/>
-          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" :class="{ 'action-buttons-visible': entry.sharedWith.length !== 0 }" icon="pi pi-share-alt" v-tooltip.top="'Share'" v-show="entry.sharedWith.length || (shareable && !entry.rename)" @click.stop="onShare(entry)"/>
-          <Button class="action-buttons p-button-sm p-button-rounded p-button-text p-button-danger" icon="pi pi-trash" v-tooltip.top="'Delete'" v-show="editable && !entry.rename" @click.stop="onDelete(entry)"/>
+          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-download" v-tooltip.top="'Download'" v-show="!entry.rename && entry.isFile && selectedEntries.length === 1" @click.stop="onDownload(entry)"/>
+          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-copy" v-tooltip.top="'Copy Link'" v-show="!entry.rename && entry.isFile && selectedEntries.length === 1" @click.stop="onCopyLink(entry)"/>
+          <Button class="action-buttons p-button-sm p-button-rounded p-button-text p-button-danger" icon="pi pi-trash" v-tooltip.top="'Delete'" v-show="editable && !entry.rename && selectedEntries.length === 1" @click.stop="onDelete(entry)"/>
+
+          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" :class="{ 'action-buttons-visible': entry.sharedWith.length !== 0 }" icon="pi pi-share-alt" v-tooltip.top="'Share'" v-show="entry.sharedWith.length || (shareable && !entry.rename && selectedEntries.length === 1)" @click.stop="onShare(entry)"/>
         </div>
       </div>
     </div>
@@ -200,19 +201,7 @@ export default {
             this.$emit('entry-renamed', entry, entry.filePathNew);
         },
         onDelete: function (entry) {
-            var that = this;
-
-            this.$confirm.require({
-                target: event.target,
-                header: 'Delete Confirmation',
-                message: 'Really delete ' + (entry.isDirectory ? 'folder ' : '') + entry.fileName,
-                icon: 'pi pi-exclamation-triangle',
-                acceptClass: 'p-button-danger',
-                accept: () => {
-                    that.$emit('entry-delete', entry);
-                },
-                reject: () => {}
-            });
+            this.$emit('entry-delete', entry);
         },
         onShare: function (entry) {
             this.$emit('entry-shared', entry);

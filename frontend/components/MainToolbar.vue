@@ -6,9 +6,16 @@
         </template>
 
         <template #right>
+            <!-- file action buttons -->
+            <Button v-show="selectedEntries.length > 1" icon="pi pi-download" class="p-ml-2 p-button-outlined p-button-sm" v-tooltip="Download" @click="onDownload"/>
+            <Button v-show="selectedEntries.length > 1" icon="pi pi-copy" class="p-ml-2 p-button-outlined p-button-sm" v-tooltip="Copy" @click="onCopy"/>
+            <Button v-show="selectedEntries.length > 1" icon="pi pi-share-alt" class="p-ml-2 p-button-outlined p-button-sm" v-tooltip="Share" @click="onDShare"/>
+            <Button v-show="selectedEntries.length > 1" icon="pi pi-trash" class="p-ml-2 p-mr-6 p-button-outlined p-button-sm p-button-danger" v-tooltip="Delete" @click="onDelete"/>
+
+            <!-- Always visible -->
             <Button icon="pi pi-upload" class="p-ml-2 p-button-sm" label="Upload" @click="onToggleMenuUpload"/>
             <Button icon="pi pi-plus" class="p-ml-2 p-button-sm" label="New" @click="onToggleMenuNew"/>
-            <Button icon="pi pi-user" class="p-ml-6 p-button-sm p-button-outlined" @click="onToggleMenuMain"/>
+            <Button icon="pi pi-user" class="p-ml-6 p-button-sm p-button-secondary" @click="onToggleMenuMain"/>
 
             <Menu ref="menuUpload" :model="uploadMenu" :popup="true"/>
             <Menu ref="menuNew" :model="newMenu" :popup="true"/>
@@ -34,7 +41,7 @@ import { sanitize } from '../utils.js';
 
 export default {
     name: 'MainToolbar',
-    emits: [ 'logout', 'upload-file', 'upload-folder', 'new-file', 'new-folder' ],
+    emits: [ 'logout', 'upload-file', 'upload-folder', 'new-file', 'new-folder', 'download', 'share', 'copy', 'delete' ],
     props: {
         currentPath: {
             type: String,
@@ -42,6 +49,10 @@ export default {
         },
         displayName: {
             type: String
+        },
+        selectedEntries: {
+            type: Array,
+            default: function () { return  []; }
         }
     },
     watch: {
@@ -131,6 +142,18 @@ export default {
         },
         onNewFolder() {
             this.$emit('new-folder');
+        },
+        onDownload() {
+            this.$emit('download');
+        },
+        onCopy() {
+            this.$emit('copy');
+        },
+        onDelete() {
+            this.$emit('delete');
+        },
+        onShare() {
+            this.$emit('share');
         }
     },
     mounted() {

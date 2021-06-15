@@ -24,7 +24,7 @@
       </div>
     </div>
     <div class="content">
-      <MainToolbar :currentPath="currentPath" :displayName="profile.displayName" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @new-folder="onNewFolder"/>
+      <MainToolbar :currentPath="currentPath" :selectedEntries="selectedEntries" :displayName="profile.displayName" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @new-folder="onNewFolder" @delete="onDelete"/>
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
@@ -162,6 +162,7 @@ export default {
             entry: {
                 files: []
             },
+            selectedEntries: [],
             currentPath: '/',
             activeEntry: {},
             sideBarVisible: true,
@@ -275,6 +276,8 @@ export default {
             this.$refs.uploadFolder.click();
         },
         onSelectionChanged(selectedEntries) {
+            this.selectedEntries = selectedEntries;
+
             if (selectedEntries.length) this.activeEntry = selectedEntries[0];
             else this.activeEntry = this.entry; // reset to current folder/view
         },
@@ -359,14 +362,26 @@ export default {
         onDelete(entry) {
             var that = this;
 
-            var filePath = sanitize(that.currentPath + '/' + entry.fileName);
+            if (!entry) entry = this.selectedEntries[0];
 
-            superagent.del('/api/v1/files').query({ path: filePath, access_token: localStorage.accessToken }).end(function (error, result) {
-                if (result && result.statusCode === 401) return that.logout();
-                if (result && result.statusCode !== 200) return console.error('Error deleting file or folder');
-                if (error) return console.error(error.message);
+            this.$confirm.require({
+                target: event.target,
+                header: 'Delete Confirmation',
+                message: 'Really delete ' + (entry.isDirectory ? 'folder ' : '') + entry.fileName,
+                icon: 'pi pi-exclamation-triangle',
+                acceptClass: 'p-button-danger',
+                accept: () => {
+                    var filePath = sanitize(that.currentPath + '/' + entry.fileName);
 
-                that.loadPath();
+                    superagent.del('/api/v1/files').query({ path: filePath, access_token: localStorage.accessToken }).end(function (error, result) {
+                        if (result && result.statusCode === 401) return that.logout();
+                        if (result && result.statusCode !== 200) return console.error('Error deleting file or folder');
+                        if (error) return console.error(error.message);
+
+                        that.loadPath();
+                    });
+                },
+                reject: () => {}
             });
         },
         onRename(entry, newFileName) {
