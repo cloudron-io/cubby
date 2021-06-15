@@ -9,3 +9,6 @@
 * Add initial context menu
 * Update share info on change
 
+[0.1.3]
+* Various multiselect fixes
+* Add initial drag-n-drop support
