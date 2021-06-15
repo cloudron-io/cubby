@@ -28,7 +28,7 @@
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
-          <EntryList :entries="entry.files" sort-folders-first="true" @entry-shared="onShare" @entry-renamed="onRename" @entry-activated="onOpen" @entry-delete="onDelete" @selection-changed="onSelectionChanged" :editable="!isShares()"/>
+          <EntryList :entries="entry.files" sort-folders-first="true" @entry-shared="onShare" @entry-renamed="onRename" @entry-activated="onOpen" @delete="onDelete" @selection-changed="onSelectionChanged" :editable="!isShares()"/>
         </div>
         <SideBar :entry="activeEntry" :visible="sideBarVisible"/>
       </div>
@@ -130,6 +130,7 @@
 <script>
 
 import superagent from 'superagent';
+import async from 'async';
 import { encode, getPreviewUrl, getExtension, sanitize, getDirectLink, prettyFileSize } from './utils.js';
 
 export default {
@@ -359,24 +360,31 @@ export default {
 
             this.uploadNext();
         },
-        onDelete(entry) {
+        onDelete(entries) {
             var that = this;
 
-            if (!entry) entry = this.selectedEntries[0];
+            if (!entries) entries = this.selectedEntries;
 
             this.$confirm.require({
                 target: event.target,
                 header: 'Delete Confirmation',
-                message: 'Really delete ' + (entry.isDirectory ? 'folder ' : '') + entry.fileName,
+                message: 'Really delete',
                 icon: 'pi pi-exclamation-triangle',
                 acceptClass: 'p-button-danger',
                 accept: () => {
-                    var filePath = sanitize(that.currentPath + '/' + entry.fileName);
+                    async.eachSeries(entries, function (entry, callback) {
+                        var filePath = sanitize(that.currentPath + '/' + entry.fileName);
 
-                    superagent.del('/api/v1/files').query({ path: filePath, access_token: localStorage.accessToken }).end(function (error, result) {
-                        if (result && result.statusCode === 401) return that.logout();
-                        if (result && result.statusCode !== 200) return console.error('Error deleting file or folder');
-                        if (error) return console.error(error.message);
+                        superagent.del('/api/v1/files').query({ path: filePath, access_token: localStorage.accessToken }).end(function (error, result) {
+                            if (result && result.statusCode === 401) return that.logout();
+                            if (result && result.statusCode !== 200) console.error('Error deleting entry.', entry);
+                            if (error) console.error(error.message);
+
+                            // we currently don't fail on first failure
+                            callback();
+                        });
+                    }, function (error) {
+                        if (error) console.error('Failed to delete entries.', entries, error);
 
                         that.loadPath();
                     });

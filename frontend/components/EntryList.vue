@@ -46,7 +46,7 @@ import { prettyDate, prettyLongDate, prettyFileSize, download, copyToClipboard, 
 
 export default {
     name: 'EntryList',
-    emits: [ 'selection-changed', 'entry-activated', 'entry-renamed', 'entry-delete', 'dropped', 'entry-shared' ],
+    emits: [ 'selection-changed', 'entry-activated', 'entry-renamed', 'delete', 'dropped', 'entry-shared' ],
     data() {
         return {
             active: {},
@@ -201,7 +201,7 @@ export default {
             this.$emit('entry-renamed', entry, entry.filePathNew);
         },
         onDelete: function (entry) {
-            this.$emit('entry-delete', entry);
+            this.$emit('delete', entry ? [ entry ] : this.selectedEntries);
         },
         onShare: function (entry) {
             this.$emit('entry-shared', entry);
