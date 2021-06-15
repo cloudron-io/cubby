@@ -8,8 +8,6 @@
         <template #right>
             <!-- file action buttons -->
             <Button v-show="selectedEntries.length > 1" icon="pi pi-download" class="p-ml-2 p-button-outlined p-button-sm" v-tooltip="Download" @click="onDownload"/>
-            <Button v-show="selectedEntries.length > 1" icon="pi pi-copy" class="p-ml-2 p-button-outlined p-button-sm" v-tooltip="Copy" @click="onCopy"/>
-            <Button v-show="selectedEntries.length > 1" icon="pi pi-share-alt" class="p-ml-2 p-button-outlined p-button-sm" v-tooltip="Share" @click="onDShare"/>
             <Button v-show="selectedEntries.length > 1" icon="pi pi-trash" class="p-ml-2 p-mr-6 p-button-outlined p-button-sm p-button-danger" v-tooltip="Delete" @click="onDelete"/>
 
             <!-- Always visible -->
@@ -41,7 +39,7 @@ import { sanitize } from '../utils.js';
 
 export default {
     name: 'MainToolbar',
-    emits: [ 'logout', 'upload-file', 'upload-folder', 'new-file', 'new-folder', 'download', 'share', 'copy', 'delete' ],
+    emits: [ 'logout', 'upload-file', 'upload-folder', 'new-file', 'new-folder', 'download', 'delete' ],
     props: {
         currentPath: {
             type: String,
@@ -151,9 +149,6 @@ export default {
         },
         onDelete() {
             this.$emit('delete');
-        },
-        onShare() {
-            this.$emit('share');
         }
     },
     mounted() {

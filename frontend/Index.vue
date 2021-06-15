@@ -24,11 +24,17 @@
       </div>
     </div>
     <div class="content">
-      <MainToolbar :currentPath="currentPath" :selectedEntries="selectedEntries" :displayName="profile.displayName" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @new-folder="onNewFolder" @delete="onDelete"/>
+      <MainToolbar :currentPath="currentPath" :selectedEntries="selectedEntries" :displayName="profile.displayName" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @new-folder="onNewFolder" @delete="onDelete" @download="onDownload"/>
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
-          <EntryList :entries="entry.files" sort-folders-first="true" @entry-shared="onShare" @entry-renamed="onRename" @entry-activated="onOpen" @delete="onDelete" @selection-changed="onSelectionChanged" :editable="!isShares()"/>
+          <EntryList :entries="entry.files" sort-folders-first="true" :editable="!isShares()"
+            @entry-shared="onShare"
+            @entry-renamed="onRename"
+            @entry-activated="onOpen"
+            @delete="onDelete"
+            @download="onDownload"
+            @selection-changed="onSelectionChanged" />
         </div>
         <SideBar :entry="activeEntry" :visible="sideBarVisible"/>
       </div>
@@ -131,7 +137,7 @@
 
 import superagent from 'superagent';
 import async from 'async';
-import { encode, getPreviewUrl, getExtension, sanitize, getDirectLink, prettyFileSize } from './utils.js';
+import { encode, getPreviewUrl, getExtension, sanitize, download, getDirectLink, prettyFileSize } from './utils.js';
 
 export default {
     name: 'Index',
@@ -359,6 +365,12 @@ export default {
             });
 
             this.uploadNext();
+        },
+        onDownload(entries) {
+            if (!entries) entries = this.selectedEntries;
+
+            // TODO use zipping for multiple files
+            download(entries[0]);
         },
         onDelete(entries) {
             var that = this;

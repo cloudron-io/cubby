@@ -42,11 +42,11 @@
 <script>
 
 import { nextTick } from 'vue';
-import { prettyDate, prettyLongDate, prettyFileSize, download, copyToClipboard, getDirectLink, clearSelection } from '../utils.js';
+import { prettyDate, prettyLongDate, prettyFileSize, copyToClipboard, getDirectLink, clearSelection } from '../utils.js';
 
 export default {
     name: 'EntryList',
-    emits: [ 'selection-changed', 'entry-activated', 'entry-renamed', 'delete', 'dropped', 'entry-shared' ],
+    emits: [ 'selection-changed', 'entry-activated', 'entry-renamed', 'delete', 'dropped', 'entry-shared', 'download' ],
     data() {
         return {
             active: {},
@@ -165,7 +165,7 @@ export default {
             if (select) this.onEntrySelect(entry);
         },
         onDownload: function (entry) {
-            download(entry);
+            this.$emit('download', entry ? [ entry ] : this.selectedEntries);
         },
         onCopyLink: function (entry) {
             copyToClipboard(getDirectLink(entry));

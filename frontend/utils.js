@@ -48,6 +48,7 @@ function decode(path) {
     return path.split('/').map(decodeURIComponent).join('/');
 }
 
+// TODO create share links instead of using access token
 function getDirectLink(entry) {
     if (entry.share) {
         return window.location.origin + '/api/v1/shares/' + entry.share.id + '?type=raw&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(entry.filePath)
