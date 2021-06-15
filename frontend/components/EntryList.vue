@@ -224,8 +224,8 @@ export default {
 
             if (!event.dataTransfer.items[0]) return;
 
-            if (entry && entry.isDirectory) this.$emit('dropped', event, entry);
-            else this.$emit('dropped', event, null);
+            if (entry && entry.isDirectory) this.$emit('dropped', event.dataTransfer.items, entry);
+            else this.$emit('dropped', event.dataTransfer.items, null);
         }
     },
     mounted() {

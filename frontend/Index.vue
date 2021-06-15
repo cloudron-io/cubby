@@ -34,7 +34,9 @@
             @entry-activated="onOpen"
             @delete="onDelete"
             @download="onDownload"
-            @selection-changed="onSelectionChanged" />
+            @selection-changed="onSelectionChanged"
+            @dropped="onDrop"
+          />
         </div>
         <SideBar :entry="activeEntry" :visible="sideBarVisible"/>
       </div>
@@ -314,6 +316,8 @@ export default {
                 that.uploadStatus.done = 0;
                 that.uploadStatus.percentDone = 0;
 
+                that.loadPath();
+
                 return;
             }
 
@@ -343,8 +347,7 @@ export default {
                 if (result && result.statusCode !== 200) console.error('Error uploading file:', result.statusCode);
                 if (error) console.error('Error uploading file:', error);
 
-                // TODO maybe smarter refresh
-                that.loadPath();
+                // TODO ideally show new file immediately here instead of only after the upload
 
                 that.uploadNext();
             });
@@ -371,6 +374,17 @@ export default {
 
             // TODO use zipping for multiple files
             download(entries[0]);
+        },
+        onDrop(items, targetEntry) {
+            const files = [];
+
+            // convert drop items to files
+            items.forEach(function (item) { files.push(item.getAsFile()); });
+
+            this.uploadFiles(files, targetEntry ? targetEntry.filePath : null);
+
+            // also navigate there
+            if (targetEntry) this.loadPath(targetEntry.filePath);
         },
         onDelete(entries) {
             var that = this;
