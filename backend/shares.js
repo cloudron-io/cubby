@@ -52,13 +52,13 @@ async function create({ user, filePath, receiverUsername, receiverEmail, readonl
     assert.strictEqual(typeof filePath, 'string');
     assert(typeof receiverUsername === 'string' || !receiverUsername);
     assert(typeof receiverEmail === 'string' || !receiverEmail);
-    assert((receiverUsername && !receiverEmail) || (!receiverUsername && receiverEmail));
     assert(typeof readonly === 'undefined' || typeof readonly === 'boolean');
+    assert.strictEqual(typeof expiresAt, 'number');
 
     // ensure we have a bool with false as fallback
     readonly = !!readonly;
 
-    debug(`create: ${user.username} ${filePath} receiver:${receiverUsername || receiverEmail} readonly:${readonly} expiresAt:${expiresAt}`);
+    debug(`create: ${user.username} ${filePath} receiver:${receiverUsername || receiverEmail || 'link'} readonly:${readonly} expiresAt:${expiresAt}`);
 
     const fullFilePath = files.getValidFullPath(user.username, filePath);
     if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);

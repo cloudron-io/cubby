@@ -5,6 +5,7 @@ exports = module.exports = {
 
     login,
     tokenAuth,
+    optionalTokenAuth,
     profile,
     list
 };
@@ -36,6 +37,24 @@ async function login(req, res, next) {
 
 async function tokenAuth(req, res, next) {
     var accessToken = req.query.access_token || req.body.accessToken;
+
+    try {
+        req.user = await users.getByAccessToken(accessToken);
+        if (!req.user) return next(new HttpError(401, 'Invalid Access Token'));
+    } catch (error) {
+        return next(new HttpError(500, error));
+    }
+
+    next();
+}
+
+async function optionalTokenAuth(req, res, next) {
+    var accessToken = req.query.access_token || req.body.accessToken;
+
+    if (!accessToken) {
+        req.user = null;
+        return next();
+    }
 
     try {
         req.user = await users.getByAccessToken(accessToken);
