@@ -57,6 +57,10 @@ function getDirectLink(entry) {
     }
 }
 
+function getShareLink(shareId) {
+    return window.location.origin + '/api/v1/shares/' + shareId + '?type=raw';
+}
+
 function download(entry) {
     if (entry.isDirectory) return;
 
@@ -105,6 +109,7 @@ function clearSelection() {
 
 export {
     getDirectLink,
+    getShareLink,
     getFileTypeGroup,
     prettyDate,
     prettyLongDate,
