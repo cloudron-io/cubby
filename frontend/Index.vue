@@ -152,7 +152,7 @@
 
 import superagent from 'superagent';
 import async from 'async';
-import { encode, getPreviewUrl, getExtension, sanitize, download, getDirectLink, prettyFileSize } from './utils.js';
+import { encode, getPreviewUrl, getExtension, getShareLink, copyToClipboard, sanitize, download, getDirectLink, prettyFileSize } from './utils.js';
 
 export default {
     name: 'Index',
@@ -526,15 +526,19 @@ export default {
             var that = this;
 
             var path = this.shareDialog.entry.filePath;
-            var readonly = true;
-            var receiver_username = this.shareDialog.receiverUsername;
+            var readonly = true; // always readonly for now
+            var expires_at = this.shareDialog.shareLink.expires ? this.shareDialog.shareLink.expiresAt : 0;
 
-            superagent.post('/api/v1/shares').query({ path, readonly, receiver_username, access_token: localStorage.accessToken }).end(function (error, result) {
+            superagent.post('/api/v1/shares').query({ path, readonly, expires_at, access_token: localStorage.accessToken }).end(function (error, result) {
                 if (result && result.statusCode === 401) return that.onLogout();
-                if (result && result.statusCode !== 200) return that.shareDialog.error = 'Error creating share: ' + result.statusCode;
+                if (result && result.statusCode !== 200) return that.shareDialog.error = 'Error creating link share: ' + result.statusCode;
                 if (error) return console.error(error.message);
 
+                copyToClipboard(getShareLink(result.body.shareId));
 
+                that.shareDialog.visible = false;
+
+                that.$toast.add({ severity:'success', summary: 'Share link copied to clipboard', life: 2000 });
             });
         },
         onCreateShare() {
