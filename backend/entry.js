@@ -32,7 +32,7 @@ function Entry({ fullFilePath, filePath, fileName, owner, size = 0, mtime = new 
     this.share = share;
 }
 
-Entry.prototype.withoutPrivate = function (username) {
+Entry.prototype.withoutPrivate = function () {
     return {
         fileName: this.fileName,
         filePath: this.filePath,
@@ -42,7 +42,7 @@ Entry.prototype.withoutPrivate = function (username) {
         isDirectory: this.isDirectory,
         isFile: this.isFile,
         mimeType: this.mimeType,
-        files: this.files.map(function (f) { return f.withoutPrivate(username); }),
+        files: this.files.map(function (f) { return f.withoutPrivate(); }),
         share: this.share,
         sharedWith: this.sharedWith || []
     };

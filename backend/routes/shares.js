@@ -64,7 +64,7 @@ async function list(req, res, next) {
         files: sharedFiles
     });
 
-    next(new HttpSuccess(200, entry.withoutPrivate(req.user.username)));
+    next(new HttpSuccess(200, entry.withoutPrivate()));
 }
 
 async function get(req, res, next) {
@@ -111,7 +111,7 @@ async function get(req, res, next) {
     // those files are always part of this share
     file.files.forEach(function (f) { f.share = share; });
 
-    next(new HttpSuccess(200, file.withoutPrivate(req.user.username)));
+    next(new HttpSuccess(200, file.withoutPrivate()));
 }
 
 // If a share for the receiver and filepath already exists, just reuse that
