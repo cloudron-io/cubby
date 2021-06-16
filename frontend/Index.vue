@@ -80,7 +80,7 @@
   </Dialog>
 
   <!-- Share Dialog -->
-  <Dialog :header="'Share ' + shareDialog.entry.fileName" v-model:visible="shareDialog.visible" :dismissableMask="true" :closable="true" :style="{width: '500px'}" :modal="true">
+  <Dialog :header="'Share ' + shareDialog.entry.fileName" v-model:visible="shareDialog.visible" :dismissableMask="true" :closable="true" :style="{width: '550px'}" :modal="true">
     <form @submit="onCreateShare" @submit.prevent>
       <div class="p-fluid">
         <div class="p-field">
@@ -96,10 +96,23 @@
           </div>
         </div>
         <div class="p-col-4">
-          <Button label="Create share" icon="pi pi-check" class="p-button-text p-button-success" @click="onCreateShare" :disabled="!shareDialog.receiverUsername"/>
+          <Button label="Create share" icon="pi pi-check" class="p-button p-button-success" @click="onCreateShare" :disabled="!shareDialog.receiverUsername"/>
         </div>
       </div>
     </form>
+
+    <hr/>
+    <h3>Share Link</h3>
+    <div class="p-formgroup-inline">
+      <div class="p-field-checkbox">
+        <Checkbox id="expireShareLinkAt" v-model="shareDialog.shareLink.expire" :binary="true" />
+        <label for="expireShareLinkAt">Expire At</label>
+      </div>
+      <div class="p-field">
+        <Calendar v-model="shareDialog.shareLink.expiresAt" :minDate="new Date()" :disabled="!shareDialog.shareLink.expire"/>
+      </div>
+      <Button label="Create and Copy Link" icon="pi pi-link" class="p-button p-button-success" @click="onCreateShareLink"/>
+    </div>
 
     <hr/>
     <h3>Shared with</h3>
@@ -192,7 +205,11 @@ export default {
                 readonly: false,
                 users: [],
                 sharedWith: [],
-                entry: {}
+                entry: {},
+                shareLink: {
+                    expire: false,
+                    expiresAt: 0
+                }
             }
         };
     },
@@ -482,6 +499,11 @@ export default {
             that.shareDialog.receiverUsername = '';
             that.shareDialog.readonly = false;
             that.shareDialog.entry = entry;
+            that.shareDialog.shareLink.expires = false;
+            that.shareDialog.shareLink.expiresAt = new Date();
+
+            // start with tomorrow
+            that.shareDialog.shareLink.expiresAt.setDate(that.shareDialog.shareLink.expiresAt.getDate() + 1);
 
             superagent.get('/api/v1/users').query({ access_token: that.accessToken }).end(function (error, result) {
                 if (error) return console.error('Failed to get user list.', error);
@@ -498,6 +520,21 @@ export default {
                 });
 
                 that.shareDialog.visible = true;
+            });
+        },
+        onCreateShareLink() {
+            var that = this;
+
+            var path = this.shareDialog.entry.filePath;
+            var readonly = true;
+            var receiver_username = this.shareDialog.receiverUsername;
+
+            superagent.post('/api/v1/shares').query({ path, readonly, receiver_username, access_token: localStorage.accessToken }).end(function (error, result) {
+                if (result && result.statusCode === 401) return that.onLogout();
+                if (result && result.statusCode !== 200) return that.shareDialog.error = 'Error creating share: ' + result.statusCode;
+                if (error) return console.error(error.message);
+
+
             });
         },
         onCreateShare() {

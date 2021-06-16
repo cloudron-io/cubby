@@ -21,6 +21,7 @@ import ToastService from 'primevue/toastservice';
 import Toast from 'primevue/toast';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import Calendar from 'primevue/calendar';
 import BadgeDirective from 'primevue/badgedirective';
 
 import 'primevue/resources/themes/saga-blue/theme.css';
@@ -51,6 +52,7 @@ app.use(ToastService);
 app.component('Dialog', Dialog);
 app.component('Dropdown', Dropdown);
 app.component('Button', Button);
+app.component('Calendar', Calendar);
 app.component('RadioButton', RadioButton);
 app.component('InputText', InputText);
 app.component('Password', Password);
