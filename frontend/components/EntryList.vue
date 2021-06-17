@@ -26,10 +26,10 @@
         <div class="td p-d-none p-d-md-flex" style="max-width: 100px;">{{ prettyFileSize(entry.size) }}</div>
         <div class="td" style="min-width: 180px; justify-content: flex-end;">
           <a :href="getDirectLink(entry)" target="_blank" @click.stop>
-            <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-external-link" v-tooltip.top="'Open'" v-show="!entry.rename && entry.isFile && selectedEntries.length === 1" />
+            <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-external-link" v-tooltip.top="'Open'" v-show="!entry.rename && entry.isFile && selectedEntries.length <= 1" />
           </a>
-          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-download" v-tooltip.top="'Download'" v-show="!entry.rename && entry.isFile && selectedEntries.length === 1" @click.stop="onDownload(entry)"/>
-          <Button class="action-buttons p-button-sm p-button-rounded p-button-text p-button-danger" icon="pi pi-trash" v-tooltip.top="'Delete'" v-show="editable && !entry.rename && selectedEntries.length === 1" @click.stop="onDelete(entry)"/>
+          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-download" v-tooltip.top="'Download'" v-show="!entry.rename && entry.isFile && selectedEntries.length <= 1" @click.stop="onDownload(entry)"/>
+          <Button class="action-buttons p-button-sm p-button-rounded p-button-text p-button-danger" icon="pi pi-trash" v-tooltip.top="'Delete'" v-show="editable && !entry.rename && selectedEntries.length <= 1" @click.stop="onDelete(entry)"/>
 
           <Button class="action-buttons p-button-sm p-button-rounded p-button-text" :class="{ 'action-buttons-visible': entry.sharedWith.length !== 0 }" icon="pi pi-share-alt" v-tooltip.top="'Share'" v-show="entry.sharedWith.length || (shareable && !entry.rename && selectedEntries.length === 1)" @click.stop="onShare(entry)"/>
         </div>
