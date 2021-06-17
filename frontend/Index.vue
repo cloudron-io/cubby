@@ -80,7 +80,20 @@
   </Dialog>
 
   <!-- Share Dialog -->
-  <Dialog :header="'Share ' + shareDialog.entry.fileName" v-model:visible="shareDialog.visible" :dismissableMask="true" :closable="true" :style="{width: '550px'}" :modal="true">
+  <Dialog :header="shareDialog.entry.fileName" v-model:visible="shareDialog.visible" :dismissableMask="true" :closable="true" :style="{width: '550px'}" :modal="true">
+    <h3 style="margin-top: 0;">Share Link</h3>
+    <div class="p-formgroup-inline">
+      <div class="p-field-checkbox">
+        <Checkbox id="expireShareLinkAt" v-model="shareDialog.shareLink.expire" :binary="true" />
+        <label for="expireShareLinkAt">Expire At</label>
+      </div>
+      <div class="p-field">
+        <Calendar v-model="shareDialog.shareLink.expiresAt" :minDate="new Date()" :disabled="!shareDialog.shareLink.expire"/>
+      </div>
+      <Button label="Create and Copy Link" icon="pi pi-link" class="p-button p-button-success" @click="onCreateShareLink"/>
+    </div>
+
+    <h3>Create Share</h3>
     <form @submit="onCreateShare" @submit.prevent>
       <div class="p-fluid">
         <div class="p-field">
@@ -101,20 +114,6 @@
       </div>
     </form>
 
-    <hr/>
-    <h3>Share Link</h3>
-    <div class="p-formgroup-inline">
-      <div class="p-field-checkbox">
-        <Checkbox id="expireShareLinkAt" v-model="shareDialog.shareLink.expire" :binary="true" />
-        <label for="expireShareLinkAt">Expire At</label>
-      </div>
-      <div class="p-field">
-        <Calendar v-model="shareDialog.shareLink.expiresAt" :minDate="new Date()" :disabled="!shareDialog.shareLink.expire"/>
-      </div>
-      <Button label="Create and Copy Link" icon="pi pi-link" class="p-button p-button-success" @click="onCreateShareLink"/>
-    </div>
-
-    <hr/>
     <h3>Shared with</h3>
     <DataTable :value="shareDialog.entry.sharedWith" class="p-datatable-sm" responsiveLayout="scroll">
       <template #empty>
