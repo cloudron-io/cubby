@@ -29,7 +29,6 @@
             <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-external-link" v-tooltip.top="'Open'" v-show="!entry.rename && entry.isFile && selectedEntries.length === 1" />
           </a>
           <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-download" v-tooltip.top="'Download'" v-show="!entry.rename && entry.isFile && selectedEntries.length === 1" @click.stop="onDownload(entry)"/>
-          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-copy" v-tooltip.top="'Copy Link'" v-show="!entry.rename && entry.isFile && selectedEntries.length === 1" @click.stop="onCopyLink(entry)"/>
           <Button class="action-buttons p-button-sm p-button-rounded p-button-text p-button-danger" icon="pi pi-trash" v-tooltip.top="'Delete'" v-show="editable && !entry.rename && selectedEntries.length === 1" @click.stop="onDelete(entry)"/>
 
           <Button class="action-buttons p-button-sm p-button-rounded p-button-text" :class="{ 'action-buttons-visible': entry.sharedWith.length !== 0 }" icon="pi pi-share-alt" v-tooltip.top="'Share'" v-show="entry.sharedWith.length || (shareable && !entry.rename && selectedEntries.length === 1)" @click.stop="onShare(entry)"/>
@@ -42,7 +41,7 @@
 <script>
 
 import { nextTick } from 'vue';
-import { prettyDate, prettyLongDate, prettyFileSize, copyToClipboard, getDirectLink, clearSelection } from '../utils.js';
+import { prettyDate, prettyLongDate, prettyFileSize, getDirectLink, clearSelection } from '../utils.js';
 
 export default {
     name: 'EntryList',
@@ -65,10 +64,6 @@ export default {
                 label:'Download',
                 icon:'pi pi-fw pi-download',
                 command: () => this.onDownload(this.selectedEntries[0])
-            }, {
-                label:'Copy Link',
-                icon:'pi pi-fw pi-copy',
-                command: () => this.onCopyLink(this.selectedEntries[0])
             }, {
                 separator:true
             }, {
@@ -166,10 +161,6 @@ export default {
         },
         onDownload: function (entry) {
             this.$emit('download', entry ? [ entry ] : this.selectedEntries);
-        },
-        onCopyLink: function (entry) {
-            copyToClipboard(getDirectLink(entry));
-            this.$toast.add({ severity:'success', summary: 'Link copied to Clipboard', life: 1500 });
         },
         onRename: function (entry) {
             if (entry.rename) {
