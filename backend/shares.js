@@ -44,7 +44,8 @@ async function list(username) {
 
     result.rows.forEach(postProcess);
 
-    return result.rows;
+    // only return non link shares
+    return result.rows.filter(function (share) { return share.receiverUsername || share.receiverEmail; });
 }
 
 async function create({ user, filePath, receiverUsername, receiverEmail, readonly, expiresAt = 0 }) {
@@ -96,7 +97,8 @@ async function getByOwnerAndFilepath(username, filepath) {
 
     result.rows.forEach(postProcess);
 
-    return result.rows;
+    // only return non link shares
+    return result.rows.filter(function (share) { return share.receiverUsername || share.receiverEmail; });
 }
 
 async function getByReceiverAndFilepath(receiver, filepath, exactMatch = false) {
@@ -115,7 +117,8 @@ async function getByReceiverAndFilepath(receiver, filepath, exactMatch = false) 
 
     result.rows.forEach(postProcess);
 
-    return result.rows;
+    // only return non link shares
+    return result.rows.filter(function (share) { return share.receiverUsername || share.receiverEmail; });
 }
 
 async function remove(shareId) {
