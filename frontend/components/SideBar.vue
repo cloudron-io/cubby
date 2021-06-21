@@ -32,8 +32,16 @@ export default {
         return {};
     },
     props: {
-        entry: Object,
+        selectedEntries: {
+            type: Array,
+            default: function () { return  []; }
+        },
         visible: Boolean
+    },
+    computed: {
+        entry() {
+            return this.selectedEntries[0] || {};
+        }
     },
     methods: {
         prettyLongDate,

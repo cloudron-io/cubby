@@ -38,7 +38,7 @@
             @dropped="onDrop"
           />
         </div>
-        <SideBar :entry="activeEntry" :visible="sideBarVisible"/>
+        <SideBar :selectedEntries="selectedEntries" :visible="sideBarVisible"/>
       </div>
       <div class="upload" v-show="uploadStatus.busy">
         <div style="margin-right: 10px;">Uploading {{ uploadStatus.queue.length+1 }} files ({{ Math.round(uploadStatus.done/1000/1000) }}MB / {{ Math.round(uploadStatus.size/1000/1000) }}MB)</div>
