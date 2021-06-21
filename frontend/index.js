@@ -1,4 +1,5 @@
 import { createApp } from 'vue';
+import { createRouter, createWebHistory } from 'vue-router';
 
 import PrimeVue from 'primevue/config';
 import Dialog from 'primevue/dialog';
@@ -44,6 +45,14 @@ import PdfViewer from './components/PdfViewer.vue';
 import OfficeViewer from './components/OfficeViewer.vue';
 
 const app = createApp(Index);
+
+// dummy router for breadcrumb component
+const router = createRouter({
+    history: createWebHistory(),
+    routes: []
+});
+
+app.use(router);
 
 app.use(PrimeVue);
 app.use(ConfirmationService);
