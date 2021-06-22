@@ -731,6 +731,14 @@ export default {
 
         window.addEventListener('hashchange', hashChange, false);
 
+        // warn the user if uploads are still in progress
+        window.addEventListener('beforeunload', function (event) {
+            if (!that.uploadStatus.busy) return;
+
+            event.preventDefault();
+            window.confirm('Uploads are still in progress. Please wait for them to finish.');
+        }, { capture: true });
+
         if (!localStorage.accessToken) {
             this.ready = true;
             return;
