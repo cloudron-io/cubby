@@ -31,7 +31,7 @@
           <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-download" v-tooltip.top="'Download'" v-show="!entry.rename && entry.isFile && selectedEntries.length <= 1" @click.stop="onDownload(entry)"/>
           <Button class="action-buttons p-button-sm p-button-rounded p-button-text p-button-danger" icon="pi pi-trash" v-tooltip.top="'Delete'" v-show="editable && !entry.rename && selectedEntries.length <= 1" @click.stop="onDelete(entry)"/>
 
-          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" :class="{ 'action-buttons-visible': entry.sharedWith.length !== 0 }" icon="pi pi-share-alt" v-tooltip.top="'Share'" v-show="entry.sharedWith.length || (shareable && !entry.rename && selectedEntries.length === 1)" @click.stop="onShare(entry)"/>
+          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" :class="{ 'action-buttons-visible': entry.sharedWith.length }" icon="pi pi-share-alt" v-tooltip.top="'Share'" v-show="entry.sharedWith.length || (shareable && !entry.rename && selectedEntries.length <= 1)" @click.stop="onShare(entry)"/>
         </div>
       </div>
     </div>
