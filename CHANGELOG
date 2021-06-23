@@ -12,3 +12,8 @@
 [0.1.3]
 * Various multiselect fixes
 * Add initial drag-n-drop support
+
+[0.1.4]
+* Add share link support
+* Ask user on upload conflict
+* Better multifile selection support for sidebar
