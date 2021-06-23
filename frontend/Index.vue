@@ -277,7 +277,7 @@ export default {
             this.newFolderDialog.folderName = '';
             this.newFolderDialog.visible = true;
         },
-        onSaveNewFileDialog: function () {
+        onSaveNewFileDialog() {
             var that = this;
 
             var path = sanitize(this.currentPath + '/' + this.newFileDialog.fileName);
@@ -297,7 +297,7 @@ export default {
                 that.newFileDialog.visible = false;
             });
         },
-        onSaveNewFolderDialog: function () {
+        onSaveNewFolderDialog() {
             var that = this;
 
             var path = sanitize(this.currentPath + '/' + this.newFolderDialog.folderName);
