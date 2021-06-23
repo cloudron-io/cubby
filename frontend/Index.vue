@@ -337,6 +337,8 @@ export default {
                 return;
             }
 
+            that.uploadStatus.busy = true;
+
             var file = that.uploadStatus.queue.pop();
             var path = sanitize(file.targetPath + '/' + (file.webkitRelativePath || file.name));
 
@@ -374,8 +376,6 @@ export default {
             if (!files || !files.length) return;
 
             targetPath = targetPath || that.currentPath;
-
-            that.uploadStatus.busy = true;
 
             files.forEach(function (file) {
                 file.targetPath = targetPath;
