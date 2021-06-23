@@ -79,6 +79,21 @@
     </template>
   </Dialog>
 
+  <!-- Conflicting Files Dialog -->
+  <Dialog header="Upload Conflict" v-model:visible="conflictingFilesDialog.visible" :dismissableMask="false" :closable="true" :style="{width: '350px'}" :modal="true">
+    <h3 style="margin-top: 0;">Select files to overwrite:</h3>
+    <div class="p-fluid" v-for="file in conflictingFilesDialog.files" :key="file.file.name">
+      <div class="p-field-checkbox">
+        <Checkbox :id="'conflictingFilesDialog-' + file.file.name" v-model="file.overwrite" :binary="true" />
+        <label :for="'conflictingFilesDialog-' + file.file.name">{{ file.file.name }}</label>
+      </div>
+    </div>
+    <template #footer>
+      <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="conflictingFilesDialog.visible = false"/>
+      <Button label="Overwrite" icon="pi pi-check" class="p-button-text p-button-danger" @click="onSubmitConflictingFilesDialog"/>
+    </template>
+  </Dialog>
+
   <!-- Share Dialog -->
   <Dialog :header="shareDialog.entry.fileName" v-model:visible="shareDialog.visible" :dismissableMask="true" :closable="true" :style="{width: '550px'}" :modal="true">
     <h3 style="margin-top: 0;">Share Link</h3>
@@ -196,6 +211,10 @@ export default {
                 visible: false,
                 error: '',
                 folderName: ''
+            },
+            conflictingFilesDialog: {
+                visible: false,
+                files: []
             },
             shareDialog: {
                 visible: false,
@@ -348,7 +367,7 @@ export default {
             var finishedUploadSize = 0;
 
             superagent.post('/api/v1/files')
-              .query({ path: path, access_token: localStorage.accessToken })
+              .query({ path: path, access_token: localStorage.accessToken, overwrite: !!file.overwrite })
               .send(formData)
               .on('progress', function (event) {
                 // only handle upload events
@@ -370,6 +389,26 @@ export default {
                 that.uploadNext();
             });
         },
+        showConflictingUploadDialog(files) {
+            // we need a reactive object for v-model (overwrite prop) and File is not
+            this.conflictingFilesDialog.files = files.map(function (file) { return { overwrite: false, file: file }; });
+            this.conflictingFilesDialog.visible = true;
+        },
+        onSubmitConflictingFilesDialog() {
+            var that = this;
+
+            this.conflictingFilesDialog.files.filter(function (file) { return file.overwrite; }).forEach(function (file) {
+                // pass the overwrite for uploadNext()
+                file.file.overwrite = true;
+                that.uploadStatus.queue.push(file.file);
+                that.uploadStatus.size += file.file.size;
+            });
+
+            this.conflictingFilesDialog.files = [];
+            this.conflictingFilesDialog.visible = false;
+
+            that.uploadNext();
+        },
         uploadFiles(files, targetPath) {
             var that = this;
 
@@ -377,13 +416,39 @@ export default {
 
             targetPath = targetPath || that.currentPath;
 
-            files.forEach(function (file) {
+            // convert from FileList to Array and amend useful properties
+            files = Array.from(files).map(function (file) {
                 file.targetPath = targetPath;
-                that.uploadStatus.queue.push(file);
-                that.uploadStatus.size += file.size;
+
+                return file;
             });
 
-            this.uploadNext();
+            superagent.get('/api/v1/files').query({ path: targetPath, access_token: localStorage.accessToken }).end(function (error, result) {
+                if (result && result.statusCode === 401) return that.logout();
+                if (result && result.statusCode !== 200) console.error('Error getting folder listing.', targetPath);
+                if (error) console.error(error.message);
+
+                var conflictingFiles = files.filter(function (file) {
+                    return result.body.files.find(function (existingFile) {
+                        return existingFile.fileName === file.name;
+                    });
+                });
+
+                if (conflictingFiles.length) that.showConflictingUploadDialog(conflictingFiles);
+
+                files = files.filter(function (file) {
+                    return !conflictingFiles.find(function (conflictingFile) {
+                        return file.name === conflictingFile.name;
+                    });
+                });
+
+                files.forEach(function (file) {
+                    that.uploadStatus.queue.push(file);
+                    that.uploadStatus.size += file.size;
+                });
+
+                that.uploadNext();
+            });
         },
         onDownload(entries) {
             if (!entries) entries = this.selectedEntries;
