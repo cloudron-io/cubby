@@ -10,7 +10,7 @@
 
   <div class="container" v-show="ready && profile.username">
     <div class="sidebar">
-      <h1 style="margin-bottom: 50px; padding-left: 15px;">cubby</h1>
+      <h1 style="margin-bottom: 50px; padding-left: 15px;">Cubby</h1>
 
       <Button icon="pi pi-folder-open" class="" label="All Files" @click="showAllFiles"/>
       <Button icon="pi pi-clock" class="" label="Recent" @click="showAllRecent"/>

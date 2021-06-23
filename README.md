@@ -1,6 +1,6 @@
-# cubby
+# Cubby
 
-cubby is a pure filesharing app with built-in viewers. It further supports an external collabora office installation.
+Cubby is a pure filesharing app with built-in viewers. It further supports an external collabora office installation.
 
 The app is mainly developed by the [Cloudron](https://cloudron.io) team to provide a laser-focused open source file sharing application.
 

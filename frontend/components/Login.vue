@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <form @submit="onLogin" @submit.prevent>
-            <h1>Login to cubby</h1>
+            <h1>Login to Cubby</h1>
             <div class="p-fluid">
                 <div class="p-field">
                     <label for="usernameInput">Username</label>
