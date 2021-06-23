@@ -6,7 +6,7 @@
   "version": "0.1.4",
   "healthCheckPath": "/",
   "icon": "file://logo.png",
-  "description": "Simple file sharing",
+  "description": "file://DESCRIPTION.md",
   "website": "https://getcubby.org",
   "contactEmail": "support@cloudron.io",
   "tags": [ "files", "sharing", "documents", "file sharing" ],
