@@ -20,4 +20,4 @@
 
 [0.1.5]
 * Ensure data directory exists on startup
-
+* Only sync resources like users and diskusage one an hour for now
