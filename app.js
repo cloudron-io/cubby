@@ -15,14 +15,6 @@ function exit(error) {
     process.exit(error ? 1 : 0);
 }
 
-function sync() {
-    ldap.sync(function (error) {
-        if (error) console.error('LDAP sync error:', error);
-
-        setTimeout(sync, 1000 * 60);
-    });
-}
-
 database.init();
 config.init(process.env.CLOUDRON ? '/app/data/config.json' : 'config.json');
 
@@ -32,10 +24,12 @@ fs.mkdirSync(constants.DATA_ROOT, { recursive: true });
 // we shall crash if this fails
 diskusage.calculate();
 
-// currently just update this every hour to put less strain on the disk
-setInterval(diskusage.calculate, 1000 * 60 * 60);
+// sync user listing
+ldap.sync();
 
-sync();
+// currently just update this every hour to put less strain on the disk and ldap server
+setInterval(diskusage.calculate, 1000 * 60 * 60);
+setInterval(ldap.sync, 1000 * 60 * 60);
 
 server.init(function (error) {
     if (error) exit(error);
