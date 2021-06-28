@@ -4,6 +4,7 @@
 
 var constants = require('./backend/constants.js'),
     database = require('./backend/database.js'),
+    fs = require('fs'),
     ldap = require('./backend/ldap.js'),
     config = require('./backend/config.js'),
     diskusage = require('./backend/diskusage.js'),
@@ -24,6 +25,9 @@ function sync() {
 
 database.init();
 config.init(process.env.CLOUDRON ? '/app/data/config.json' : 'config.json');
+
+// ensure data directory or crash
+fs.mkdirSync(constants.DATA_ROOT, { recursive: true });
 
 // we shall crash if this fails
 diskusage.calculate();
