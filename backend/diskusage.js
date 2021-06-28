@@ -71,7 +71,7 @@ async function calculateByUsername(username) {
             else gCache[username].directories[filepath] = size;
         });
     } catch (error) {
-        console.error(`Failed to calculate usage for ${username}. Falling back to 0.`, error);
+        debug(`Failed to calculate usage for ${username}. Falling back to 0. ${error}`);
     }
 }
 
