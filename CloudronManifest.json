@@ -3,7 +3,7 @@
   "title": "Cubby",
   "author": "Cloudron Team",
   "tagline": "Collaborative filemanager",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "healthCheckPath": "/",
   "icon": "file://logo.png",
   "description": "file://DESCRIPTION.md",

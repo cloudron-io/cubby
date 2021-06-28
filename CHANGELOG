@@ -17,3 +17,7 @@
 * Add share link support
 * Ask user on upload conflict
 * Better multifile selection support for sidebar
+
+[0.1.5]
+* Ensure data directory exists on startup
+
