@@ -1,8 +1,6 @@
 'use strict';
 
 exports = module.exports = {
-    WebdavUserManager,
-
     login,
     tokenAuth,
     optionalTokenAuth,
@@ -13,11 +11,9 @@ exports = module.exports = {
 var assert = require('assert'),
     users = require('../users.js'),
     tokens = require('../tokens.js'),
-    MainError = require('../mainerror.js'),
     diskusage = require('../diskusage.js'),
     HttpError = require('connect-lastmile').HttpError,
-    HttpSuccess = require('connect-lastmile').HttpSuccess,
-    webdavErrors = require('webdav-server').v2.Errors;
+    HttpSuccess = require('connect-lastmile').HttpSuccess;
 
 async function login(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
@@ -87,40 +83,3 @@ async function list(req, res, next) {
         return next(new HttpError(500, error));
     }
 }
-
-// This implements the required interface only for the Basic Authentication for webdav-server
-function WebdavUserManager() {
-    this._authCache = {
-        // key: TimeToDie as ms
-    };
-}
-
-WebdavUserManager.prototype.getDefaultUser = function (callback) {
-    // this is only a dummy user, since we always require authentication
-    var user = {
-        username: 'DefaultUser',
-        password: null,
-        isAdministrator: false,
-        isDefaultUser: true,
-        uid: 'DefaultUser'
-    };
-
-    callback(user);
-};
-
-WebdavUserManager.prototype.getUserByNamePassword = async function (username, password, callback) {
-    const cacheKey = 'key-'+username+password;
-
-    if (this._authCache[cacheKey] && this._authCache[cacheKey].expiresAt > Date.now()) {
-        return callback(null, this._authCache[cacheKey].user);
-    } else {
-        delete this._authCache[cacheKey];
-    }
-
-    const user = await users.login(username, password);
-    if (!user) return callback(webdavErrors.UserNotFound);
-
-    this._authCache[cacheKey] = { user: user, expiresAt: Date.now() + (60 * 1000) }; // cache for up to 1 min
-
-    callback(null, user);
-};

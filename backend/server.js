@@ -8,10 +8,9 @@ var express = require('express'),
     files = require('./routes/files.js'),
     shares = require('./routes/shares.js'),
     office = require('./routes/office.js'),
-    constants = require('./constants.js'),
+    webdav = require('./routes/webdav.js'),
     multipart = require('./routes/multipart.js'),
     morgan = require('morgan'),
-    webdav = require('webdav-server').v2,
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
 
@@ -22,15 +21,6 @@ exports = module.exports = {
 function init(callback) {
     var app = express();
     var router = new express.Router();
-
-    var webdavServer = new webdav.WebDAVServer({
-        requireAuthentification: true,
-        httpAuthentication: new webdav.HTTPBasicAuthentication(new users.WebdavUserManager(), 'Cubby')
-    });
-
-    webdavServer.setFileSystem('/', new webdav.PhysicalFileSystem(constants.DATA_ROOT), function (success) {
-        if (!success) console.error('Failed to setup webdav server!');
-    });
 
     app.set('json spaces', 2); // pretty json
 
@@ -80,7 +70,7 @@ function init(callback) {
     app.use('/api/healthcheck', function (req, res) { res.status(200).send(); });
     app.use('/api', bodyParser.json());
     app.use('/api', bodyParser.urlencoded({ extended: false, limit: '100mb' }));
-    app.use(webdav.extensions.express('/webdav', webdavServer));
+    app.use(webdav.express());
     app.use(router);
     app.use('/', express.static(path.resolve(__dirname, '../dist')));
 
