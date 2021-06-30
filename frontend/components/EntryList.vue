@@ -42,6 +42,7 @@
 
 import { nextTick } from 'vue';
 import { prettyDate, prettyLongDate, prettyFileSize, getDirectLink, clearSelection } from '../utils.js';
+import * as Combokeys from 'combokeys';
 
 export default {
     name: 'EntryList',
@@ -150,6 +151,12 @@ export default {
 
             this.$emit('selection-changed', this.selectedEntries);
         },
+        onSelectAll() {
+            this.selected = this.entries.map(function (e) { return e.filePath; });
+            this.selectedEntries = this.entries;
+
+            this.$emit('selection-changed', this.selectedEntries);
+        },
         onEntryOpen: function (entry, select) {
             clearSelection();
 
@@ -242,6 +249,12 @@ export default {
                 // prevents scrolling the viewport
                 event.preventDefault();
             }
+        });
+
+        var keys = new Combokeys(document.documentElement);
+        keys.bind([ 'command+a', 'ctrl+a' ], function () {
+            that.onSelectAll();
+            return false;
         });
     }
 };
