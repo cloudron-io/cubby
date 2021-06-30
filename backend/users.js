@@ -54,11 +54,16 @@ async function login(username, password) {
     const user = await get(username);
     if (!user) return null;
 
-    if (user.source === constants.USER_SOURCE_LOCAL && await localLogin(username, password)) return user;
-    else if (user.source === constants.USER_SOURCE_LDAP && await ldap.login(username, password)) return user;
-    else throw new MainError(MainError.BAD_STATE);
-
-    return null;
+    if (user.source === constants.USER_SOURCE_LOCAL) {
+        if (await localLogin(username, password)) return user;
+        else return null;
+    } else if (user.source === constants.USER_SOURCE_LDAP) {
+        if (await ldap.login(username, password)) return user;
+        else return null;
+    } else {
+        debug(`login: ${username} has invalid source type ${user.source}.`);
+        return null;
+    }
 }
 
 async function add(user, source) {
