@@ -21,3 +21,7 @@
 [0.1.5]
 * Ensure data directory exists on startup
 * Only sync resources like users and diskusage one an hour for now
+
+[0.1.6]
+* Add ctrl/cmd + a select all shortcut combo
+* Improve multi-select sidebar
