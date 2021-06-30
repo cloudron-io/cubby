@@ -1,22 +1,27 @@
 <template>
-    <div class="container" :class="{ 'visible': visible }">
+    <div class="container" :class="{ 'visible': visible && selectedEntries.length }">
       <div class="p-d-flex p-jc-between header" style="padding-bottom: 10px;">Details</div>
-      <div class="preview" :style="{ backgroundImage: entry && entry.previewUrl ? 'url(' + entry.previewUrl + ')' : 'none' }"></div>
-      <div class="detail">
-        <p>Owner</p>
-        <span>Admin</span>
+      <div class="preview-container">
+        <div class="preview" v-for="entry in selectedEntries" :key="entry.filename" :style="{ backgroundImage: entry && entry.previewUrl ? 'url(' + entry.previewUrl + ')' : 'none' }"></div>
       </div>
-      <div class="detail">
+      <div class="detail" v-show="selectedEntries.length === 1">
+        <p>Owner</p>
+        <span>{{ entry.owner }}</span>
+      </div>
+      <div class="detail" v-show="selectedEntries.length === 1">
         <p>Updated</p>
         <span>{{ prettyLongDate(entry.mtime) }}</span>
       </div>
-      <div class="detail">
-        <p>Size</p>
-        <span>{{ prettyFileSize(entry.size) }}</span>
+      <div class="detail" v-show="selectedEntries.length > 1">
+        <p>{{ selectedEntries.length }} files selected</p>
       </div>
       <div class="detail">
+        <p>Size</p>
+        <span>{{ prettyFileSize(combinedSize) }}</span>
+      </div>
+      <div class="detail" v-show="selectedEntries.length === 1">
         <p>Type</p>
-        <span>{{ entry.mimeType }}</span>
+        <span >{{ entry.mimeType }}</span>
       </div>
     </div>
 </template>
@@ -41,6 +46,9 @@ export default {
     computed: {
         entry() {
             return this.selectedEntries[0] || {};
+        },
+        combinedSize() {
+            return this.selectedEntries.reduce(function (acc, val) { return acc + val.size; }, 0);
         }
     },
     methods: {
@@ -77,12 +85,21 @@ export default {
     width: 350px;
 }
 
-.preview {
+.preview-container {
+    display: flex;
     width: 100%;
     height: 250px;
+    flex-direction: row;
+    flex-wrap: wrap-reverse;
+}
+
+.preview {
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
+    flex-grow: 1;
+    min-width: 64px;
+    min-height: 64px;
 }
 
 .header {
