@@ -8,12 +8,12 @@
         <template #right>
             <!-- file action buttons -->
             <Button v-show="selectedEntries.length > 1" icon="pi pi-download" class="p-ml-2 p-button-outlined p-button-sm" v-tooltip="'Download'" @click="onDownload"/>
-            <Button v-show="selectedEntries.length > 1" icon="pi pi-trash" class="p-ml-2 p-mr-6 p-button-outlined p-button-sm p-button-danger" v-tooltip="'Delete'" @click="onDelete"/>
+            <Button v-show="displayName && selectedEntries.length > 1" icon="pi pi-trash" class="p-ml-2 p-mr-6 p-button-outlined p-button-sm p-button-danger" v-tooltip="'Delete'" @click="onDelete"/>
 
-            <!-- Always visible -->
-            <Button icon="pi pi-upload" class="p-ml-2 p-button-sm" label="Upload" @click="onToggleMenuUpload"/>
-            <Button icon="pi pi-plus" class="p-ml-2 p-button-sm" label="New" @click="onToggleMenuNew"/>
-            <Button icon="pi pi-user" class="p-ml-6 p-button-sm p-button-secondary" @click="onToggleMenuMain"/>
+            <!-- Always visible if we have a login session-->
+            <Button v-show="displayName" icon="pi pi-upload" class="p-ml-2 p-button-sm" label="Upload" @click="onToggleMenuUpload"/>
+            <Button v-show="displayName" icon="pi pi-plus" class="p-ml-2 p-button-sm" label="New" @click="onToggleMenuNew"/>
+            <Button v-show="displayName" icon="pi pi-user" class="p-ml-6 p-button-sm p-button-secondary" @click="onToggleMenuMain"/>
 
             <Menu ref="menuUpload" :model="uploadMenu" :popup="true"/>
             <Menu ref="menuNew" :model="newMenu" :popup="true"/>
@@ -46,7 +46,8 @@ export default {
             default: ''
         },
         displayName: {
-            type: String
+            type: String,
+            default: ''
         },
         selectedEntries: {
             type: Array,
