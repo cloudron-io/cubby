@@ -13,8 +13,8 @@
       <h1 style="margin-bottom: 50px; padding-left: 15px;">Cubby</h1>
 
       <Button icon="pi pi-folder-open" class="" label="All Files" @click="showAllFiles"/>
-      <Button icon="pi pi-clock" class="" label="Recent" @click="showAllRecent"/>
-      <Button icon="pi pi-share-alt" class="" label="Shared" @click="showAllShares"/>
+      <Button icon="pi pi-clock" class="" label="Recent Files" @click="showAllRecent"/>
+      <Button icon="pi pi-share-alt" class="" label="Shared With You" @click="showAllShares"/>
 
       <div style="flex-grow: 1">&nbsp;</div>
 
