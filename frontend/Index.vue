@@ -156,7 +156,7 @@
     </template>
   </Dialog>
 
-  <ImageViewer ref="imageViewer" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'image'" />
+  <ImageViewer ref="imageViewer" :entries="entry.files" @close="onViewerClose" @download="onDownload" v-show="viewer === 'image'" />
   <TextEditor ref="textEditor" :entries="entry.files" @close="onViewerClose" @saved="onFileSaved" v-show="viewer === 'text'" />
   <PdfViewer ref="pdfViewer" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'pdf'" />
   <OfficeViewer ref="officeViewer" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'office'" />
