@@ -36,13 +36,12 @@ export default {
         };
     },
     props: {
-        entries: Array
+        entries: Array,
+        config: {}
     },
     methods: {
         canHandle(entry) {
-            return entry.mimeType === 'application/vnd.oasis.opendocument.presentation' ||
-                entry.mimeType === 'application/vnd.oasis.opendocument.text' ||
-                entry.mimeType === 'application/vnd.oasis.opendocument.spreadsheet';
+            return this.config.extensions.find(function (e) { return entry.fileName.endsWith(e); });
         },
         async open(entry) {
             var that = this;

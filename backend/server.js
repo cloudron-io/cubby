@@ -2,8 +2,12 @@
 
 var express = require('express'),
     path = require('path'),
+    superagent = require('superagent'),
     bodyParser = require('body-parser'),
     lastMile = require('connect-lastmile'),
+    Dom = require('xmldom').DOMParser,
+    xpath = require('xpath'),
+    config = require('./config.js'),
     users = require('./routes/users.js'),
     files = require('./routes/files.js'),
     shares = require('./routes/shares.js'),
@@ -47,6 +51,34 @@ function init(callback) {
 
     router.post('/api/v1/login', users.login);
     router.get ('/api/v1/profile', users.tokenAuth, users.profile);
+    router.get ('/api/v1/config', users.tokenAuth, async function (req, res, next) {
+        // currently we only send configs for collabora
+
+        const tmp = {
+            viewers: {}
+        };
+
+        const collaboraHost = config.get('collabora.host', '');
+        if (collaboraHost) {
+            let result;
+            try {
+                result = await superagent.get(`${collaboraHost}/hosting/discovery`);
+            } catch (error) {
+                console.error('Failed to get collabora config.', error);
+            }
+
+            var doc = new Dom().parseFromString(result.text);
+            if (doc) {
+                var nodes = xpath.select("/wopi-discovery/net-zone/app/action", doc);
+                if (nodes) {
+                    const extensions = nodes.map(function (n) { return n.getAttribute('ext'); }).filter(function (e) { return !!e; });
+                    tmp.viewers.collabora = { extensions };
+                }
+            }
+        }
+
+        next(new HttpSuccess(200, tmp));
+    });
 
     router.get ('/api/v1/users', users.tokenAuth, users.list);
 

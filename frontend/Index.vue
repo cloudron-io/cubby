@@ -159,7 +159,7 @@
   <ImageViewer ref="imageViewer" :entries="entry.files" @close="onViewerClose" @download="onDownload" v-show="viewer === 'image'" />
   <TextEditor ref="textEditor" :entries="entry.files" @close="onViewerClose" @saved="onFileSaved" v-show="viewer === 'text'" />
   <PdfViewer ref="pdfViewer" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'pdf'" />
-  <OfficeViewer ref="officeViewer" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'office'" />
+  <OfficeViewer ref="officeViewer" :config="config.viewers.collabora" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'office'" />
 </template>
 
 <script>
@@ -185,6 +185,11 @@ export default {
                     used: 0,
                     size: 0,
                     available: 0
+                }
+            },
+            config: {
+                viewers: {
+                    collabora: {}
                 }
             },
             viewers: [],
@@ -823,9 +828,16 @@ export default {
             that.profile.displayName = result.body.displayName;
             that.profile.diskusage = result.body.diskusage;
 
-            that.ready = true;
+            superagent.get('/api/v1/config').query({ access_token: that.accessToken }).end(function (error, result) {
+                if (error) return console.error('Cant load config', error);
 
-            hashChange();
+                // ensure we know what we get so we can properly reference
+                that.config.viewers.collabora = result.body.viewers.collabora || {};
+
+                that.ready = true;
+
+                hashChange();
+            });
         });
     }
 };
