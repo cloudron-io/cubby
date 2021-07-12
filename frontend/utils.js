@@ -107,6 +107,10 @@ function clearSelection() {
     }
 }
 
+function urlSearchQuery() {
+    return decodeURIComponent(window.location.search).slice(1).split('&').map(function (item) { return item.split('='); }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
+}
+
 export {
     getDirectLink,
     getShareLink,
@@ -121,5 +125,6 @@ export {
     getPreviewUrl,
     getExtension,
     copyToClipboard,
-    clearSelection
+    clearSelection,
+    urlSearchQuery
 };

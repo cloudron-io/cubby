@@ -52,14 +52,20 @@ export default {
         selectedEntries: {
             type: Array,
             default: function () { return  []; }
+        },
+        pathPrefix: {
+            type: String,
+            default: 'files'
         }
     },
     watch: {
         currentPath(newCurrentPath) {
+            var that = this;
+
             this.breadCrumbs.items = sanitize(newCurrentPath).split('/').slice(1).map(function (e, i, a) {
                 return {
                     label: e,
-                    url: '#files' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
+                    url: '#' + that.pathPrefix + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
                 };
             });
         },
@@ -74,7 +80,7 @@ export default {
                 visible: false
             },
             breadCrumbs: {
-                home: { icon: 'pi pi-home', url: '#files/' },
+                home: { icon: 'pi pi-home' },
                 items: []
             },
             mainMenu: [{
@@ -153,6 +159,7 @@ export default {
         }
     },
     mounted() {
+        this.breadCrumbs.home.url = '#' + this.pathPrefix + '/';
     }
 };
 

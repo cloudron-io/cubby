@@ -86,8 +86,7 @@ async function get(req, res, next) {
         return next(new HttpError(500, error));
     }
 
-    if (share.receiverUsername && share.receiverUsername !== req.user.username) return next(new HttpError(403, 'not allowed'));
-    if (filePath && filePath.indexOf(share.filePath) !== 0) return next(new HttpError(403, 'not allowed'));
+    if (req.user && share.receiverUsername && share.receiverUsername !== req.user.username) return next(new HttpError(403, 'not allowed'));
 
     let file;
     try {
@@ -98,7 +97,7 @@ async function get(req, res, next) {
     }
 
     if (type === 'raw') {
-        if (file.isDirectory) return next(new HttpError(417, 'type "raw" is not supported for directories'));
+        if (file.isDirectory) return res.redirect(`/share.html?shareId=${shareId}#/`);
         return res.sendFile(file._fullFilePath);
     } else if (type === 'download') {
         if (file.isDirectory) return next(new HttpError(417, 'type "download" is not supported for directories'));
@@ -106,7 +105,7 @@ async function get(req, res, next) {
     }
 
     // for now we only allow raw or download on publicly shared links
-    if (!req.user) return next(new HttpError(403, 'not allowed'));
+    // if (!req.user) return next(new HttpError(403, 'not allowed'));
 
     // those files are always part of this share
     file.files.forEach(function (f) { f.share = share; });

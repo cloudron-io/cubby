@@ -1,32 +1,21 @@
 <template>
-  <input type="file" ref="uploadFile" style="display: none" multiple/>
-  <input type="file" ref="uploadFolder" style="display: none" multiple webkitdirectory directory/>
-
   <!-- This is re-used and thus global -->
   <ConfirmDialog></ConfirmDialog>
   <Toast position="top-center" />
 
   <div class="container" v-show="ready">
     <div class="content">
-      <MainToolbar :currentPath="currentPath" :selectedEntries="selectedEntries" @download="onDownload"/>
+      <MainToolbar :currentPath="currentPath" :selectedEntries="selectedEntries" :pathPrefix="''" @download="onDownload"/>
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
           <EntryList :entries="entry.files" :sort-folders-first="true" :editable="false"
-            @entry-shared="onShare"
-            @entry-renamed="onRename"
             @entry-activated="onOpen"
-            @delete="onDelete"
             @download="onDownload"
             @selection-changed="onSelectionChanged"
-            @dropped="onDrop"
           />
         </div>
         <SideBar :selectedEntries="selectedEntries" :visible="sideBarVisible"/>
-      </div>
-      <div class="upload" v-show="uploadStatus.busy">
-        <div style="margin-right: 10px;">Uploading {{ uploadStatus.queue.length+1 }} files ({{ Math.round(uploadStatus.done/1000/1000) }}MB / {{ Math.round(uploadStatus.size/1000/1000) }}MB)</div>
-        <ProgressBar :value="uploadStatus.percentDone">{{uploadStatus.percentDone}}%</ProgressBar>
       </div>
     </div>
   </div>
@@ -40,7 +29,7 @@
 <script>
 
 import superagent from 'superagent';
-import { encode, getPreviewUrl, getExtension, download, getDirectLink, prettyFileSize } from './utils.js';
+import { urlSearchQuery, encode, getPreviewUrl, getExtension, download, getDirectLink, prettyFileSize } from './utils.js';
 
 export default {
     name: 'Index',
@@ -52,12 +41,6 @@ export default {
             search: '',
             viewer: '',
             viewers: [],
-            uploadStatus: {
-                busy: false,
-                queue: [],
-                done: 0,
-                percentDone: 0
-            },
             error: '',
             entry: {
                 files: []
@@ -65,41 +48,11 @@ export default {
             selectedEntries: [],
             currentPath: '/',
             activeEntry: {},
-            sideBarVisible: true,
-            newFileDialog: {
-                visible: false,
-                error: '',
-                fileName: ''
-            },
-            newFolderDialog: {
-                visible: false,
-                error: '',
-                folderName: ''
-            },
-            conflictingFilesDialog: {
-                visible: false,
-                files: []
-            },
-            shareDialog: {
-                visible: false,
-                error: '',
-                receiverUsername: '',
-                readonly: false,
-                users: [],
-                sharedWith: [],
-                entry: {},
-                shareLink: {
-                    expire: false,
-                    expiresAt: 0
-                }
-            }
+            sideBarVisible: true
         };
     },
     methods: {
         prettyFileSize,
-        showAllFiles() {
-            window.location.hash = 'files/';
-        },
         onSelectionChanged(selectedEntries) {
             this.selectedEntries = selectedEntries;
 
@@ -115,13 +68,6 @@ export default {
             // TODO use zipping for multiple files
             download(entries[0]);
         },
-        onFiles() {
-            const hash = window.location.hash.slice(1);
-
-            if (hash.indexOf('files/') !== 0) return console.error('invalid call for this URI');
-
-            this.loadPath(hash.slice('files'.length));
-        },
         loadPath(path) {
             var that = this;
 
@@ -129,16 +75,16 @@ export default {
 
             var filePath = path || that.currentPath || '/';
 
-            window.location.hash = 'files' + filePath;
+            window.location.hash = filePath;
 
             that.busy = true;
-            superagent.get('/api/v1/files').query({ path: encode(filePath), access_token: that.accessToken }).end(function (error, result) {
+            superagent.get('/api/v1/shares/' + that.shareId).query({ path: encode(filePath) }).end(function (error, result) {
                 that.busy = false;
 
                 if (error) {
                     that.entries = [];
 
-                    if (error.status === 401) that.onLogout();
+                    if (error.status === 403) that.error = 'Not allowed';
                     else if (error.status === 404) that.error = 'Does not exist';
                     else console.error(error);
 
@@ -166,12 +112,11 @@ export default {
                 that.activeEntry = that.entry;
             });
         },
-        openDirectory(entry) {
-            if (entry.share && entry.share.id) window.location.hash = 'shares/' + entry.share.id + entry.filePath;
-            else window.location.hash = 'files' + entry.filePath;
-        },
         onOpen(entry) {
-            if (entry.isDirectory) return this.openDirectory(entry);
+            if (entry.isDirectory) {
+                window.location.hash = entry.filePath;
+                return;
+            }
 
             if (this.$refs.imageViewer.canHandle(entry)) {
                 this.$refs.imageViewer.open(entry);
@@ -198,40 +143,18 @@ export default {
     mounted() {
         var that = this;
 
-        // upload input event handler
-        this.$refs.uploadFile.addEventListener('change', function () {
-            that.uploadFiles(that.$refs.uploadFile.files || []);
-        });
-
-        this.$refs.uploadFolder.addEventListener('change', function () {
-            that.uploadFiles(that.$refs.uploadFolder.files || []);
-        });
-
         function hashChange() {
             const hash = window.location.hash.slice(1);
-
-            if (hash.indexOf('files/') === 0) that.onFiles();
-            else if (hash.indexOf('recent/') === 0) that.onRecent();
-            else if (hash.indexOf('shares/') === 0) that.onShares();
-            else window.location.hash = 'files/';
+            that.loadPath(hash);
         }
 
         window.addEventListener('hashchange', hashChange, false);
 
-        // warn the user if uploads are still in progress
-        window.addEventListener('beforeunload', function (event) {
-            if (!that.uploadStatus.busy) return;
+        var search = urlSearchQuery();
 
-            event.preventDefault();
-            window.confirm('Uploads are still in progress. Please wait for them to finish.');
-        }, { capture: true });
+        if (!search.shareId) return;
 
-        if (!localStorage.accessToken) {
-            this.ready = true;
-            return;
-        }
-
-        that.accessToken = localStorage.accessToken;
+        that.shareId = search.shareId;
 
         that.ready = true;
 
@@ -272,14 +195,6 @@ label {
     display: flex;
     height: 100%;
     width: 100%;
-    flex-direction: column;
-}
-
-.upload {
-    display: flex;
-    height: 50px;
-    width: 100%;
-    padding: 10px;
     flex-direction: column;
 }
 
