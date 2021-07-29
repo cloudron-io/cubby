@@ -58,6 +58,7 @@ export default {
         }
     },
     mounted() {
+        setTimeout(function () { document.getElementById('usernameInput').focus(); }, 0);
     }
 };
 
