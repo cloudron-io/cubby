@@ -14,6 +14,7 @@ var assert = require('assert'),
     files = require('../files.js'),
     Entry = require('../entry.js'),
     util = require('util'),
+    path = require('path'),
     MainError = require('../mainerror.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
@@ -90,7 +91,7 @@ async function get(req, res, next) {
 
     let file;
     try {
-        file = await files.get(share.owner, filePath || share.filePath);
+        file = await files.get(share.owner, path.join(share.filePath, filePath));
     } catch (error) {
         if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'file not found'));
         return next(new HttpError(500, error));
@@ -110,7 +111,7 @@ async function get(req, res, next) {
     // those files are always part of this share
     file.files.forEach(function (f) { f.share = share; });
 
-    next(new HttpSuccess(200, file.withoutPrivate()));
+    next(new HttpSuccess(200, file.asShare(share.filePath).withoutPrivate()));
 }
 
 // If a share for the receiver and filepath already exists, just reuse that
