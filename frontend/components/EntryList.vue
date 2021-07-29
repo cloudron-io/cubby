@@ -95,6 +95,11 @@ export default {
             default: true
         }
     },
+    watch: {
+        entries(/*val, oldVal*/) {
+            this.onSelectClear();
+        }
+    },
     computed: {
         filteredAndSortedEntries: function () {
             var that = this;
@@ -160,6 +165,10 @@ export default {
             this.selectedEntries = this.entries;
 
             this.$emit('selection-changed', this.selectedEntries);
+        },
+        onSelectClear() {
+            this.selected = [];
+            this.selectedEntries = [];
         },
         onEntryOpen: function (entry, select) {
             clearSelection();
