@@ -51,7 +51,11 @@ function decode(path) {
 // TODO create share links instead of using access token
 function getDirectLink(entry) {
     if (entry.share) {
-        return window.location.origin + '/api/v1/shares/' + entry.share.id + '?type=raw&path=' + encodeURIComponent(entry.filePath);
+        let link = window.location.origin + '/api/v1/shares/' + entry.share.id + '?type=raw&path=' + encodeURIComponent(entry.filePath);
+
+        if (localStorage.accessToken) link += '&access_token=' + localStorage.accessToken;
+
+        return link;
     } else {
         return window.location.origin + '/api/v1/files?type=raw&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(entry.filePath);
     }
