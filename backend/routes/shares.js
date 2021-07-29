@@ -47,6 +47,7 @@ async function list(req, res, next) {
             let file = await files.get(share.owner, share.filePath);
 
             file.share = share;
+            file = file.asShare(share.filePath);
 
             sharedFiles.push(file);
         });
