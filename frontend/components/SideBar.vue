@@ -1,5 +1,5 @@
 <template>
-    <div class="container" :class="{ 'visible': visible && selectedEntries.length }">
+    <div class="sidebar-container" :class="{ 'visible': visible && selectedEntries.length }">
       <div class="p-d-flex p-jc-between header" style="padding-bottom: 10px;">Details</div>
       <div class="preview-container">
         <div class="preview" v-for="entry in selectedEntries" :key="entry.filename" :style="{ backgroundImage: entry && entry.previewUrl ? 'url(' + entry.previewUrl + ')' : 'none' }"></div>
@@ -71,7 +71,7 @@ export default {
 
 <style scoped>
 
-.container {
+.sidebar-container {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -81,7 +81,7 @@ export default {
     border-left: 1px solid #f8f9fa;
 }
 
-.container.visible {
+.sidebar-container.visible {
     width: 350px;
 }
 
