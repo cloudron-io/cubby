@@ -50,7 +50,7 @@ async function list(username) {
 
 async function create({ user, filePath, receiverUsername, receiverEmail, readonly, expiresAt = 0 }) {
     assert.strictEqual(typeof user, 'object');
-    assert.strictEqual(typeof filePath, 'string');
+    assert(filePath && typeof filePath === 'string');
     assert(typeof receiverUsername === 'string' || !receiverUsername);
     assert(typeof receiverEmail === 'string' || !receiverEmail);
     assert(typeof readonly === 'undefined' || typeof readonly === 'boolean');
