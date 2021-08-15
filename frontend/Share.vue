@@ -29,7 +29,7 @@
 <script>
 
 import superagent from 'superagent';
-import { sanitize, urlSearchQuery, encode, getPreviewUrl, getExtension, download, getDirectLink, prettyFileSize } from './utils.js';
+import { sanitize, urlSearchQuery, getPreviewUrl, getExtension, download, getDirectLink, prettyFileSize } from './utils.js';
 
 export default {
     name: 'Index',
@@ -83,7 +83,7 @@ export default {
             window.location.hash = filePath;
 
             that.busy = true;
-            superagent.get('/api/v1/shares/' + that.shareId).query({ path: encode(filePath) }).end(function (error, result) {
+            superagent.get('/api/v1/shares/' + that.shareId).query({ path: filePath }).end(function (error, result) {
                 that.busy = false;
 
                 if (error) {

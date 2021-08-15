@@ -166,7 +166,7 @@
 
 import superagent from 'superagent';
 import async from 'async';
-import { encode, getPreviewUrl, getExtension, getShareLink, copyToClipboard, sanitize, download, getDirectLink, prettyFileSize } from './utils.js';
+import { getPreviewUrl, getExtension, getShareLink, copyToClipboard, sanitize, download, getDirectLink, prettyFileSize } from './utils.js';
 
 export default {
     name: 'Index',
@@ -741,7 +741,7 @@ export default {
             window.location.hash = 'files' + filePath;
 
             that.busy = true;
-            superagent.get('/api/v1/files').query({ path: encode(filePath), access_token: that.accessToken }).end(function (error, result) {
+            superagent.get('/api/v1/files').query({ path: filePath, access_token: that.accessToken }).end(function (error, result) {
                 that.busy = false;
 
                 if (error) {
