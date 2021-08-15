@@ -31,7 +31,7 @@
           <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-download" v-tooltip.top="'Download'" v-show="!entry.rename && entry.isFile && selectedEntries.length <= 1" @click.stop="onDownload(entry)"/>
           <Button class="action-buttons p-button-sm p-button-rounded p-button-text p-button-danger" icon="pi pi-trash" v-tooltip.top="'Delete'" v-show="editable && !entry.rename && selectedEntries.length <= 1" @click.stop="onDelete(entry)"/>
 
-          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" :class="{ 'action-buttons-visible': entry.sharedWith.length }" icon="pi pi-share-alt" v-tooltip.top="entry.sharedWith.length ? 'Edit Shares' : 'Create Share'" v-show="entry.sharedWith.length || (shareable && !entry.rename && selectedEntries.length <= 1)" @click.stop="onShare(entry)"/>
+          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" :class="{ 'action-buttons-visible': entry.sharedWith.length }" icon="pi pi-share-alt" v-tooltip.top="entry.sharedWith.length ? 'Edit Shares' : 'Create Share'" v-show="editable && (entry.sharedWith.length || (shareable && !entry.rename && selectedEntries.length <= 1))" @click.stop="onShare(entry)"/>
         </div>
       </div>
     </div>
@@ -64,19 +64,22 @@ export default {
             }, {
                 label:'Download',
                 icon:'pi pi-fw pi-download',
-                disabled: () => this.selectedEntries[0].isDirectory,
+                visible: () => this.selectedEntries[0].isDirectory,
                 command: () => this.onDownload(this.selectedEntries[0])
             }, {
-                separator:true
+                separator: true,
+                visible: () => this.editable
             }, {
                 label:'Share',
                 icon:'pi pi-fw pi-share-alt',
+                visible: () => this.editable,
                 command: () => this.onShare(this.selectedEntries[0])
             }, {
                 separator:true
             }, {
                 label:'Delete',
                 icon:'pi pi-fw pi-trash',
+                visible: () => this.editable,
                 command: () => this.onDelete(this.selectedEntries[0])
             }]
         };
