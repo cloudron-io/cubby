@@ -111,6 +111,7 @@ async function get(req, res, next) {
 
     // those files are always part of this share
     file.files.forEach(function (f) { f.share = share; });
+    file.share = share;
 
     next(new HttpSuccess(200, file.asShare(share.filePath).withoutPrivate()));
 }
