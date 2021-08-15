@@ -29,7 +29,7 @@
 <script>
 
 import superagent from 'superagent';
-import { sanitize, urlSearchQuery, getPreviewUrl, getExtension, download, getDirectLink, prettyFileSize } from './utils.js';
+import { decode, sanitize, urlSearchQuery, getPreviewUrl, getExtension, download, getDirectLink, prettyFileSize } from './utils.js';
 
 export default {
     name: 'Index',
@@ -100,7 +100,7 @@ export default {
 
                 that.breadCrumbs = sanitize(filePath).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
                     return {
-                        label: e,
+                        label: decode(e),
                         url: '#'  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
                     };
                 });

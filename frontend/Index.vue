@@ -166,7 +166,7 @@
 
 import superagent from 'superagent';
 import async from 'async';
-import { getPreviewUrl, getExtension, getShareLink, copyToClipboard, sanitize, download, getDirectLink, prettyFileSize } from './utils.js';
+import { decode, getPreviewUrl, getExtension, getShareLink, copyToClipboard, sanitize, download, getDirectLink, prettyFileSize } from './utils.js';
 
 export default {
     name: 'Index',
@@ -692,7 +692,7 @@ export default {
 
                 that.breadCrumbs = sanitize(filePath).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
                     return {
-                        label: e,
+                        label: decode(e),
                         url: '#shares/' + shareId  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
                     };
                 });
@@ -756,7 +756,7 @@ export default {
 
                 that.breadCrumbs = sanitize(filePath).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
                     return {
-                        label: e,
+                        label: decode(e),
                         url: '#files' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
                     };
                 });
