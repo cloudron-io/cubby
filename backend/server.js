@@ -90,8 +90,8 @@ function init(callback) {
     router.del ('/api/v1/files', users.tokenAuth, files.remove);
 
     router.get ('/api/v1/shares', users.tokenAuth, shares.list);
-    router.get ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.get);
     router.post('/api/v1/shares', users.tokenAuth, shares.create);
+    router.get ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.get);
     router.del ('/api/v1/shares/:shareId', users.tokenAuth, shares.remove);
 
     router.get ('/api/v1/office/handle', users.tokenAuth, office.getHandle);
