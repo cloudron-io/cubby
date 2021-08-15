@@ -690,7 +690,7 @@ export default {
 
                 that.currentPath = '/' + filePath;
 
-                that.breadCrumbs = sanitize(filePath).split('/').slice(1).map(function (e, i, a) {
+                that.breadCrumbs = sanitize(filePath).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
                     return {
                         label: e,
                         url: '#shares/' + shareId  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
@@ -698,7 +698,7 @@ export default {
                 });
                 that.breadCrumbHome = {
                     icon: 'pi pi-share-alt',
-                    url: '#shares/'
+                    url: '#/'
                 };
 
                 // if we are not toplevel, add the share information
@@ -754,7 +754,7 @@ export default {
                     return;
                 }
 
-                that.breadCrumbs = sanitize(filePath).split('/').slice(1).map(function (e, i, a) {
+                that.breadCrumbs = sanitize(filePath).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
                     return {
                         label: e,
                         url: '#files' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)

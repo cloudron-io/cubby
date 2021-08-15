@@ -5,7 +5,7 @@
 
   <div class="container" v-show="ready">
     <div class="content">
-      <MainToolbar :currentPath="currentPath" :selectedEntries="selectedEntries" :pathPrefix="''" @download="onDownload"/>
+      <MainToolbar :breadCrumbs="breadCrumbs" :breadCrumbHome="breadCrumbHome" :currentPath="currentPath" :selectedEntries="selectedEntries" :pathPrefix="''" @download="onDownload"/>
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
@@ -29,7 +29,7 @@
 <script>
 
 import superagent from 'superagent';
-import { urlSearchQuery, encode, getPreviewUrl, getExtension, download, getDirectLink, prettyFileSize } from './utils.js';
+import { sanitize, urlSearchQuery, encode, getPreviewUrl, getExtension, download, getDirectLink, prettyFileSize } from './utils.js';
 
 export default {
     name: 'Index',
@@ -48,7 +48,12 @@ export default {
             selectedEntries: [],
             currentPath: '/',
             activeEntry: {},
-            sideBarVisible: true
+            sideBarVisible: true,
+            breadCrumbs: [],
+            breadCrumbHome: {
+                icon: 'pi pi-share-alt',
+                url: '#/'
+            }
         };
     },
     methods: {
@@ -92,6 +97,13 @@ export default {
                 }
 
                 that.currentPath = filePath;
+
+                that.breadCrumbs = sanitize(filePath).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
+                    return {
+                        label: e,
+                        url: '#'  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
+                    };
+                });
 
                 if (result.body.isDirectory) {
                     result.body.files.forEach(function (entry) {
