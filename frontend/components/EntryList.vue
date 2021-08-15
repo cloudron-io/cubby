@@ -75,7 +75,8 @@ export default {
                 visible: () => this.editable,
                 command: () => this.onShare(this.selectedEntries[0])
             }, {
-                separator:true
+                separator: true,
+                visible: () => this.editable
             }, {
                 label:'Delete',
                 icon:'pi pi-fw pi-trash',
