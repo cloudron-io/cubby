@@ -681,7 +681,8 @@ export default {
                     return;
                 }
 
-                that.currentPath = '/' + result.body.owner + filePath;
+                // toplevel we have no result.body share
+                that.currentPath = (result.body.share ? result.body.share.filePath : '/') + filePath;
 
                 result.body.files.forEach(function (entry) {
                     entry.previewUrl = getPreviewUrl(entry);
