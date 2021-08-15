@@ -69,7 +69,7 @@ function download(entry) {
     if (entry.isDirectory) return;
 
     if (entry.share) {
-        window.location.href = '/api/v1/shares/' + entry.share.id + '?type=download&access_token=' + localStorage.accessToken;
+        window.location.href = '/api/v1/shares/' + entry.share.id + '?type=download&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(entry.filePath);
     } else {
         window.location.href = '/api/v1/files?type=download&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(entry.filePath);
     }
