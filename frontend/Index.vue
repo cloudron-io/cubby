@@ -24,7 +24,7 @@
       </div>
     </div>
     <div class="content">
-      <MainToolbar :currentPath="currentPath" :selectedEntries="selectedEntries" :displayName="profile.displayName" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @new-folder="onNewFolder" @delete="onDelete" @download="onDownload"/>
+      <MainToolbar :breadCrumbs="breadCrumbs" :breadCrumbHome="breadCrumbHome" :currentPath="currentPath" :selectedEntries="selectedEntries" :displayName="profile.displayName" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @new-folder="onNewFolder" @delete="onDelete" @download="onDownload"/>
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
@@ -207,6 +207,11 @@ export default {
             currentPath: '/',
             activeEntry: {},
             sideBarVisible: true,
+            breadCrumbs: [],
+            breadCrumbHome: {
+                icon: 'pi pi-home',
+                url: '#files'
+            },
             newFileDialog: {
                 visible: false,
                 error: '',
@@ -524,6 +529,7 @@ export default {
         onRecent() {
             var that = this;
 
+
             that.busy = true;
             superagent.get('/api/v1/recent').query({ access_token: that.accessToken }).end(function (error, result) {
                 that.busy = false;
@@ -539,6 +545,7 @@ export default {
                 }
 
                 that.currentPath = '/';
+                that.breadCrumbs = [];
 
                 result.body.files.forEach(function (entry) {
                     entry.previewUrl = getPreviewUrl(entry);
@@ -681,8 +688,26 @@ export default {
                     return;
                 }
 
-                // toplevel we have no result.body share
-                that.currentPath = (result.body.share ? result.body.share.filePath : '/') + filePath;
+                that.currentPath = '/' + filePath;
+
+                that.breadCrumbs = sanitize(filePath).split('/').slice(1).map(function (e, i, a) {
+                    return {
+                        label: e,
+                        url: '#shares/' + shareId  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
+                    };
+                });
+                that.breadCrumbHome = {
+                    icon: 'pi pi-share-alt',
+                    url: '#shares/'
+                };
+
+                // if we are not toplevel, add the share information
+                if (result.body.share) {
+                    that.breadCrumbs.unshift({
+                        label: result.body.share.filePath.slice(1), // remove slash at the beginning
+                        url: '#shares/' + shareId + '/'
+                    });
+                }
 
                 result.body.files.forEach(function (entry) {
                     entry.previewUrl = getPreviewUrl(entry);
@@ -728,6 +753,13 @@ export default {
 
                     return;
                 }
+
+                that.breadCrumbs = sanitize(filePath).split('/').slice(1).map(function (e, i, a) {
+                    return {
+                        label: e,
+                        url: '#files' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
+                    };
+                });
 
                 that.currentPath = filePath;
 

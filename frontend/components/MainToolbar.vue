@@ -1,8 +1,8 @@
 <template>
     <Toolbar>
         <template #left>
-          <Button icon="pi pi-chevron-left" class="p-mr-2 p-button-sm" :disabled="breadCrumbs.items.length === 0" @click="onUp"/>
-          <Breadcrumb :home="breadCrumbs.home" :model="breadCrumbs.items"/>
+          <Button icon="pi pi-chevron-left" class="p-mr-2 p-button-sm" :disabled="breadCrumbs.length === 0" @click="onUp"/>
+          <Breadcrumb :home="breadCrumbHome" :model="breadCrumbs"/>
         </template>
 
         <template #right>
@@ -41,9 +41,13 @@ export default {
     name: 'MainToolbar',
     emits: [ 'logout', 'upload-file', 'upload-folder', 'new-file', 'new-folder', 'download', 'delete' ],
     props: {
-        currentPath: {
-            type: String,
-            default: ''
+        breadCrumbs: {
+            type: Array,
+            default: () => []
+        },
+        breadCrumbHome: {
+            type: Object,
+            default: () => { return { icon: 'pi pi-home' }; }
         },
         displayName: {
             type: String,
@@ -51,24 +55,10 @@ export default {
         },
         selectedEntries: {
             type: Array,
-            default: function () { return  []; }
-        },
-        pathPrefix: {
-            type: String,
-            default: 'files'
+            default: () =>[]
         }
     },
     watch: {
-        currentPath(newCurrentPath) {
-            var that = this;
-
-            this.breadCrumbs.items = sanitize(newCurrentPath).split('/').slice(1).map(function (e, i, a) {
-                return {
-                    label: e,
-                    url: '#' + that.pathPrefix + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
-                };
-            });
-        },
         displayName(newDisplayName) {
             this.mainMenu[0].label = newDisplayName;
         }
@@ -79,7 +69,7 @@ export default {
             aboutDialog: {
                 visible: false
             },
-            breadCrumbs: {
+            breadCrumbModel: {
                 home: { icon: 'pi pi-home' },
                 items: []
             },
@@ -157,9 +147,6 @@ export default {
         onDelete() {
             this.$emit('delete');
         }
-    },
-    mounted() {
-        this.breadCrumbs.home.url = '#' + this.pathPrefix + '/';
     }
 };
 
