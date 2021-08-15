@@ -333,7 +333,6 @@ export default {
     width: 100%;
     display: flex;
     flex-flow: row nowrap;
-    border-radius: 3px;
     cursor: default;
 }
 
