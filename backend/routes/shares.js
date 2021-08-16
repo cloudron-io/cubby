@@ -72,7 +72,8 @@ async function list(req, res, next) {
 async function get(req, res, next) {
     assert.strictEqual(typeof req.params.shareId, 'string');
 
-    const filePath = req.query.path ? decodeURIComponent(req.query.path) : '';
+    console.log('path', req.query.path)
+    const filePath = req.query.path || '';//? decodeURIComponent(req.query.path) : '';
     const type = req.query.type;
     const shareId = req.params.shareId;
 

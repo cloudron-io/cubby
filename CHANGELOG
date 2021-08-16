@@ -28,3 +28,9 @@
 * Fix file selection
 * Add public sharing page for directories
 * Update Primevue to 3.6.0
+
+[0.1.7]
+* Various fixes related to public shares
+* Improved breadcrumbs
+* Visual improvements
+* Use new logo everywhere
