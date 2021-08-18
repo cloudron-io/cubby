@@ -34,3 +34,7 @@
 * Improved breadcrumbs
 * Visual improvements
 * Use new logo everywhere
+
+[0.1.8]
+* Fix folder drop for upload
+* Generate preview URLs on the backend
