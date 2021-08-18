@@ -429,7 +429,6 @@ export default {
             // convert from FileList to Array and amend useful properties
             files = Array.from(files).map(function (file) {
                 file.targetPath = targetPath;
-
                 return file;
             });
 
@@ -438,6 +437,7 @@ export default {
                 if (result && result.statusCode !== 200) console.error('Error getting folder listing.', targetPath);
                 if (error) console.error(error.message);
 
+                // FIXME this is broken if cwd/targetpath has same filenames as file within a folder.
                 var conflictingFiles = files.filter(function (file) {
                     return result.body.files.find(function (existingFile) {
                         return existingFile.fileName === file.name;
@@ -467,12 +467,46 @@ export default {
             download(entries[0]);
         },
         onDrop(items, targetEntry) {
+            var that = this;
+
+            if (items.length === 0) return;
+
+            // figure if a folder was dropped on a modern browser, in this case the first would have to be a directory
+            var folderItem;
+            var targetPath = targetEntry ? targetEntry.filePath : null;
+            try {
+                folderItem = items[0].webkitGetAsEntry();
+                if (folderItem.isFile) return that.uploadFiles(items.map(function (item) { return item.getAsFile(); }), targetPath);
+            } catch (e) {
+                return that.uploadFiles(items.map(function (item) { return item.getAsFile(); }), targetPath);
+            }
+
+            // if we got here we have a folder drop and a modern browser
+            // now traverse the folder tree and create a file list
             const files = [];
+            function traverseFileTree(item, path, callback) {
+                if (item.isFile) {
+                    // Get file
+                    item.file(function (file) {
+                        files.push(file);
+                        callback();
+                    });
+                } else if (item.isDirectory) {
+                    // Get folder contents
+                    var dirReader = item.createReader();
+                    dirReader.readEntries(function (entries) {
+                        async.each(entries, function (entry, callback) {
+                            traverseFileTree(entry, path + item.name + '/', callback);
+                        }, callback);
+                    });
+                }
+            }
 
-            // convert drop items to files
-            items.forEach(function (item) { files.push(item.getAsFile()); });
+            traverseFileTree(folderItem, '', function (error) {
+                if (error) return console.error(error);
 
-            this.uploadFiles(files, targetEntry ? targetEntry.filePath : null);
+                that.uploadFiles(files, targetPath);
+            });
 
             // also navigate there
             if (targetEntry) this.loadPath(targetEntry.filePath);
