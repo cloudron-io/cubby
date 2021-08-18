@@ -166,7 +166,7 @@
 
 import superagent from 'superagent';
 import async from 'async';
-import { decode, getPreviewUrl, getExtension, getShareLink, copyToClipboard, sanitize, download, getDirectLink, prettyFileSize } from './utils.js';
+import { decode, getExtension, getShareLink, copyToClipboard, sanitize, download, getDirectLink, prettyFileSize } from './utils.js';
 
 export default {
     name: 'Index',
@@ -548,13 +548,10 @@ export default {
                 that.breadCrumbs = [];
 
                 result.body.files.forEach(function (entry) {
-                    entry.previewUrl = getPreviewUrl(entry);
                     entry.extension = getExtension(entry);
                     entry.rename = false;
                     entry.filePathNew = entry.fileName;
                 });
-
-                result.body.previewUrl = getPreviewUrl(result.body);
 
                 that.entry = result.body;
 
@@ -710,13 +707,10 @@ export default {
                 }
 
                 result.body.files.forEach(function (entry) {
-                    entry.previewUrl = getPreviewUrl(entry);
                     entry.extension = getExtension(entry);
                     entry.rename = false;
                     entry.filePathNew = entry.fileName;
                 });
-
-                result.body.previewUrl = getPreviewUrl(result.body);
 
                 that.entry = result.body;
 
@@ -765,7 +759,6 @@ export default {
 
                 if (result.body.isDirectory) {
                     result.body.files.forEach(function (entry) {
-                        entry.previewUrl = getPreviewUrl(entry);
                         entry.extension = getExtension(entry);
                         entry.rename = false;
                         entry.filePathNew = entry.fileName;
@@ -773,8 +766,6 @@ export default {
                 } else {
                     result.body.files = [];
                 }
-
-                result.body.previewUrl = getPreviewUrl(result.body);
 
                 that.entry = result.body;
 

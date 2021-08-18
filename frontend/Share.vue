@@ -29,7 +29,7 @@
 <script>
 
 import superagent from 'superagent';
-import { decode, sanitize, urlSearchQuery, getPreviewUrl, getExtension, download, getDirectLink, prettyFileSize } from './utils.js';
+import { decode, sanitize, urlSearchQuery, getExtension, download, getDirectLink, prettyFileSize } from './utils.js';
 
 export default {
     name: 'Index',
@@ -107,7 +107,6 @@ export default {
 
                 if (result.body.isDirectory) {
                     result.body.files.forEach(function (entry) {
-                        entry.previewUrl = getPreviewUrl(entry);
                         entry.extension = getExtension(entry);
                         entry.rename = false;
                         entry.filePathNew = entry.fileName;
@@ -115,8 +114,6 @@ export default {
                 } else {
                     result.body.files = [];
                 }
-
-                result.body.previewUrl = getPreviewUrl(result.body);
 
                 that.entry = result.body;
 

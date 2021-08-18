@@ -1,6 +1,8 @@
 'use strict';
 
-const assert = require('assert');
+const assert = require('assert'),
+    fs = require('fs'),
+    constants = require('./constants.js');
 
 exports = module.exports = Entry;
 
@@ -41,6 +43,21 @@ Entry.prototype.asShare = function (shareFilePath) {
     return result;
 };
 
+Entry.prototype.getPreviewUrl = function () {
+    if (!this.mimeType) return '';
+    if (this.mimeType === 'inode/recent') return '/folder-temp.svg';
+    if (this.mimeType === 'inode/share') return '/folder-network.svg';
+
+    var mime = this.mimeType.split('/');
+    var previewUrl = '/mime-types/' + mime[0] + '-' + mime[1] + '.svg';
+
+    if (fs.existsSync(constants.FRONTEND_ROOT + previewUrl)) return previewUrl;
+
+    previewUrl = '/mime-types/' + mime[0] + '-x-generic.svg';
+    if (fs.existsSync(constants.FRONTEND_ROOT + previewUrl)) return previewUrl;
+    else return '';
+};
+
 Entry.prototype.withoutPrivate = function () {
     return {
         fileName: this.fileName,
@@ -53,6 +70,7 @@ Entry.prototype.withoutPrivate = function () {
         mimeType: this.mimeType,
         files: this.files.map(function (f) { return f.withoutPrivate(); }),
         share: this.share,
-        sharedWith: this.sharedWith || []
+        sharedWith: this.sharedWith || [],
+        previewUrl: this.getPreviewUrl()
     };
 };
