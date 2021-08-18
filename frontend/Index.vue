@@ -928,6 +928,11 @@ label {
 
 <style>
 
+.upload .p-progressbar-label {
+    line-height: 11px;
+    font-size: 11px;
+}
+
 .diskusage.p-progressbar {
     height: 10px;
     margin-top: 5px;
