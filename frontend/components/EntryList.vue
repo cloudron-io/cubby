@@ -64,7 +64,7 @@ export default {
             }, {
                 label:'Download',
                 icon:'pi pi-fw pi-download',
-                visible: () => this.selectedEntries[0].isDirectory,
+                visible: () => !this.selectedEntries[0].isDirectory,
                 command: () => this.onDownload(this.selectedEntries[0])
             }, {
                 separator: true,
