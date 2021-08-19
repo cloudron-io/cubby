@@ -197,6 +197,7 @@ export default {
                 busy: false,
                 queue: [],
                 done: 0,
+                size: 0,
                 percentDone: 0
             },
             error: '',
@@ -376,27 +377,39 @@ export default {
 
             var finishedUploadSize = 0;
 
-            superagent.post('/api/v1/files')
-              .query({ path: path, access_token: localStorage.accessToken, overwrite: !!file.overwrite })
-              .send(formData)
-              .on('progress', function (event) {
-                // only handle upload events
-                if (!(event.target instanceof XMLHttpRequestUpload)) return;
-
-                that.uploadStatus.done += event.loaded - finishedUploadSize;
-                // keep track of progress diff not absolute
-                finishedUploadSize = event.loaded;
-
-                var tmp = Math.round(that.uploadStatus.done / that.uploadStatus.size * 100);
-                that.uploadStatus.percentDone = tmp > 100 ? 100 : tmp;
-            }).end(function (error, result) {
+            // check first for conflict to avoid double upload
+            superagent.get('/api/v1/files').query({ path: path, access_token: localStorage.accessToken }).end(function (error, result) {
                 if (result && result.statusCode === 401) return that.logout();
-                if (result && result.statusCode !== 200) console.error('Error uploading file:', result.statusCode);
-                if (error) console.error('Error uploading file:', error);
+                if (result && result.statusCode === 409) {
+                    console.error('Conflicting, do something.', path);
 
-                // TODO ideally show new file immediately here instead of only after the upload
+                    // FIXME this should block for user input
+                    return that.uploadNext();
+                }
+                if (error) console.error(error.message);
 
-                that.uploadNext();
+                superagent.post('/api/v1/files')
+                  .query({ path: path, access_token: localStorage.accessToken, overwrite: !!file.overwrite })
+                  .send(formData)
+                  .on('progress', function (event) {
+                    // only handle upload events
+                    if (!(event.target instanceof XMLHttpRequestUpload)) return;
+
+                    that.uploadStatus.done += event.loaded - finishedUploadSize;
+                    // keep track of progress diff not absolute
+                    finishedUploadSize = event.loaded;
+
+                    var tmp = Math.round(that.uploadStatus.done / that.uploadStatus.size * 100);
+                    that.uploadStatus.percentDone = tmp > 100 ? 100 : tmp;
+                }).end(function (error, result) {
+                    if (result && result.statusCode === 401) return that.logout();
+                    if (result && result.statusCode !== 200) console.error('Error uploading file:', result.statusCode);
+                    if (error) console.error('Error uploading file:', error);
+
+                    // TODO ideally show new file immediately here instead of only after the upload
+
+                    that.uploadNext();
+                });
             });
         },
         showConflictingUploadDialog(files) {
@@ -432,33 +445,13 @@ export default {
                 return file;
             });
 
-            superagent.get('/api/v1/files').query({ path: targetPath, access_token: localStorage.accessToken }).end(function (error, result) {
-                if (result && result.statusCode === 401) return that.logout();
-                if (result && result.statusCode !== 200) console.error('Error getting folder listing.', targetPath);
-                if (error) console.error(error.message);
-
-                // FIXME this is broken if cwd/targetpath has same filenames as file within a folder.
-                var conflictingFiles = files.filter(function (file) {
-                    return result.body.files.find(function (existingFile) {
-                        return existingFile.fileName === file.name;
-                    });
-                });
-
-                if (conflictingFiles.length) that.showConflictingUploadDialog(conflictingFiles);
-
-                files = files.filter(function (file) {
-                    return !conflictingFiles.find(function (conflictingFile) {
-                        return file.name === conflictingFile.name;
-                    });
-                });
-
-                files.forEach(function (file) {
-                    that.uploadStatus.queue.push(file);
-                    that.uploadStatus.size += file.size;
-                });
-
-                that.uploadNext();
+            // now collect stats for progress
+            files.forEach(function (file) {
+                that.uploadStatus.queue.push(file);
+                that.uploadStatus.size += file.size;
             });
+
+            that.uploadNext();
         },
         onDownload(entries) {
             if (!entries) entries = this.selectedEntries;
