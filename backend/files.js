@@ -5,6 +5,7 @@ exports = module.exports = {
     addDirectory,
     addOrOverwriteFile,
     get,
+    head,
     move,
     remove,
     recent
@@ -241,6 +242,34 @@ async function get(username, filePath) {
         const stat = await fs.stat(fullFilePath);
         if (stat.isDirectory()) return await getDirectory(username, fullFilePath, filePath, stat);
         if (stat.isFile()) return await getFile(username, fullFilePath, filePath, stat);
+    } catch (error) {
+        if (error.code === 'ENOENT') throw new MainError(MainError.NOT_FOUND);
+        throw new MainError(MainError.FS_ERROR, error);
+    }
+}
+
+async function head(username, filePath) {
+    assert.strictEqual(typeof username, 'string');
+    assert.strictEqual(typeof filePath, 'string');
+
+    debug(`head ${username} ${filePath}`);
+
+    const fullFilePath = getValidFullPath(username, filePath);
+    if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);
+
+    try {
+        const stat = await fs.stat(fullFilePath);
+        return {
+            fileName: path.basename(fullFilePath),
+            filePath: filePath,
+            size: stat.size,
+            mtime: stat.mtime,
+            isDirectory: stat.isDirectory(),
+            isFile: stat.isFile(),
+            // sharedWith: result || [],
+            owner: username,
+            mimeType: stat.isDirectory() ? 'inode/directory' : mime(filePath)
+        };
     } catch (error) {
         if (error.code === 'ENOENT') throw new MainError(MainError.NOT_FOUND);
         throw new MainError(MainError.FS_ERROR, error);

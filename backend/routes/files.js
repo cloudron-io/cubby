@@ -2,6 +2,7 @@
 
 exports = module.exports = {
     add,
+    head,
     get,
     update,
     remove,
@@ -49,6 +50,29 @@ async function add(req, res, next) {
     }
 
     next(new HttpSuccess(200, {}));
+}
+
+async function head(req, res, next) {
+    assert.strictEqual(typeof req.user, 'object');
+
+    const type = req.query.type;
+    const filePath = req.query.path ? decodeURIComponent(req.query.path) : '';
+
+    if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
+    if (type && (type !== 'raw' && type !== 'download')) return next(new HttpError(400, 'type must be either empty, "download" or "raw"'));
+
+    debug(`head: ${filePath} type:${type || 'json'}`);
+
+    let result;
+
+    try {
+        result = await files.head(req.user.username, filePath);
+    } catch (error) {
+        if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'not found'));
+        return next(new HttpError(500, error));
+    }
+
+    next(new HttpSuccess(200, result));
 }
 
 async function get(req, res, next) {

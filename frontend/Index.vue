@@ -80,17 +80,13 @@
   </Dialog>
 
   <!-- Conflicting Files Dialog -->
-  <Dialog header="Upload Conflict" v-model:visible="conflictingFilesDialog.visible" :dismissableMask="false" :closable="true" :style="{width: '350px'}" :modal="true">
-    <h3 style="margin-top: 0;">Select files to overwrite:</h3>
-    <div class="p-fluid" v-for="file in conflictingFilesDialog.files" :key="file.file.name">
-      <div class="p-field-checkbox">
-        <Checkbox :id="'conflictingFilesDialog-' + file.file.name" v-model="file.overwrite" :binary="true" />
-        <label :for="'conflictingFilesDialog-' + file.file.name">{{ file.file.name }}</label>
-      </div>
-    </div>
+  <Dialog header="Conflicting file or folder" v-model:visible="conflictingFileDialog.visible" :dismissableMask="false" :closable="false" :style="{width: '550px'}" :modal="true">
+    <h3 style="margin-top: 0;"><i>{{ conflictingFileDialog.path }}</i></h3>
     <template #footer>
-      <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="conflictingFilesDialog.visible = false"/>
-      <Button label="Overwrite" icon="pi pi-check" class="p-button-text p-button-danger" @click="onSubmitConflictingFilesDialog"/>
+      <Button label="Overwrite" icon="pi pi-check" class="p-button-text p-button-danger" @click="onSubmitConflictingFileDialog('overwrite')"/>
+      <Button label="Overwrite All" icon="pi pi-check-circle" class="p-button-text p-button-danger" @click="onSubmitConflictingFileDialog('overwriteAll')"/>
+      <Button label="Skip" icon="pi pi-times" class="p-button-text" @click="onSubmitConflictingFileDialog('skip')"/>
+      <Button label="Skip All" icon="pi pi-times-circle" class="p-button-text" @click="onSubmitConflictingFileDialog('skipAll')"/>
     </template>
   </Dialog>
 
@@ -223,9 +219,10 @@ export default {
                 error: '',
                 folderName: ''
             },
-            conflictingFilesDialog: {
+            conflictingFileDialog: {
                 visible: false,
-                files: []
+                path: '',
+                file: null
             },
             shareDialog: {
                 visible: false,
@@ -353,6 +350,44 @@ export default {
                 if (typeof done === 'function') done();
             });
         },
+        uploadFile(file, path, callback) {
+            var that = this;
+
+            if (file.skip) {
+                // FIXME maybe refactor this calculation
+                that.uploadStatus.done += file.size;
+                var tmp = Math.round(that.uploadStatus.done / that.uploadStatus.size * 100);
+                that.uploadStatus.percentDone = tmp > 100 ? 100 : tmp;
+
+                return callback();
+            }
+
+            var formData = new FormData();
+            formData.append('file', file);
+
+            var finishedUploadSize = 0;
+
+            superagent.post('/api/v1/files')
+              .query({ path: path, access_token: localStorage.accessToken, overwrite: !!file.overwrite })
+              .send(formData)
+              .on('progress', function (event) {
+                // only handle upload events
+                if (!(event.target instanceof XMLHttpRequestUpload)) return;
+
+                that.uploadStatus.done += event.loaded - finishedUploadSize;
+                // keep track of progress diff not absolute
+                finishedUploadSize = event.loaded;
+
+                var tmp = Math.round(that.uploadStatus.done / that.uploadStatus.size * 100);
+                that.uploadStatus.percentDone = tmp > 100 ? 100 : tmp;
+            }).end(function (error, result) {
+                if (result && result.statusCode === 401) return that.logout();
+                if (result && result.statusCode !== 200) console.error('Error uploading file:', result.statusCode);
+                if (error) console.error('Error uploading file:', error);
+
+                callback();
+            });
+        },
         uploadNext() {
             var that = this;
 
@@ -372,65 +407,73 @@ export default {
             var file = that.uploadStatus.queue.pop();
             var path = sanitize(file.targetPath + '/' + (file.webkitRelativePath || file.name));
 
-            var formData = new FormData();
-            formData.append('file', file);
-
-            var finishedUploadSize = 0;
-
             // check first for conflict to avoid double upload
-            superagent.get('/api/v1/files').query({ path: path, access_token: localStorage.accessToken }).end(function (error, result) {
+            superagent.head('/api/v1/files').query({ path: path, access_token: localStorage.accessToken }).end(function (error, result) {
                 if (result && result.statusCode === 401) return that.logout();
-                if (result && result.statusCode === 409) {
-                    console.error('Conflicting, do something.', path);
 
-                    // FIXME this should block for user input
-                    return that.uploadNext();
+                // This stops the uploadNext flow waiting for user input
+                if (result && result.statusCode === 200) {
+                    if (file.skip) {
+                        // FIXME maybe refactor this calculation
+                        that.uploadStatus.done += file.size;
+                        var tmp = Math.round(that.uploadStatus.done / that.uploadStatus.size * 100);
+                        that.uploadStatus.percentDone = tmp > 100 ? 100 : tmp;
+
+                        that.uploadNext();
+                    } else if (file.overwrite) {
+                        that.uploadFile(file, path, function (error) {
+                            if (error) return console.error(error);
+                            that.uploadNext();
+                        });
+                    } else {
+                        // FIXME: check why we need the timeout to give UI a chance to update
+                        setTimeout(function () { that.showConflictingFileDialog(file, path); }, 1000);
+                    }
+                    return;
                 }
-                if (error) console.error(error.message);
 
-                superagent.post('/api/v1/files')
-                  .query({ path: path, access_token: localStorage.accessToken, overwrite: !!file.overwrite })
-                  .send(formData)
-                  .on('progress', function (event) {
-                    // only handle upload events
-                    if (!(event.target instanceof XMLHttpRequestUpload)) return;
+                if (error && error.status !== 404) console.error(error.message);
 
-                    that.uploadStatus.done += event.loaded - finishedUploadSize;
-                    // keep track of progress diff not absolute
-                    finishedUploadSize = event.loaded;
-
-                    var tmp = Math.round(that.uploadStatus.done / that.uploadStatus.size * 100);
-                    that.uploadStatus.percentDone = tmp > 100 ? 100 : tmp;
-                }).end(function (error, result) {
-                    if (result && result.statusCode === 401) return that.logout();
-                    if (result && result.statusCode !== 200) console.error('Error uploading file:', result.statusCode);
-                    if (error) console.error('Error uploading file:', error);
-
-                    // TODO ideally show new file immediately here instead of only after the upload
+                that.uploadFile(file, path, function (error) {
+                    if (error) return console.error(error);
 
                     that.uploadNext();
                 });
             });
         },
-        showConflictingUploadDialog(files) {
-            // we need a reactive object for v-model (overwrite prop) and File is not
-            this.conflictingFilesDialog.files = files.map(function (file) { return { overwrite: false, file: file }; });
-            this.conflictingFilesDialog.visible = true;
+        showConflictingFileDialog(file, path) {
+            this.conflictingFileDialog.file = file;
+            this.conflictingFileDialog.path = path;
+            this.conflictingFileDialog.visible = true;
         },
-        onSubmitConflictingFilesDialog() {
+        onSubmitConflictingFileDialog(action) {
             var that = this;
 
-            this.conflictingFilesDialog.files.filter(function (file) { return file.overwrite; }).forEach(function (file) {
-                // pass the overwrite for uploadNext()
-                file.file.overwrite = true;
-                that.uploadStatus.queue.push(file.file);
-                that.uploadStatus.size += file.file.size;
+            if (action === 'skip') {
+                this.conflictingFileDialog.file.skip = true;
+            } else if (action === 'skipAll') {
+                this.conflictingFileDialog.file.skip = true;
+                this.uploadStatus.queue.forEach(function (file) { file.skip = true; });
+            } else if (action === 'overwrite') {
+                this.conflictingFileDialog.file.overwrite = true;
+            } else if (action === 'overwriteAll') {
+                this.conflictingFileDialog.file.overwrite = true;
+                this.uploadStatus.queue.forEach(function (file) { file.overwrite = true; });
+            } else {
+                console.error('This should never happen');
+            }
+
+            this.conflictingFileDialog.visible = false;
+
+            that.uploadFile(this.conflictingFileDialog.file, this.conflictingFileDialog.path, function (error) {
+                if (error) return console.error(error);
+
+                that.conflictingFileDialog.file = null;
+                that.conflictingFileDialog.path = '';
+
+                // continue
+                that.uploadNext();
             });
-
-            this.conflictingFilesDialog.files = [];
-            this.conflictingFilesDialog.visible = false;
-
-            that.uploadNext();
         },
         uploadFiles(files, targetPath) {
             var that = this;
