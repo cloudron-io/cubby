@@ -56,6 +56,7 @@ async function list(req, res, next) {
     }
 
     const entry = new Entry({
+        id: 'shares',
         fullFilePath: '/shares',
         fileName: 'Shares',
         filePath: '/',

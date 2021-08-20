@@ -2,6 +2,7 @@
 
 const assert = require('assert'),
     fs = require('fs'),
+    crypto = require('crypto'),
     constants = require('./constants.js');
 
 exports = module.exports = Entry;
@@ -60,6 +61,7 @@ Entry.prototype.getPreviewUrl = function () {
 
 Entry.prototype.withoutPrivate = function () {
     return {
+        id: crypto.createHash('sha1').update(this.owner + this.filePath).digest('base64'),
         fileName: this.fileName,
         filePath: this.filePath,
         owner: this.owner,

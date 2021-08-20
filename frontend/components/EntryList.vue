@@ -15,7 +15,7 @@
     <div class="tbody">
       <div class="tr-placeholder" v-show="entries.length === 0">{{ emptyPlaceholder }}</div>
       <div class="tr-placeholder" v-show="entries.length !== 0 && filteredAndSortedEntries.length === 0">Nothing found</div>
-      <div class="tr" v-for="entry in filteredAndSortedEntries" :key="entry.fileName" @contextmenu="onContextMenu(entry, $event)" @dblclick="onEntryOpen(entry, false)" @click="onEntrySelect(entry, $event)" @drop.stop.prevent="drop(entry)" @dragover.stop.prevent="dragOver(entry)" :class="{ 'selected': selected.includes(getEntryIdentifier(entry)), 'drag-active': entry === dragActive }">
+      <div class="tr" v-for="entry in filteredAndSortedEntries" :key="entry.id" @contextmenu="onContextMenu(entry, $event)" @dblclick="onEntryOpen(entry, false)" @click="onEntrySelect(entry, $event)" @drop.stop.prevent="drop(entry)" @dragover.stop.prevent="dragOver(entry)" :class="{ 'selected': selected.includes(getEntryIdentifier(entry)), 'drag-active': entry === dragActive }">
         <div class="td" style="max-width: 50px;"><img :src="entry.previewUrl" style="width: 32px; height: 32px; vertical-align: middle;"/></div>
         <div class="td" style="flex-grow: 2;">
           <InputText @click.stop @keyup.enter="onRenameSubmit(entry)" @keyup.esc="onRenameEnd(entry)" @blur="onRenameEnd(entry)" v-model="entry.filePathNew" :id="'filePathRenameInputId-' + entry.fileName" v-show="entry.rename" class="rename-input"/>

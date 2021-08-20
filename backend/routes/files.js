@@ -168,6 +168,7 @@ async function recent(req, res, next) {
     }
 
     const entry = new Entry({
+        id: 'recent',
         fullFilePath: '/recent',
         fileName: 'Recent',
         filePath: '/',

@@ -28,7 +28,7 @@
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
-          <EntryList :entries="entry.files" :sort-folders-first="true" :editable="!isShares()"
+          <EntryList :entries="entries" :sort-folders-first="true" :editable="!isShares()"
             @entry-shared="onShare"
             @entry-renamed="onRename"
             @entry-activated="onOpen"
@@ -152,10 +152,10 @@
     </template>
   </Dialog>
 
-  <ImageViewer ref="imageViewer" :entries="entry.files" @close="onViewerClose" @download="onDownload" v-show="viewer === 'image'" />
-  <TextEditor ref="textEditor" :entries="entry.files" @close="onViewerClose" @saved="onFileSaved" v-show="viewer === 'text'" />
-  <PdfViewer ref="pdfViewer" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'pdf'" />
-  <OfficeViewer ref="officeViewer" :config="config.viewers.collabora" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'office'" />
+  <ImageViewer ref="imageViewer" :entries="entries" @close="onViewerClose" @download="onDownload" v-show="viewer === 'image'" />
+  <TextEditor ref="textEditor" :entries="entries" @close="onViewerClose" @saved="onFileSaved" v-show="viewer === 'text'" />
+  <PdfViewer ref="pdfViewer" :entries="entries" @close="onViewerClose" v-show="viewer === 'pdf'" />
+  <OfficeViewer ref="officeViewer" :config="config.viewers.collabora" :entries="entries" @close="onViewerClose" v-show="viewer === 'office'" />
 </template>
 
 <script>
@@ -197,9 +197,7 @@ export default {
                 percentDone: 0
             },
             error: '',
-            entry: {
-                files: []
-            },
+            entries: [],
             selectedEntries: [],
             currentPath: '/',
             sideBarVisible: true,
@@ -623,7 +621,7 @@ export default {
                     entry.filePathNew = entry.fileName;
                 });
 
-                that.entry = result.body;
+                that.entries = result.body.files;
             });
         },
         showAllShares() {
@@ -779,7 +777,7 @@ export default {
                     entry.filePathNew = entry.fileName;
                 });
 
-                that.entry = result.body;
+                that.entries = result.body.files;
             });
         },
         onFiles() {
@@ -835,7 +833,7 @@ export default {
                     result.body.files = [];
                 }
 
-                that.entry = result.body;
+                that.entries = result.body.files;
             });
         },
         openDirectory(entry) {

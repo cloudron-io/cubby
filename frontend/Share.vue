@@ -9,7 +9,7 @@
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
-          <EntryList :entries="entry.files" :sort-folders-first="true" :editable="false"
+          <EntryList :entries="entries" :sort-folders-first="true" :editable="false"
             @entry-activated="onOpen"
             @download="onDownload"
             @selection-changed="onSelectionChanged"
@@ -20,10 +20,10 @@
     </div>
   </div>
 
-  <ImageViewer ref="imageViewer" :entries="entry.files" @close="onViewerClose" @download="onDownload" v-show="viewer === 'image'" />
-  <TextEditor ref="textEditor" :entries="entry.files" @close="onViewerClose" @saved="onFileSaved" v-show="viewer === 'text'" />
-  <PdfViewer ref="pdfViewer" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'pdf'" />
-  <OfficeViewer ref="officeViewer" :entries="entry.files" @close="onViewerClose" v-show="viewer === 'office'" />
+  <ImageViewer ref="imageViewer" :entries="entries" @close="onViewerClose" @download="onDownload" v-show="viewer === 'image'" />
+  <TextEditor ref="textEditor" :entries="entries" @close="onViewerClose" @saved="onFileSaved" v-show="viewer === 'text'" />
+  <PdfViewer ref="pdfViewer" :entries="entries" @close="onViewerClose" v-show="viewer === 'pdf'" />
+  <OfficeViewer ref="officeViewer" :entries="entries" @close="onViewerClose" v-show="viewer === 'office'" />
 </template>
 
 <script>
@@ -42,9 +42,7 @@ export default {
             viewer: '',
             viewers: [],
             error: '',
-            entry: {
-                files: []
-            },
+            entries: [],
             selectedEntries: [],
             currentPath: '/',
             sideBarVisible: true,
@@ -111,7 +109,7 @@ export default {
                     result.body.files = [];
                 }
 
-                that.entry = result.body;
+                that.entries = result.body.files;
             });
         },
         onOpen(entry) {
