@@ -311,7 +311,7 @@ async function remove(username, filePath) {
     }
 }
 
-async function recent(username, daysAgo = 3) {
+async function recent(username, daysAgo = 3, maxFiles = 100) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof daysAgo, 'number');
 
@@ -330,7 +330,9 @@ async function recent(username, daysAgo = 3) {
     let result = [];
 
     const localResolvedPrefix = path.join(constants.DATA_ROOT, username);
-    await async.each(filePaths, async function (filePath) {
+
+    // we limit files to
+    await async.eachLimit(filePaths.slice(0, maxFiles), 20, async function (filePath) {
         try {
             const stat = await fs.stat(filePath);
             if (!stat.isFile()) throw new MainError(MainError.FS_ERROR, 'recent should only list files');

@@ -155,13 +155,14 @@ async function recent(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
     const daysAgo = isNaN(parseInt(req.query.days_ago, 10)) ? 3 : parseInt(req.query.days_ago, 10);
+    const maxFiles = 100;
 
-    debug(`recent: daysAgo:${daysAgo}`);
+    debug(`recent: daysAgo:${daysAgo} maxFiles:${maxFiles}`);
 
     let result = [];
 
     try {
-        result = await files.recent(req.user.username, daysAgo);
+        result = await files.recent(req.user.username, daysAgo, maxFiles);
     } catch (error) {
         return next(new HttpError(500, error));
     }
