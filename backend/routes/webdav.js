@@ -17,10 +17,7 @@ class WebdavPrivilegeManager extends PrivilegeManager
     }
 
     _can(fullPath, user, resource, privilege, callback) {
-        // this is just the root
-        if (resource.context.requested.uri === '/') return callback(null, true);
-
-        // currently we only check for prefixes
+        // currently we only check for prefixes /webdav/ access is never allowed
         if (resource.context.requested.uri.indexOf('/' + user.username) !== 0) return callback(null, false);
 
         callback(null, true);
