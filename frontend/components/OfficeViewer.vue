@@ -41,6 +41,7 @@ export default {
     },
     methods: {
         canHandle(entry) {
+            if (!this.config || !this.config.extensions) return false;
             return this.config.extensions.find(function (e) { return entry.fileName.endsWith(e); });
         },
         async open(entry) {

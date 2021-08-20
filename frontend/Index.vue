@@ -202,7 +202,6 @@ export default {
             },
             selectedEntries: [],
             currentPath: '/',
-            activeEntry: {},
             sideBarVisible: true,
             breadCrumbs: [],
             breadCrumbHome: {
@@ -329,9 +328,6 @@ export default {
         },
         onSelectionChanged(selectedEntries) {
             this.selectedEntries = selectedEntries;
-
-            if (selectedEntries.length) this.activeEntry = selectedEntries[0];
-            else this.activeEntry = this.entry; // reset to current folder/view
         },
         onToggleSideBar() {
             this.sideBarVisible = !this.sideBarVisible;
@@ -628,9 +624,6 @@ export default {
                 });
 
                 that.entry = result.body;
-
-                // also set active entry for now maybe wrong
-                that.activeEntry = that.entry;
             });
         },
         showAllShares() {
@@ -787,9 +780,6 @@ export default {
                 });
 
                 that.entry = result.body;
-
-                // also set active entry for now maybe wrong
-                that.activeEntry = that.entry;
             });
         },
         onFiles() {
@@ -846,9 +836,6 @@ export default {
                 }
 
                 that.entry = result.body;
-
-                // also set active entry for now maybe wrong
-                that.activeEntry = that.entry;
             });
         },
         openDirectory(entry) {
