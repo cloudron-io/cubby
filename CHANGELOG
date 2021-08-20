@@ -38,3 +38,5 @@
 [0.1.8]
 * Fix folder drop for upload
 * Generate preview URLs on the backend
+* Do not leak usernames in webdav listing
+* Fix duplicate entries in file listing
