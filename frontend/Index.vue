@@ -616,6 +616,10 @@ export default {
 
                 that.currentPath = '/';
                 that.breadCrumbs = [];
+                that.breadCrumbHome = {
+                    icon: 'pi pi-clock',
+                    url: '#recent'
+                };
 
                 result.body.files.forEach(function (entry) {
                     entry.extension = getExtension(entry);
@@ -824,6 +828,10 @@ export default {
                         url: '#files' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
                     };
                 });
+                that.breadCrumbHome = {
+                    icon: 'pi pi-home',
+                    url: '#files'
+                };
 
                 that.currentPath = filePath;
 
