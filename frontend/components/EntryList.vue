@@ -16,7 +16,7 @@
       <div class="tr-placeholder" v-show="entries.length === 0">{{ emptyPlaceholder }}</div>
       <div class="tr-placeholder" v-show="entries.length !== 0 && filteredAndSortedEntries.length === 0">Nothing found</div>
       <div class="tr" v-for="entry in filteredAndSortedEntries" :key="entry.id" @contextmenu="onContextMenu(entry, $event)" @dblclick="onEntryOpen(entry, false)" @click="onEntrySelect(entry, $event)" @drop.stop.prevent="drop(entry)" @dragover.stop.prevent="dragOver(entry)" :class="{ 'selected': selected.includes(getEntryIdentifier(entry)), 'drag-active': entry === dragActive }">
-        <div class="td" style="max-width: 50px;"><img :src="entry.previewUrl" style="width: 32px; height: 32px; vertical-align: middle;"/></div>
+        <div class="td icon"><img :src="entry.previewUrl"/></div>
         <div class="td" style="flex-grow: 2;">
           <InputText @click.stop @keyup.enter="onRenameSubmit(entry)" @keyup.esc="onRenameEnd(entry)" @blur="onRenameEnd(entry)" v-model="entry.filePathNew" :id="'filePathRenameInputId-' + entry.fileName" v-show="entry.rename" class="rename-input"/>
           <a v-show="!entry.rename" :href="entry.filePath" @click.stop.prevent="onEntryOpen(entry, true)">{{ entry.fileName }}</a>
@@ -336,6 +336,8 @@ export default {
 
 .th > .td {
     white-space: normal;
+    display: block;
+    user-select: none;
 }
 
 .tr {
@@ -386,14 +388,19 @@ export default {
     flex-flow: row nowrap;
     flex-grow: 1;
     flex-basis: 0;
-    padding: 0.5em;
+    padding: 0.2em;
     min-width: 0px;
     margin: auto;
 }
 
-.th > .td {
-    display: block;
-    user-select: none;
+.tr > .td.icon {
+    max-width: 40px;
+}
+
+.tr > .td.icon > img {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
 }
 
 .hand {
