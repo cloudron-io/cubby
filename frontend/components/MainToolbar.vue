@@ -160,6 +160,10 @@ export default {
     padding: 20px;
 }
 
+.p-toolbar {
+    padding: 0.5rem;
+}
+
 </style>
 
 <!-- WARNING those are not scoped, but menu DOM elements are taken out -->
