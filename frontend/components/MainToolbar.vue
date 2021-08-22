@@ -13,7 +13,7 @@
             <!-- Always visible if we have a login session-->
             <Button v-show="displayName" icon="pi pi-upload" class="p-ml-2 p-button-sm" label="Upload" @click="onToggleMenuUpload"/>
             <Button v-show="displayName" icon="pi pi-plus" class="p-ml-2 p-button-sm" label="New" @click="onToggleMenuNew"/>
-            <Button v-show="displayName" icon="pi pi-user" class="p-ml-6 p-button-sm p-button-secondary" @click="onToggleMenuMain"/>
+            <Button v-show="displayName" icon="pi pi-user" class="p-ml-6 p-button-sm p-button-secondary" @click="onToggleMenuMain" :label="displayName"/>
 
             <Menu ref="menuUpload" :model="uploadMenu" :popup="true"/>
             <Menu ref="menuNew" :model="newMenu" :popup="true"/>
@@ -58,11 +58,6 @@ export default {
             default: () =>[]
         }
     },
-    watch: {
-        displayName(newDisplayName) {
-            this.mainMenu[0].label = newDisplayName;
-        }
-    },
     data() {
         return {
             search: '',
@@ -74,14 +69,6 @@ export default {
                 items: []
             },
             mainMenu: [{
-                // the position of this item is used when profile is fetched
-                label: 'Display Name',
-                icon: 'pi pi-user',
-                disabled: true,
-                class: 'menu-profile-item'
-            }, {
-                separator: true
-            }, {
                 label: 'About',
                 icon: 'pi pi-info-circle',
                 command: () => this.aboutDialog.visible = true
