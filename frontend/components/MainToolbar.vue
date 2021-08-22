@@ -151,6 +151,10 @@ export default {
     padding: 0.5rem;
 }
 
+.p-breadcrumb {
+    background: none;
+}
+
 </style>
 
 <!-- WARNING those are not scoped, but menu DOM elements are taken out -->
