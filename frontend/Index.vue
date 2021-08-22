@@ -612,7 +612,7 @@ export default {
                 that.breadCrumbs = [];
                 that.breadCrumbHome = {
                     icon: 'pi pi-clock',
-                    url: '#recent'
+                    url: '#recent/'
                 };
 
                 result.body.files.forEach(function (entry) {
@@ -760,7 +760,7 @@ export default {
                 });
                 that.breadCrumbHome = {
                     icon: 'pi pi-share-alt',
-                    url: '#/'
+                    url: '#shares/'
                 };
 
                 // if we are not toplevel, add the share information
