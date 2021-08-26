@@ -2,7 +2,9 @@
 
 exports = module.exports = {
     list,
+    add,
     get,
+    head,
     create,
     remove
 };
@@ -70,10 +72,46 @@ async function list(req, res, next) {
     next(new HttpSuccess(200, entry.withoutPrivate()));
 }
 
+async function add(req, res, next) {
+    assert.strictEqual(typeof req.params.shareId, 'string');
+
+    const filePath = req.query.path || '';
+    const shareId = req.params.shareId;
+    const directory = boolLike(req.query.directory);
+    const overwrite = boolLike(req.query.overwrite);
+
+    if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
+    if (!(req.files && req.files.file) && !directory) return next(new HttpError(400, 'missing file or directory'));
+    if ((req.files && req.files.file) && directory) return next(new HttpError(400, 'either file or directory'));
+
+    const mtime = req.fields && req.fields.mtime ? new Date(req.fields.mtime) : null;
+
+    debug(`add: ${shareId} path:${filePath} mtime:${mtime}`);
+
+    let share;
+    try {
+        share = await shares.get(shareId);
+    } catch (error) {
+        if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'share not found'));
+        return next(new HttpError(500, error));
+    }
+
+    if (req.user && share.receiverUsername && share.receiverUsername !== req.user.username) return next(new HttpError(403, 'not allowed'));
+
+    try {
+        if (directory) await files.addDirectory(share.owner, path.join(share.filePath, filePath));
+        else await files.addOrOverwriteFile(share.owner, path.join(share.filePath, filePath), req.files.file.path, mtime, overwrite);
+    } catch (error) {
+        if (error.reason === MainError.ALREADY_EXISTS) return next(new HttpError(409, 'already exists'));
+        return next(new HttpError(500, error));
+    }
+
+    next(new HttpSuccess(200, {}));
+}
+
 async function get(req, res, next) {
     assert.strictEqual(typeof req.params.shareId, 'string');
 
-    console.log('path', req.query.path)
     const filePath = req.query.path || '';//? decodeURIComponent(req.query.path) : '';
     const type = req.query.type;
     const shareId = req.params.shareId;
@@ -116,6 +154,39 @@ async function get(req, res, next) {
     file.share = share;
 
     next(new HttpSuccess(200, file.asShare(share.filePath).withoutPrivate()));
+}
+
+async function head(req, res, next) {
+    assert.strictEqual(typeof req.params.shareId, 'string');
+
+    const filePath = req.query.path || '';//? decodeURIComponent(req.query.path) : '';
+    const type = req.query.type;
+    const shareId = req.params.shareId;
+
+    if (type && (type !== 'raw' && type !== 'download')) return next(new HttpError(400, 'type must be either empty, "download" or "raw"'));
+
+    debug(`head: ${shareId} path:${filePath} type:${type || 'json'}`);
+
+    let share;
+    try {
+        share = await shares.get(shareId);
+    } catch (error) {
+        if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'share not found'));
+        return next(new HttpError(500, error));
+    }
+
+    if (req.user && share.receiverUsername && share.receiverUsername !== req.user.username) return next(new HttpError(403, 'not allowed'));
+
+    let result;
+    try {
+        result = await files.head(share.owner, path.join(share.filePath, filePath));
+    } catch (error) {
+        if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'file not found'));
+        return next(new HttpError(500, error));
+    }
+
+
+    next(new HttpSuccess(200, result));
 }
 
 // If a share for the receiver and filepath already exists, just reuse that

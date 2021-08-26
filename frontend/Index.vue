@@ -200,6 +200,7 @@ export default {
             entries: [],
             selectedEntries: [],
             currentPath: '/',
+            currentFullPath: 'files/',
             sideBarVisible: true,
             breadCrumbs: [],
             breadCrumbHome: {
@@ -361,7 +362,9 @@ export default {
 
             var finishedUploadSize = 0;
 
-            superagent.post('/api/v1/files')
+            var api = file.apiType === 'files' ? '/api/v1/files' : ('/api/v1/shares/' + file.shareId);
+
+            superagent.post(api)
               .query({ path: path, access_token: localStorage.accessToken, overwrite: !!file.overwrite })
               .send(formData)
               .on('progress', function (event) {
@@ -399,10 +402,19 @@ export default {
             that.uploadStatus.busy = true;
 
             var file = that.uploadStatus.queue.pop();
-            var path = sanitize(file.targetPath + '/' + (file.webkitRelativePath || file.name));
+            var apiType = file.targetPath.indexOf('files/') === 0 ? 'files' : 'shares';
+            var path = '';
+
+            // amend info for uploadFile
+            file.apiType = apiType;
+            file.shareId = apiType === 'files' ? null : file.targetPath.split('/')[1];
+
+            if (apiType === 'files') path = sanitize(file.targetPath.slice('files'.length) + '/' + (file.webkitRelativePath || file.name));
+            if (apiType === 'shares') path = sanitize(file.targetPath.slice('shares/'.length + file.targetPath.split('/')[1].length) + '/' + (file.webkitRelativePath || file.name));
 
             // check first for conflict to avoid double upload
-            superagent.head('/api/v1/files').query({ path: path, access_token: localStorage.accessToken }).end(function (error, result) {
+            var api = apiType === 'files' ? '/api/v1/files' : ('/api/v1/shares/' + file.targetPath.split('/')[1]);
+            superagent.head(api).query({ path: path, access_token: localStorage.accessToken }).end(function (error, result) {
                 if (result && result.statusCode === 401) return that.logout();
 
                 // This stops the uploadNext flow waiting for user input
@@ -474,7 +486,7 @@ export default {
 
             if (!files || !files.length) return;
 
-            targetPath = targetPath || that.currentPath;
+            targetPath = targetPath || that.currentFullPath;
 
             // convert from FileList to Array and amend useful properties
             files = Array.from(files).map(function (file) {
@@ -609,6 +621,7 @@ export default {
                 }
 
                 that.currentPath = '/';
+                that.currentFullPath = 'recent/';
                 that.breadCrumbs = [];
                 that.breadCrumbHome = {
                     icon: 'pi pi-clock',
@@ -750,7 +763,8 @@ export default {
                     return;
                 }
 
-                that.currentPath = '/' + filePath;
+                that.currentPath = filePath;
+                that.currentFullPath = 'shares/' + shareId + filePath;
 
                 that.breadCrumbs = sanitize(filePath).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
                     return {
@@ -822,6 +836,7 @@ export default {
                 };
 
                 that.currentPath = filePath;
+                that.currentFullPath = 'files' + filePath;
 
                 if (result.body.isDirectory) {
                     result.body.files.forEach(function (entry) {
