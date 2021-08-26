@@ -984,7 +984,7 @@ label {
 .side-bar-toggle {
     position: absolute;
     right: 10px;
-    top: 10px;
+    top: 3px;
 }
 
 </style>
