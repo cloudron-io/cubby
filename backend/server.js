@@ -92,10 +92,10 @@ function init(callback) {
 
     router.get ('/api/v1/shares', users.tokenAuth, shares.list);
     router.post('/api/v1/shares', users.tokenAuth, shares.create);
-    router.head('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.head);
-    router.post('/api/v1/shares/:shareId', users.optionalTokenAuth, multipart({ maxFieldsSize: 2 * 1024, limit: '512mb', timeout: 3 * 60 * 1000 }), shares.add);
-    router.get ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.get);
-    router.del ('/api/v1/shares/:shareId', users.tokenAuth, shares.remove);
+    router.head('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attach, shares.head);
+    router.post('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attach, multipart({ maxFieldsSize: 2 * 1024, limit: '512mb', timeout: 3 * 60 * 1000 }), shares.add);
+    router.get ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attach, shares.get);
+    router.del ('/api/v1/shares/:shareId', users.tokenAuth, shares.attach, shares.remove);
 
     router.get ('/api/v1/office/handle', users.tokenAuth, office.getHandle);
     router.get ('/api/v1/office/wopi/files/:shareId', users.tokenAuth, office.checkFileInfo);
