@@ -1,7 +1,8 @@
 'use strict';
 
 exports = module.exports = {
-    attach,
+    attachOwner,
+    attachReceiver,
     list,
     add,
     get,
@@ -31,7 +32,27 @@ function boolLike(arg) {
 }
 
 // just handles the :shareId param and adds req.share if valid
-async function attach(req, res, next) {
+async function attachOwner(req, res, next) {
+    assert.strictEqual(typeof req.user, 'object');
+    assert.strictEqual(typeof req.params.shareId, 'string');
+
+    const shareId = req.params.shareId;
+
+    debug(`attach: ${shareId}`);
+
+    try {
+        req.share = await shares.get(shareId);
+    } catch (error) {
+        if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'share not found'));
+        return next(new HttpError(500, error));
+    }
+
+    if (req.user && req.share.owner !== req.user.username) return next(new HttpError(403, 'not allowed'));
+
+    next();
+}
+
+async function attachReceiver(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
     assert.strictEqual(typeof req.params.shareId, 'string');
 
