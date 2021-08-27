@@ -107,6 +107,31 @@ function urlSearchQuery() {
     return decodeURIComponent(window.location.search).slice(1).split('&').map(function (item) { return item.split('='); }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
 }
 
+// those paths contain the internal type and path reference eg. shares/:shareId/folder/filename or files/folder/filename
+function parseResourcePath(resourcePath) {
+    var result = {
+        type: '',
+        path: '',
+        shareId: '',
+        apiPath: ''
+    };
+
+    if (resourcePath.indexOf('files/') === 0) {
+        result.type = 'files';
+        result.path = resourcePath.slice('files'.length);
+        result.apiPath = '/api/v1/files';
+    } else if (resourcePath.indexOf('shares/') === 0) {
+        result.type = 'shares';
+        result.shareId = resourcePath.split('/')[1];
+        result.path = resourcePath.slice(('shares/' + result.shareId + '/').length);
+        result.apiPath = '/api/v1/shares/' + result.shareId;
+    } else {
+        console.error('Unknown resource path', resourcePath);
+    }
+
+    return result;
+}
+
 export {
     getDirectLink,
     getShareLink,
@@ -121,5 +146,6 @@ export {
     getExtension,
     copyToClipboard,
     clearSelection,
-    urlSearchQuery
+    urlSearchQuery,
+    parseResourcePath
 };

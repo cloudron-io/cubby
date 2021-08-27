@@ -162,7 +162,7 @@
 
 import superagent from 'superagent';
 import async from 'async';
-import { decode, getExtension, getShareLink, copyToClipboard, sanitize, download, getDirectLink, prettyFileSize } from './utils.js';
+import { parseResourcePath, decode, getExtension, getShareLink, copyToClipboard, sanitize, download, getDirectLink, prettyFileSize } from './utils.js';
 
 export default {
     name: 'Index',
@@ -345,7 +345,7 @@ export default {
                 if (typeof done === 'function') done();
             });
         },
-        uploadFile(file, path, callback) {
+        uploadFile(file, fullTargetPath, callback) {
             var that = this;
 
             if (file.skip) {
@@ -362,10 +362,8 @@ export default {
 
             var finishedUploadSize = 0;
 
-            var api = file.apiType === 'files' ? '/api/v1/files' : ('/api/v1/shares/' + file.shareId);
-
-            superagent.post(api)
-              .query({ path: path, access_token: localStorage.accessToken, overwrite: !!file.overwrite })
+            superagent.post(file.apiPath)
+              .query({ path: fullTargetPath, access_token: localStorage.accessToken, overwrite: !!file.overwrite })
               .send(formData)
               .on('progress', function (event) {
                 // only handle upload events
@@ -402,19 +400,16 @@ export default {
             that.uploadStatus.busy = true;
 
             var file = that.uploadStatus.queue.pop();
-            var apiType = file.targetPath.indexOf('files/') === 0 ? 'files' : 'shares';
-            var path = '';
+            var resource = parseResourcePath(file.targetPath);
+            var fullTargetPath = sanitize(resource.path + '/' + (file.webkitRelativePath || file.name));
 
             // amend info for uploadFile
-            file.apiType = apiType;
-            file.shareId = apiType === 'files' ? null : file.targetPath.split('/')[1];
-
-            if (apiType === 'files') path = sanitize(file.targetPath.slice('files'.length) + '/' + (file.webkitRelativePath || file.name));
-            if (apiType === 'shares') path = sanitize(file.targetPath.slice('shares/'.length + file.targetPath.split('/')[1].length) + '/' + (file.webkitRelativePath || file.name));
+            file.apiType = resource.type;
+            file.apiPath = resource.apiPath;
+            file.shareId = resource.shareId;
 
             // check first for conflict to avoid double upload
-            var api = apiType === 'files' ? '/api/v1/files' : ('/api/v1/shares/' + file.targetPath.split('/')[1]);
-            superagent.head(api).query({ path: path, access_token: localStorage.accessToken }).end(function (error, result) {
+            superagent.head(resource.apiPath).query({ path: fullTargetPath, access_token: localStorage.accessToken }).end(function (error, result) {
                 if (result && result.statusCode === 401) return that.logout();
 
                 // This stops the uploadNext flow waiting for user input
@@ -427,20 +422,20 @@ export default {
 
                         that.uploadNext();
                     } else if (file.overwrite) {
-                        that.uploadFile(file, path, function (error) {
+                        that.uploadFile(file, fullTargetPath, function (error) {
                             if (error) return console.error(error);
                             that.uploadNext();
                         });
                     } else {
                         // FIXME: check why we need the timeout to give UI a chance to update
-                        setTimeout(function () { that.showConflictingFileDialog(file, path); }, 1000);
+                        setTimeout(function () { that.showConflictingFileDialog(file, fullTargetPath); }, 1000);
                     }
                     return;
                 }
 
                 if (error && error.status !== 404) console.error(error.message);
 
-                that.uploadFile(file, path, function (error) {
+                that.uploadFile(file, fullTargetPath, function (error) {
                     if (error) return console.error(error);
 
                     that.uploadNext();
