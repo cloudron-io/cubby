@@ -751,8 +751,11 @@ export default {
             // FIXME rework this to not make the listview flicker that much
             var resource = parseResourcePath(path || that.currentResourcePath || 'files/');
 
-            that.busy = true;
+            // only show busy state if it takes more than 2 seconds to avoid flickering
+            var busyTimer = setTimeout(function () { that.busy = true; }, 2000);
+
             superagent.get(resource.apiPath).query({ path: resource.path, access_token: that.accessToken }).end(function (error, result) {
+                clearTimeout(busyTimer);
                 that.busy = false;
 
                 if (error) {
