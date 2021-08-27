@@ -40,3 +40,8 @@
 * Generate preview URLs on the backend
 * Do not leak usernames in webdav listing
 * Fix duplicate entries in file listing
+
+[0.1.9]
+* Fix share uploads
+* Reduce UI flickering
+* Condensed view
