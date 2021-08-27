@@ -200,7 +200,7 @@ export default {
             entries: [],
             selectedEntries: [],
             currentPath: '/',
-            currentFullPath: 'files/',
+            currentResourcePath: 'files/',
             sideBarVisible: true,
             breadCrumbs: [],
             breadCrumbHome: {
@@ -481,7 +481,7 @@ export default {
 
             if (!files || !files.length) return;
 
-            targetPath = targetPath || that.currentFullPath;
+            targetPath = targetPath || that.currentResourcePath;
 
             // convert from FileList to Array and amend useful properties
             files = Array.from(files).map(function (file) {
@@ -544,9 +544,6 @@ export default {
 
                 that.uploadFiles(files, targetPath);
             });
-
-            // also navigate there
-            if (targetEntry) this.loadPath(targetEntry.filePath);
         },
         onDelete(entries) {
             var that = this;
@@ -616,7 +613,7 @@ export default {
                 }
 
                 that.currentPath = '/';
-                that.currentFullPath = 'recent/';
+                that.currentResourcePath = 'recent/';
                 that.breadCrumbs = [];
                 that.breadCrumbHome = {
                     icon: 'pi pi-clock',
@@ -735,78 +732,27 @@ export default {
             });
         },
         onShares() {
-            var that = this;
             const hash = window.location.hash.slice(1);
 
             if (hash.indexOf('shares/') !== 0) return console.error('invalid call for this URI');
 
-            const shareId = hash.slice('shares/'.length).split('/')[0] || '';
-            const filePath = hash.slice(`shares/${shareId}`.length) || '/';
-
-            that.busy = true;
-            superagent.get('/api/v1/shares/' + shareId).query({ access_token: that.accessToken, path: filePath }).end(function (error, result) {
-                that.busy = false;
-
-                if (error) {
-                    that.entries = [];
-
-                    if (error.status === 401) that.onLogout();
-                    else if (error.status === 403) that.error = 'Not allowed';
-                    else if (error.status === 404) that.error = 'Does not exist';
-                    else console.error(error);
-
-                    return;
-                }
-
-                that.currentPath = filePath;
-                that.currentFullPath = 'shares/' + shareId + filePath;
-
-                that.breadCrumbs = sanitize(filePath).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
-                    return {
-                        label: decode(e),
-                        url: '#shares/' + shareId  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
-                    };
-                });
-                that.breadCrumbHome = {
-                    icon: 'pi pi-share-alt',
-                    url: '#shares/'
-                };
-
-                // if we are not toplevel, add the share information
-                if (result.body.share) {
-                    that.breadCrumbs.unshift({
-                        label: result.body.share.filePath.slice(1), // remove slash at the beginning
-                        url: '#shares/' + shareId + '/'
-                    });
-                }
-
-                result.body.files.forEach(function (entry) {
-                    entry.extension = getExtension(entry);
-                    entry.rename = false;
-                    entry.filePathNew = entry.fileName;
-                });
-
-                that.entries = result.body.files;
-            });
+            this.loadPath(hash);
         },
         onFiles() {
             const hash = window.location.hash.slice(1);
 
             if (hash.indexOf('files/') !== 0) return console.error('invalid call for this URI');
 
-            this.loadPath(hash.slice('files'.length));
+            this.loadPath(hash);
         },
         loadPath(path) {
             var that = this;
 
             // FIXME rework this to not make the listview flicker that much
-
-            var filePath = path || that.currentPath || '/';
-
-            window.location.hash = 'files' + filePath;
+            var resource = parseResourcePath(path || that.currentResourcePath || 'files/');
 
             that.busy = true;
-            superagent.get('/api/v1/files').query({ path: filePath, access_token: that.accessToken }).end(function (error, result) {
+            superagent.get(resource.apiPath).query({ path: resource.path, access_token: that.accessToken }).end(function (error, result) {
                 that.busy = false;
 
                 if (error) {
@@ -819,19 +765,45 @@ export default {
                     return;
                 }
 
-                that.breadCrumbs = sanitize(filePath).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
-                    return {
-                        label: decode(e),
-                        url: '#files' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
+                if (resource.type === 'files') {
+                    that.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
+                        return {
+                            label: decode(e),
+                            url: '#files' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
+                        };
+                    });
+                    that.breadCrumbHome = {
+                        icon: 'pi pi-home',
+                        url: '#files/'
                     };
-                });
-                that.breadCrumbHome = {
-                    icon: 'pi pi-home',
-                    url: '#files'
-                };
+                } else if (resource.type === 'shares') {
+                    that.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
+                        return {
+                            label: decode(e),
+                            url: '#shares/' + resource.shareId  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
+                        };
+                    });
+                    that.breadCrumbHome = {
+                        icon: 'pi pi-share-alt',
+                        url: '#shares/'
+                    };
 
-                that.currentPath = filePath;
-                that.currentFullPath = 'files' + filePath;
+                    // if we are not toplevel, add the share information
+                    if (result.body.share) {
+                        that.breadCrumbs.unshift({
+                            label: result.body.share.filePath.slice(1), // remove slash at the beginning
+                            url: '#shares/' + resource.shareId + '/'
+                        });
+                    }
+                } else {
+                    console.error('FIXME breadcrumbs for resource type', resource.type);
+                }
+
+                that.currentPath = resource.path;
+                that.currentResourcePath = resource.resourcePath;
+
+                // update the browser hash
+                window.location.hash = that.currentResourcePath;
 
                 if (result.body.isDirectory) {
                     result.body.files.forEach(function (entry) {
@@ -847,7 +819,7 @@ export default {
             });
         },
         openDirectory(entry) {
-            if (entry.share && entry.share.id) window.location.hash = 'shares/' + entry.share.id + entry.filePath;
+            if (entry.share && entry.share.id) window.location.hash = 'shares/' + entry.share.id + '/' + entry.filePath;
             else window.location.hash = 'files' + entry.filePath;
         },
         onOpen(entry) {
