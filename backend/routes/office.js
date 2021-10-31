@@ -101,6 +101,7 @@ async function checkFileInfo(req, res, next) {
     next(new HttpSuccess(200, {
         BaseFileName: result.fileName,
         Size: result.size,
+        LastModifiedTime: result.mtime.toISOString(),
         UserId: req.user.username,
         UserCanWrite: true
     }));
@@ -151,16 +152,30 @@ async function getFile(req, res, next) {
  *  The PutFile wopi endpoint is triggered by a request with a POST verb at
  *  https://HOSTNAME/wopi/files/<document_id>/contents
  */
-function putFile(req, res) {
+async function putFile(req, res, next) {
     // we log to the console so that is possible
     // to check that saving has triggered this wopi endpoint
     console.log('wopi PutFile endpoint');
-    if (req.body) {
-        console.dir(req.body);
-        console.log(req.body.toString());
-        res.sendStatus(200);
-    } else {
-        console.log('Not possible to get the file content.');
-        res.sendStatus(404);
+    if (!req.body) return next(new HttpError(500, 'no body provided'));
+
+    const shareId = req.params.shareId;
+    if (!shareId) return next(new HttpError(400, 'missing or invalid shareId'));
+
+    debug(`putFile: ${shareId} ${req.body.length}`);
+
+    let result;
+    try {
+        result = await shares.get(shareId);
+    } catch (error) {
+        if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'not found'));
+        return next(new HttpError(500, error));
     }
+
+    try {
+        await files.addOrOverwriteFileContents(result.owner, result.filePath, req.body, null, true);
+    } catch (error) {
+        return next(new HttpError(500, error));
+    }
+
+    next(new HttpSuccess(200, { LastModifiedTime: new Date().toISOString() }));
 }

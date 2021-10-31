@@ -100,7 +100,7 @@ function init(callback) {
     router.get ('/api/v1/office/handle', users.tokenAuth, office.getHandle);
     router.get ('/api/v1/office/wopi/files/:shareId', users.tokenAuth, office.checkFileInfo);
     router.get ('/api/v1/office/wopi/files/:shareId/contents', users.tokenAuth, office.getFile);
-    router.post('/api/v1/office/wopi/files/:shareId/contents', users.tokenAuth, office.putFile);
+    router.post('/api/v1/office/wopi/files/:shareId/contents', users.tokenAuth, bodyParser.raw(), office.putFile);
 
     app.use('/api/healthcheck', function (req, res) { res.status(200).send(); });
     app.use('/api', bodyParser.json());

@@ -4,6 +4,7 @@ exports = module.exports = {
     getValidFullPath,
     addDirectory,
     addOrOverwriteFile,
+    addOrOverwriteFileContents,
     get,
     head,
     move,
@@ -81,6 +82,44 @@ async function addOrOverwriteFile(username, filePath, sourceFilePath, mtime, ove
     try {
         await fs.ensureDir(path.dirname(fullFilePath));
         await fs.copy(sourceFilePath, fullFilePath);
+    } catch (error) {
+        throw new MainError(MainError.FS_ERROR, error);
+    }
+
+    if (!mtime) return;
+
+    try {
+        var fd = fs.openSync(fullFilePath);
+        fs.futimesSync(fd, mtime, mtime);
+    } catch (error) {
+        throw new MainError(MainError.FS_ERROR, error);
+    }
+}
+
+async function addOrOverwriteFileContents(username, filePath, content, mtime, overwrite) {
+    assert.strictEqual(typeof username, 'string');
+    assert.strictEqual(typeof filePath, 'string');
+    assert.strictEqual(typeof mtime, 'object');
+    assert.strictEqual(typeof overwrite, 'boolean');
+    assert.strict(Buffer.isBuffer(content));
+
+    const fullFilePath = getValidFullPath(username, filePath);
+    if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);
+
+    debug(`addOrOverwriteFileContents: ${username} ${fullFilePath} mtime:${mtime} overwrite:${overwrite}`);
+
+    var stat;
+    try {
+        stat = fs.statSync(fullFilePath);
+    } catch (error) {
+        if (error.code !== 'ENOENT') throw new MainError(MainError.FS_ERROR, error);
+    }
+
+    if (stat && !overwrite) throw new MainError(MainError.ALREADY_EXISTS);
+
+    try {
+        await fs.ensureDir(path.dirname(fullFilePath));
+        await fs.writeFile(fullFilePath, content, 'utf8');
     } catch (error) {
         throw new MainError(MainError.FS_ERROR, error);
     }
