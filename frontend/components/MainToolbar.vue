@@ -24,8 +24,9 @@
     <!-- About Dialog -->
     <Dialog header="About Cubby" v-model:visible="aboutDialog.visible" :dismissableMask="true" :closable="true" :style="{width: '450px'}" :modal="true">
         <div>
-            Some info here!!!
-            <br/><br/>
+            Cubby the painless file sharing solution!<br/>
+            Developed by <a href="https://cloudron.io" target="_blank">Cloudron</a>.
+            <br/>
         </div>
         <template #footer>
             <Button label="Close" icon="pi pi-times" class="p-button-text" @click="aboutDialog.visible = false"/>
