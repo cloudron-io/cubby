@@ -45,3 +45,8 @@
 * Fix share uploads
 * Reduce UI flickering
 * Condensed view
+
+[0.2.0]
+* Allow office documents to be saved through WOPI protocol
+* Clear selection on path changes
+
