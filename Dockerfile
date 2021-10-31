@@ -6,8 +6,12 @@ WORKDIR /app/code
 ADD package.json package-lock.json /app/code/
 RUN npm install
 
-ADD . /app/code/
+ADD backend /app/code/backend
+ADD migrations /app/code/migrations
+ADD public /app/code/public
 
+ADD frontend /app/code/frontend
+ADD start.sh vue.config.js babel.config.js app.js cli.js /app/code/
 RUN npm run build
 
 CMD [ "/app/code/start.sh" ]
