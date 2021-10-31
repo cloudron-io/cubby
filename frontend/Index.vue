@@ -345,6 +345,9 @@ export default {
                 if (typeof done === 'function') done();
             });
         },
+        clearSelection() {
+          this.selectedEntries = [];
+        },
         uploadFile(file, fullTargetPath, callback) {
             var that = this;
 
@@ -597,6 +600,7 @@ export default {
         onRecent() {
             var that = this;
 
+            this.clearSelection();
 
             that.busy = true;
             superagent.get('/api/v1/recent').query({ access_token: that.accessToken }).end(function (error, result) {
@@ -747,6 +751,8 @@ export default {
         },
         loadPath(path) {
             var that = this;
+
+            this.clearSelection();
 
             // FIXME rework this to not make the listview flicker that much
             var resource = parseResourcePath(path || that.currentResourcePath || 'files/');
