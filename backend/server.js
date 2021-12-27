@@ -84,19 +84,21 @@ function init(callback) {
 
     router.get ('/api/v1/recent', users.tokenAuth, files.recent);
 
-    router.get ('/api/v1/files', users.tokenAuth, files.get);
     router.head('/api/v1/files', users.tokenAuth, files.head);
+    router.get ('/api/v1/files', users.tokenAuth, files.get);
     router.post('/api/v1/files', users.tokenAuth, multipart({ maxFieldsSize: 2 * 1024, limit: '512mb', timeout: 3 * 60 * 1000 }), files.add);
     router.put ('/api/v1/files', users.tokenAuth, files.update);
     router.del ('/api/v1/files', users.tokenAuth, files.remove);
 
-    router.get ('/api/v1/shares', users.tokenAuth, shares.list);
-    router.post('/api/v1/shares', users.tokenAuth, shares.create);
+    router.get ('/api/v1/shares', users.tokenAuth, shares.listShares);
+    router.post('/api/v1/shares', users.tokenAuth, shares.createShare);
+    router.del ('/api/v1/shares', users.tokenAuth, shares.removeShare);
+
     router.head('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.head);
+    router.get ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.get);
     router.post('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, multipart({ maxFieldsSize: 2 * 1024, limit: '512mb', timeout: 3 * 60 * 1000 }), shares.add);
     router.put ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.update);
-    router.get ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.get);
-    router.del ('/api/v1/shares/:shareId', users.tokenAuth, shares.attachOwner, shares.remove);
+    router.del ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.remove);
 
     router.get ('/api/v1/office/handle', users.tokenAuth, office.getHandle);
     router.get ('/api/v1/office/wopi/files/:shareId', users.tokenAuth, office.checkFileInfo);

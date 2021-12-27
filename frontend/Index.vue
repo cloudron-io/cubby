@@ -562,9 +562,9 @@ export default {
                 acceptClass: 'p-button-danger',
                 accept: () => {
                     async.eachSeries(entries, function (entry, callback) {
-                        var filePath = sanitize(that.currentPath + '/' + entry.fileName);
+                        var resource = parseResourcePath(that.currentResourcePath + entry.fileName);
 
-                        superagent.del('/api/v1/files').query({ path: filePath, access_token: localStorage.accessToken }).end(function (error, result) {
+                        superagent.del(resource.apiPath).query({ path: resource.path, access_token: localStorage.accessToken }).end(function (error, result) {
                             if (result && result.statusCode === 401) return that.logout();
                             if (result && result.statusCode !== 200) console.error('Error deleting entry.', entry);
                             if (error) console.error(error.message);
@@ -725,7 +725,7 @@ export default {
         onDeleteShare(share) {
             var that = this;
 
-            superagent.delete('/api/v1/shares/' + share.id).query({ access_token: localStorage.accessToken }).end(function (error, result) {
+            superagent.delete('/api/v1/shares').query({ share_id: share.id, access_token: localStorage.accessToken }).end(function (error, result) {
                 if (result && result.statusCode === 401) return that.logout();
                 if (result && result.statusCode !== 200) return console.error('Error deleting share');
                 if (error) return console.error(error.message);

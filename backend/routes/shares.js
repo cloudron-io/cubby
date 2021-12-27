@@ -3,11 +3,12 @@
 exports = module.exports = {
     attachOwner,
     attachReceiver,
-    list,
+    listShares,
+    createShare,
+    removeShare,
     add,
     get,
     head,
-    create,
     update,
     remove
 };
@@ -74,7 +75,7 @@ async function attachReceiver(req, res, next) {
 }
 
 // If a share for the receiver and filepath already exists, just reuse that
-async function create(req, res, next) {
+async function createShare(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
     const filePath = decodeURIComponent(req.query.path);
@@ -85,7 +86,7 @@ async function create(req, res, next) {
 
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
 
-    debug(`create: ${filePath} receiver:${receiverUsername || receiverEmail || 'link'}`);
+    debug(`createShare: ${filePath} receiver:${receiverUsername || receiverEmail || 'link'}`);
 
     let existingShares;
 
@@ -112,10 +113,10 @@ async function create(req, res, next) {
     next(new HttpSuccess(200, { shareId }));
 }
 
-async function list(req, res, next) {
+async function listShares(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
-    debug('list');
+    debug('listShares');
 
     let result = [];
 
@@ -153,6 +154,24 @@ async function list(req, res, next) {
     });
 
     next(new HttpSuccess(200, entry.withoutPrivate()));
+}
+
+async function removeShare(req, res, next) {
+    assert.strictEqual(typeof req.user, 'object');
+
+    const shareId = req.query.share_id;
+
+    if (!shareId) return next(new HttpError(400, 'share_id must be a non-empty string'));
+
+    debug(`removeShare: ${shareId}`);
+
+    try {
+        await shares.remove(shareId);
+    } catch (error) {
+        return next(new HttpError(500, error));
+    }
+
+    next(new HttpSuccess(200, {}));
 }
 
 async function add(req, res, next) {
@@ -270,10 +289,14 @@ async function remove(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
     assert.strictEqual(typeof req.share, 'object');
 
-    debug(`remove: ${req.share.id}`);
+    const filePath = req.query.path;
+
+    if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
+
+    debug(`remove: ${req.share.id} path=${filePath}`);
 
     try {
-        await shares.remove(req.share.id);
+        await files.remove(req.share.owner, path.join(req.share.filePath, filePath));
     } catch (error) {
         return next(new HttpError(500, error));
     }
