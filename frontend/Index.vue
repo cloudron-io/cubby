@@ -562,7 +562,7 @@ export default {
                 acceptClass: 'p-button-danger',
                 accept: () => {
                     async.eachSeries(entries, function (entry, callback) {
-                        var resource = parseResourcePath(that.currentResourcePath + entry.fileName);
+                        var resource = parseResourcePath(that.currentResourcePath + '/' + entry.fileName);
 
                         superagent.del(resource.apiPath).query({ path: resource.path, access_token: localStorage.accessToken }).end(function (error, result) {
                             if (result && result.statusCode === 401) return that.logout();
@@ -584,11 +584,8 @@ export default {
         onRename(entry, newFileName) {
             var that = this;
 
-            var filePath = that.currentResourcePath + entry.fileName;
-            var newFilePath = that.currentResourcePath + newFileName;
-
-            var resource = parseResourcePath(filePath);
-            var newResource = parseResourcePath(newFilePath);
+            var resource = parseResourcePath(that.currentResourcePath + '/' + entry.fileName);
+            var newResource = parseResourcePath(that.currentResourcePath + '/' + newFileName);
 
             superagent.put(resource.apiPath).query({ path: resource.path, action: 'move', new_path: newResource.path, access_token: localStorage.accessToken }).end(function (error, result) {
                 if (result && result.statusCode === 401) return that.logout();
