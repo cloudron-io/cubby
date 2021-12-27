@@ -240,11 +240,8 @@ async function head(req, res, next) {
     assert.strictEqual(typeof req.share, 'object');
 
     const filePath = req.query.path || '';//? decodeURIComponent(req.query.path) : '';
-    const type = req.query.type;
 
-    if (type && (type !== 'raw' && type !== 'download')) return next(new HttpError(400, 'type must be either empty, "download" or "raw"'));
-
-    debug(`head: ${req.share.id} path:${filePath} type:${type || 'json'}`);
+    debug(`head: ${req.share.id} path:${filePath}`);
 
     let result;
     try {
