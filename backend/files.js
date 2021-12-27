@@ -315,7 +315,7 @@ async function head(username, filePath) {
     }
 }
 
-function move(username, filePath, newFilePath) {
+async function move(username, filePath, newFilePath) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof filePath, 'string');
     assert.strictEqual(typeof newFilePath, 'string');
@@ -330,7 +330,7 @@ function move(username, filePath, newFilePath) {
 
     try {
         // TODO add option for overwrite
-        fs.move(fullFilePath, fullNewFilePath, { overwrite: false });
+        await fs.move(fullFilePath, fullNewFilePath, { overwrite: false });
     } catch (error) {
         throw new MainError(MainError.FS_ERROR, error);
     }
