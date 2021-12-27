@@ -8,6 +8,7 @@ exports = module.exports = {
     get,
     head,
     create,
+    update,
     remove
 };
 
@@ -235,6 +236,34 @@ async function head(req, res, next) {
     }
 
     next(new HttpSuccess(200, result));
+}
+
+async function update(req, res, next) {
+    assert.strictEqual(typeof req.user, 'object');
+    assert.strictEqual(typeof req.share, 'object');
+
+    const filePath = req.query.path;
+    const action = req.query.action;
+
+    if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
+
+    debug(`update: [${action}] ${req.share.id} ${filePath}`);
+
+    if (action === 'move') {
+        const newFilePath = decodeURIComponent(req.query.new_path);
+        if (!newFilePath) return next(new HttpError(400, 'move action requires new_path argument'));
+
+        try {
+            await files.move(req.share.owner, path.join(req.share.filePath, filePath), path.join(req.share.filePath, newFilePath));
+        } catch (error) {
+            if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'not found'));
+            return next(new HttpError(500, error));
+        }
+
+        return next(new HttpSuccess(200, {}));
+    } else {
+        return next(new HttpError(400, 'unknown action'));
+    }
 }
 
 async function remove(req, res, next) {

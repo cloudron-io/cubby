@@ -94,6 +94,7 @@ function init(callback) {
     router.post('/api/v1/shares', users.tokenAuth, shares.create);
     router.head('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.head);
     router.post('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, multipart({ maxFieldsSize: 2 * 1024, limit: '512mb', timeout: 3 * 60 * 1000 }), shares.add);
+    router.put ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.update);
     router.get ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.get);
     router.del ('/api/v1/shares/:shareId', users.tokenAuth, shares.attachOwner, shares.remove);
 
