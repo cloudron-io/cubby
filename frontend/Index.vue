@@ -28,7 +28,7 @@
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
-          <EntryList :entries="entries" :sort-folders-first="true" :editable="!isShares()"
+          <EntryList :entries="entries" :sort-folders-first="true" :editable="!isReadonly()"
             @entry-shared="onShare"
             @entry-renamed="onRename"
             @entry-activated="onOpen"
@@ -201,6 +201,7 @@ export default {
             selectedEntries: [],
             currentPath: '/',
             currentResourcePath: 'files/',
+            currentShare: null,
             sideBarVisible: true,
             breadCrumbs: [],
             breadCrumbHome: {
@@ -583,10 +584,13 @@ export default {
         onRename(entry, newFileName) {
             var that = this;
 
-            var filePath = sanitize(that.currentPath + '/' + entry.fileName);
-            var newFilePath = sanitize(that.currentPath + '/' + newFileName);
+            var filePath = that.currentResourcePath + entry.fileName;
+            var newFilePath = that.currentResourcePath + newFileName;
 
-            superagent.put('/api/v1/files').query({ path: filePath, action: 'move', new_path: newFilePath, access_token: localStorage.accessToken }).end(function (error, result) {
+            var resource = parseResourcePath(filePath);
+            var newResource = parseResourcePath(newFilePath);
+
+            superagent.put(resource.apiPath).query({ path: resource.path, action: 'move', new_path: newResource.path, access_token: localStorage.accessToken }).end(function (error, result) {
                 if (result && result.statusCode === 401) return that.logout();
                 if (result && result.statusCode !== 200) return console.error('Error moving file or folder');
                 if (error) return console.error(error.message);
@@ -636,8 +640,10 @@ export default {
         showAllShares() {
             window.location.hash = 'shares/';
         },
-        isShares() {
-            return window.location.hash.slice(1).startsWith('shares/');
+        isReadonly() {
+            if (window.location.hash === '/shares/') return true;
+            if (!this.currentShare) return false;
+            return this.currentShare.readonly;
         },
         onShare(entry) {
             var that = this;
@@ -810,6 +816,7 @@ export default {
 
                 that.currentPath = resource.path;
                 that.currentResourcePath = resource.resourcePath;
+                that.currentShare = result.body.share || null;
 
                 // update the browser hash
                 window.location.hash = that.currentResourcePath;
@@ -848,7 +855,7 @@ export default {
                 this.viewer = 'office';
             } else {
                 this.viewer = '';
-                console.log('TODO implement viewer');
+                console.warn('TODO implement viewer');
                 window.open(getDirectLink(entry));
             }
         },
