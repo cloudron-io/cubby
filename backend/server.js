@@ -13,6 +13,7 @@ var express = require('express'),
     shares = require('./routes/shares.js'),
     office = require('./routes/office.js'),
     webdav = require('./routes/webdav.js'),
+    preview = require('./routes/preview.js'),
     multipart = require('./routes/multipart.js'),
     morgan = require('morgan'),
     HttpError = require('connect-lastmile').HttpError,
@@ -99,6 +100,8 @@ function init(callback) {
     router.post('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, multipart({ maxFieldsSize: 2 * 1024, limit: '512mb', timeout: 3 * 60 * 1000 }), shares.add);
     router.put ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.update);
     router.del ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.remove);
+
+    router.get ('/api/v1/preview/:type/:id/:hash', users.optionalTokenAuth, preview.get);
 
     router.get ('/api/v1/office/handle', users.tokenAuth, office.getHandle);
     router.get ('/api/v1/office/wopi/files/:shareId', users.tokenAuth, office.checkFileInfo);

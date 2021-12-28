@@ -3,7 +3,8 @@
 const assert = require('assert'),
     fs = require('fs'),
     crypto = require('crypto'),
-    constants = require('./constants.js');
+    constants = require('./constants.js'),
+    preview = require('./preview.js');
 
 exports = module.exports = Entry;
 
@@ -48,6 +49,13 @@ Entry.prototype.getPreviewUrl = function () {
     if (!this.mimeType) return '';
     if (this.mimeType === 'inode/recent') return '/folder-temp.svg';
     if (this.mimeType === 'inode/share') return '/folder-network.svg';
+
+    const previewHash = preview.getHash(this.mimeType, this._fullFilePath);
+    if (previewHash) {
+        const type = this.share ? 'shares' : 'files';
+        const ownerId = this.share ? this.share.id : this.owner;
+        return `/api/v1/preview/${type}/${ownerId}/${previewHash}`;
+    }
 
     var mime = this.mimeType.split('/');
     var previewUrl = '/mime-types/' + mime[0] + '-' + mime[1] + '.svg';

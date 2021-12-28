@@ -16,7 +16,7 @@
       <div class="tr-placeholder" v-show="entries.length === 0">{{ emptyPlaceholder }}</div>
       <div class="tr-placeholder" v-show="entries.length !== 0 && filteredAndSortedEntries.length === 0">Nothing found</div>
       <div class="tr" v-for="entry in filteredAndSortedEntries" :key="entry.id" @contextmenu="onContextMenu(entry, $event)" @dblclick="onEntryOpen(entry, false)" @click="onEntrySelect(entry, $event)" @drop.stop.prevent="drop(entry)" @dragover.stop.prevent="dragOver(entry)" :class="{ 'selected': selected.includes(getEntryIdentifier(entry)), 'drag-active': entry === dragActive }">
-        <div class="td icon"><img :src="entry.previewUrl"/></div>
+        <div class="td icon"><img :src="getPreviewUrl(entry)" style="object-fit: cover;"/></div>
         <div class="td" style="flex-grow: 2;">
           <InputText @click.stop @keyup.enter="onRenameSubmit(entry)" @keyup.esc="onRenameEnd(entry)" @blur="onRenameEnd(entry)" v-model="entry.filePathNew" :id="'filePathRenameInputId-' + entry.fileName" v-show="entry.rename" class="rename-input"/>
           <a v-show="!entry.rename" :href="entry.filePath" @click.stop.prevent="onEntryOpen(entry, true)">{{ entry.fileName }}</a>
@@ -41,7 +41,7 @@
 <script>
 
 import { nextTick } from 'vue';
-import { prettyDate, prettyLongDate, prettyFileSize, getDirectLink, clearSelection } from '../utils.js';
+import { getPreviewUrl, prettyDate, prettyLongDate, prettyFileSize, getDirectLink, clearSelection } from '../utils.js';
 import * as Combokeys from 'combokeys';
 
 export default {
@@ -135,6 +135,7 @@ export default {
     },
     methods: {
         getDirectLink,
+        getPreviewUrl,
         prettyDate,
         prettyFileSize,
         prettyLongDate,

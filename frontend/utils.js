@@ -61,6 +61,12 @@ function getDirectLink(entry) {
     }
 }
 
+// TODO the url might actually return a 412 in which case we have to keep reloading
+function getPreviewUrl(entry) {
+    if (!entry.previewUrl) return '';
+    return entry.previewUrl + '?access_token=' + localStorage.accessToken;
+}
+
 function getShareLink(shareId) {
     return window.location.origin + '/api/v1/shares/' + shareId + '?type=raw';
 }
@@ -138,6 +144,7 @@ function parseResourcePath(resourcePath) {
 
 export {
     getDirectLink,
+    getPreviewUrl,
     getShareLink,
     getFileTypeGroup,
     prettyDate,

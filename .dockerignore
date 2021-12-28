@@ -4,6 +4,7 @@ files/
 dist/
 .git/
 .data/
+.thumbnails/
 screenshots/
 cli/
 favicon.png

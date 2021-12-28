@@ -2,7 +2,7 @@
     <div class="sidebar-container" :class="{ 'visible': visible && selectedEntries.length }">
       <div class="p-d-flex p-jc-between header" style="padding-bottom: 10px;">Details</div>
       <div class="preview-container">
-        <div class="preview" v-for="entry in selectedEntries" :key="entry.id" :style="{ backgroundImage: entry && entry.previewUrl ? 'url(' + entry.previewUrl + ')' : 'none' }"></div>
+        <div class="preview" v-for="entry in selectedEntries" :key="entry.id" :style="{ backgroundImage: entry && getPreviewUrl(entry) ? 'url(' + getPreviewUrl(entry) + ')' : 'none' }"></div>
       </div>
       <div class="detail" v-show="selectedEntries.length === 1">
         <p>Owner</p>
@@ -28,7 +28,7 @@
 
 <script>
 
-import { download, encode, copyToClipboard, prettyLongDate, prettyFileSize } from '../utils.js';
+import { getPreviewUrl, download, encode, copyToClipboard, prettyLongDate, prettyFileSize } from '../utils.js';
 
 export default {
     name: 'SideBar',
@@ -54,6 +54,7 @@ export default {
     methods: {
         prettyLongDate,
         prettyFileSize,
+        getPreviewUrl,
         onDownload: function (entry) {
             download(entry);
         },
