@@ -16,7 +16,7 @@
       <div class="tr-placeholder" v-show="entries.length === 0">{{ emptyPlaceholder }}</div>
       <div class="tr-placeholder" v-show="entries.length !== 0 && filteredAndSortedEntries.length === 0">Nothing found</div>
       <div class="tr" v-for="entry in filteredAndSortedEntries" :key="entry.id" @contextmenu="onContextMenu(entry, $event)" @dblclick="onEntryOpen(entry, false)" @click="onEntrySelect(entry, $event)" @drop.stop.prevent="drop(entry)" @dragover.stop.prevent="dragOver(entry)" :class="{ 'selected': selected.includes(getEntryIdentifier(entry)), 'drag-active': entry === dragActive }">
-        <div class="td icon"><img :src="getPreviewUrl(entry)" style="object-fit: cover;"/></div>
+        <div class="td icon"><img :src="getPreviewUrl(entry)" @load="previewLoaded(entry)" @error="previewError(entry, $event)" style="object-fit: cover;" v-show="!entry.previewLoading"/><i class="pi pi-spin pi-spinner" v-show="entry.previewLoading"></i></div>
         <div class="td" style="flex-grow: 2;">
           <InputText @click.stop @keyup.enter="onRenameSubmit(entry)" @keyup.esc="onRenameEnd(entry)" @blur="onRenameEnd(entry)" v-model="entry.filePathNew" :id="'filePathRenameInputId-' + entry.fileName" v-show="entry.rename" class="rename-input"/>
           <a v-show="!entry.rename" :href="entry.filePath" @click.stop.prevent="onEntryOpen(entry, true)">{{ entry.fileName }}</a>
@@ -139,6 +139,17 @@ export default {
         prettyDate,
         prettyFileSize,
         prettyLongDate,
+        previewLoaded: function (entry) {
+            entry.previewLoading = false;
+        },
+        previewError: function (entry, event) {
+            entry.previewLoading = true;
+            var url = new URL(event.target.src);
+
+            setTimeout(function () {
+                event.target.src = url.pathname + '?access_token=' + url.searchParams.get('access_token') + '&refresh=' + Date.now();
+            }, 1000);
+        },
         getEntryIdentifier(entry) {
             return (entry.share ? (entry.share.id + '/') : '') + entry.filePath;
         },
