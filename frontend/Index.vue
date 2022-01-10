@@ -12,14 +12,16 @@
     <div class="sidebar">
       <h1 style="margin-bottom: 50px; text-align: center;"><img src="logo.png" height="60" width="60"/><br/>Cubby</h1>
 
-      <Button icon="pi pi-folder-open" class="p-button-text p-button-secondary" label="All Files" @click="showAllFiles"/>
-      <Button icon="pi pi-clock" class="p-button-text p-button-secondary" label="Recent Files" @click="showAllRecent"/>
-      <Button icon="pi pi-share-alt" class="p-button-text p-button-secondary" label="Shared With You" @click="showAllShares"/>
+      <Button icon="pi pi-folder-open" class="p-button-text p-button-primary" label="All Files" @click="showAllFiles"/>
+      <Button icon="pi pi-clock" class="p-button-text p-button-primary" label="Recent Files" @click="showAllRecent"/>
+      <Button icon="pi pi-share-alt" class="p-button-text p-button-primary" label="Shared With You" @click="showAllShares"/>
 
       <div style="flex-grow: 1">&nbsp;</div>
 
-      <div class="p-fluid">
-        <span><b>{{ prettyFileSize(profile.diskusage.used) }}</b> of <b>{{ prettyFileSize(profile.diskusage.available) }}</b> used</span>
+      <div class="p-fluid" v-tooltip.top="prettyFileSize(profile.diskusage.used) + ' of ' + prettyFileSize(profile.diskusage.available) + ' used'">
+        <span>
+          <b>{{ parseInt(profile.diskusage.used / profile.diskusage.available * 100) }}%</b> of storage used
+        </span>
         <ProgressBar class="diskusage" :value="(profile.diskusage.used / profile.diskusage.size) * 100" :showValue="false"/>
       </div>
     </div>
