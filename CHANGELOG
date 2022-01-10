@@ -50,3 +50,8 @@
 * Allow office documents to be saved through WOPI protocol
 * Clear selection on path changes
 
+[0.3.0]
+* Various bugfixes
+* Less colorful visual distraction
+* Support for image thumbnails
+
