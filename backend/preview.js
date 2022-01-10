@@ -42,8 +42,9 @@ function enqueue(hash, fullFilePath, generator) {
 
 const generators = [{
     name: 'imagemagick',
-    mimeTypes: [ 'image/jpeg' ],
-    getHash: function (fullFilePath) {
+    mimeTypes: [ 'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff', 'image/ico' ],
+    getHash: function (mimeType, fullFilePath) {
+        assert.strictEqual(typeof mimeType, 'string');
         assert.strictEqual(typeof fullFilePath, 'string');
 
         const hash = crypto.createHash('md5').update(fullFilePath).digest('hex');
@@ -56,7 +57,8 @@ const generators = [{
 
             try {
                 await fs.ensureDir(constants.THUMBNAIL_ROOT);
-                await exec(`convert -thumbnail 1024 "${fullFilePath}" "${targetPath}"`);
+                if (mimeType === 'image/gif') await exec(`convert -thumbnail 512 "${fullFilePath}[0]" "${targetPath}"`);
+                else await exec(`convert -thumbnail 512 "${fullFilePath}" "${targetPath}"`);
             } catch (e) {
                 console.error(`Failed to create thumbnail for ${fullFilePath}`, e);
             }
@@ -75,7 +77,7 @@ function getHash(mimeType, fullFilePath) {
     const generator = generators.find(function (g) { return g.mimeTypes.indexOf(mimeType) !== -1; });
     if (!generator) return null;
 
-    return generator.getHash(fullFilePath);
+    return generator.getHash(mimeType, fullFilePath);
 }
 
 function getLocalPath(hash) {
