@@ -36,11 +36,9 @@
 
 <script>
 
-import { sanitize } from '../utils.js';
-
 export default {
     name: 'MainToolbar',
-    emits: [ 'logout', 'upload-file', 'upload-folder', 'new-file', 'new-folder', 'download', 'delete' ],
+    emits: [ 'logout', 'upload-file', 'upload-folder', 'new-file', 'new-folder', 'download', 'delete', 'directory-up' ],
     props: {
         breadCrumbs: {
             type: Array,
@@ -112,7 +110,7 @@ export default {
             this.$emit('logout');
         },
         onUp() {
-            window.location.hash = sanitize(this.currentPath.split('/').slice(0, -1).filter(function (p) { return !!p; }).join('/'));
+            this.$emit('directory-up');
         },
         onUploadFile() {
             this.$emit('upload-file');
