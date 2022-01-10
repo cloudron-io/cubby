@@ -12,9 +12,9 @@
     <div class="sidebar">
       <h1 style="margin-bottom: 50px; text-align: center;"><img src="logo.png" height="60" width="60"/><br/>Cubby</h1>
 
-      <Button icon="pi pi-folder-open" class="" label="All Files" @click="showAllFiles"/>
-      <Button icon="pi pi-clock" class="" label="Recent Files" @click="showAllRecent"/>
-      <Button icon="pi pi-share-alt" class="" label="Shared With You" @click="showAllShares"/>
+      <Button icon="pi pi-folder-open" class="p-button-text p-button-secondary" label="All Files" @click="showAllFiles"/>
+      <Button icon="pi pi-clock" class="p-button-text p-button-secondary" label="Recent Files" @click="showAllRecent"/>
+      <Button icon="pi pi-share-alt" class="p-button-text p-button-secondary" label="Shared With You" @click="showAllShares"/>
 
       <div style="flex-grow: 1">&nbsp;</div>
 
@@ -947,8 +947,8 @@ label {
     display: flex;
     height: 100%;
     width: 250px;
-    background-color: #2196f3;
-    color: white;
+    background-color: #E8E8E8;
+    color: #607D8B;
     padding: 10px;
     flex-direction: column;
 }
