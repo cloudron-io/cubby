@@ -1,7 +1,7 @@
 <template>
     <Toolbar>
         <template #left>
-          <Button icon="pi pi-chevron-left" class="p-mr-2 p-button-sm" :disabled="breadCrumbs.length === 0" @click="onUp"/>
+          <Button icon="pi pi-chevron-left" class="p-mr-2 p-button-sm p-button-text" :disabled="breadCrumbs.length === 0" @click="onUp"/>
           <Breadcrumb :home="breadCrumbHome" :model="breadCrumbs"/>
         </template>
 
