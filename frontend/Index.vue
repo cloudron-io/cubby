@@ -18,7 +18,7 @@
 
       <div style="flex-grow: 1">&nbsp;</div>
 
-      <div class="p-fluid" v-tooltip.top="prettyFileSize(profile.diskusage.used) + ' of ' + prettyFileSize(profile.diskusage.available) + ' used'">
+      <div class="p-fluid" v-tooltip.top="prettyFileSize(profile.diskusage.used) + ' of ' + prettyFileSize(profile.diskusage.available)">
         <span>
           <b>{{ parseInt(profile.diskusage.used / profile.diskusage.available * 100) }}%</b> of storage used
         </span>
