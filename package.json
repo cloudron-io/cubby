@@ -13,7 +13,7 @@
     "async": "^3.2.3",
     "body-parser": "^1.19.1",
     "combokeys": "^3.0.1",
-    "commander": "^7.2.0",
+    "commander": "^9.0.0",
     "connect-lastmile": "^2.1.1",
     "connect-timeout": "^1.9.0",
     "core-js": "^3.16.1",
