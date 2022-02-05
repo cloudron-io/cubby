@@ -13,7 +13,7 @@ var assert = require('assert'),
     constants = require('./constants.js'),
     users = require('./users.js'),
     path = require('path'),
-    df = require('@sindresorhus/df'),
+    df = require('./df.js'),
     MainError = require('./mainerror.js');
 
 // { username: { used: int, directories: { filepath: size }}
