@@ -57,4 +57,5 @@
 
 [0.4.0]
 * Update dependencies
+* Update base image to v3.2.0
 
