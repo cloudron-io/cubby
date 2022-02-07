@@ -1,4 +1,4 @@
-This app packages Cubby <upstream>0.3.0</upstream>
+This app packages Cubby <upstream>0.4.0</upstream>
 
 ### Overview
 
