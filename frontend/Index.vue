@@ -26,7 +26,7 @@
       </div>
     </div>
     <div class="content">
-      <MainToolbar :breadCrumbs="breadCrumbs" :breadCrumbHome="breadCrumbHome" :selectedEntries="selectedEntries" :displayName="profile.displayName" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @directory-up="onDirectoryUp" @new-folder="onNewFolder" @delete="onDelete" @download="onDownload"/>
+      <MainToolbar :breadCrumbs="breadCrumbs" :breadCrumbHome="breadCrumbHome" :selectedEntries="selectedEntries" :displayName="profile.displayName" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @directory-up="onUp" @new-folder="onNewFolder" @delete="onDelete" @download="onDownload"/>
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
@@ -740,20 +740,6 @@ export default {
                 });
             });
         },
-        onShares() {
-            const hash = window.location.hash.slice(1);
-
-            if (hash.indexOf('shares/') !== 0) return console.error('invalid call for this URI');
-
-            this.loadPath(hash);
-        },
-        onFiles() {
-            const hash = window.location.hash.slice(1);
-
-            if (hash.indexOf('files/') !== 0) return console.error('invalid call for this URI');
-
-            this.loadPath(hash);
-        },
         loadPath(path) {
             var that = this;
 
@@ -778,6 +764,8 @@ export default {
 
                     return;
                 }
+
+                const entry = result.body;
 
                 if (resource.type === 'files') {
                     that.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
@@ -826,43 +814,41 @@ export default {
                         entry.rename = false;
                         entry.filePathNew = entry.fileName;
                     });
+                    that.viewer = '';
                 } else {
-                    result.body.files = [];
+                    // TODO load parent directory for that.entries
+                    if (that.$refs.imageViewer.canHandle(entry)) {
+                        that.$refs.imageViewer.open(entry);
+                        that.viewer = 'image';
+                    } else if (that.$refs.textEditor.canHandle(entry)) {
+                        that.$refs.textEditor.open(entry);
+                        that.viewer = 'text';
+                    } else if (that.$refs.pdfViewer.canHandle(entry)) {
+                        that.$refs.pdfViewer.open(entry);
+                        that.viewer = 'pdf';
+                    } else if (that.$refs.officeViewer.canHandle(entry)) {
+                        that.$refs.officeViewer.open(entry);
+                        that.viewer = 'office';
+                    } else {
+                        that.viewer = '';
+                        console.warn('TODO implement viewer');
+                        window.open(getDirectLink(entry));
+                    }
                 }
 
                 that.entries = result.body.files;
             });
         },
-        openDirectory(entry) {
+        onOpen(entry) {
             if (entry.share && entry.share.id) window.location.hash = 'shares/' + entry.share.id + '/' + entry.filePath;
             else window.location.hash = 'files' + entry.filePath;
         },
-        onOpen(entry) {
-            if (entry.isDirectory) return this.openDirectory(entry);
-
-            if (this.$refs.imageViewer.canHandle(entry)) {
-                this.$refs.imageViewer.open(entry);
-                this.viewer = 'image';
-            } else if (this.$refs.textEditor.canHandle(entry)) {
-                this.$refs.textEditor.open(entry);
-                this.viewer = 'text';
-            } else if (this.$refs.pdfViewer.canHandle(entry)) {
-                this.$refs.pdfViewer.open(entry);
-                this.viewer = 'pdf';
-            } else if (this.$refs.officeViewer.canHandle(entry)) {
-                this.$refs.officeViewer.open(entry);
-                this.viewer = 'office';
-            } else {
-                this.viewer = '';
-                console.warn('TODO implement viewer');
-                window.open(getDirectLink(entry));
-            }
-        },
         onViewerClose() {
-            this.viewer = null;
+            this.onUp();
         },
-        onDirectoryUp() {
-            window.location.hash = sanitize(this.currentPath.split('/').slice(0, -1).filter(function (p) { return !!p; }).join('/'));
+        onUp() {
+            const hash = window.location.hash.slice(1);
+            window.location.hash = hash.split('/')[0] + sanitize(hash.split('/').slice(1, -1).filter(function (p) { return !!p; }).join('/'));
         }
     },
     mounted() {
@@ -880,9 +866,9 @@ export default {
         function hashChange() {
             const hash = window.location.hash.slice(1);
 
-            if (hash.indexOf('files/') === 0) that.onFiles();
+            if (hash.indexOf('files/') === 0) that.loadPath(hash);
             else if (hash.indexOf('recent/') === 0) that.onRecent();
-            else if (hash.indexOf('shares/') === 0) that.onShares();
+            else if (hash.indexOf('shares/') === 0) that.loadPath(hash);
             else window.location.hash = 'files/';
         }
 
