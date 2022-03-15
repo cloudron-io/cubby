@@ -26,7 +26,7 @@ function prettyLongDate(value) {
     if (!value) return 'unkown';
 
     var date = new Date(value);
-    return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+    return `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
 }
 
 function prettyFileSize(value) {
