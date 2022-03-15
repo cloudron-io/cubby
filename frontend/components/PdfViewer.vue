@@ -30,9 +30,6 @@ export default {
             entry: null
         };
     },
-    props: {
-        entries: Array
-    },
     methods: {
         canHandle(entry) {
             return entry.mimeType === 'application/pdf';

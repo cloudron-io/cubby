@@ -154,10 +154,10 @@
     </template>
   </Dialog>
 
-  <ImageViewer ref="imageViewer" :entries="entries" @close="onViewerClose" @download="onDownload" v-show="viewer === 'image'" />
-  <TextEditor ref="textEditor" :entries="entries" @close="onViewerClose" @saved="onFileSaved" v-show="viewer === 'text'" />
-  <PdfViewer ref="pdfViewer" :entries="entries" @close="onViewerClose" v-show="viewer === 'pdf'" />
-  <OfficeViewer ref="officeViewer" :config="config.viewers.collabora" :entries="entries" @close="onViewerClose" v-show="viewer === 'office'" />
+  <ImageViewer ref="imageViewer" @close="onViewerClose" @download="onDownload" v-show="viewer === 'image'" />
+  <TextEditor ref="textEditor" @close="onViewerClose" @saved="onFileSaved" v-show="viewer === 'text'" />
+  <PdfViewer ref="pdfViewer" @close="onViewerClose" v-show="viewer === 'pdf'" />
+  <OfficeViewer ref="officeViewer" :config="config.viewers.collabora" @close="onViewerClose" v-show="viewer === 'office'" />
 </template>
 
 <script>

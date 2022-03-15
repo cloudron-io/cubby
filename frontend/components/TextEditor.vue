@@ -36,9 +36,6 @@ export default {
             busySave: false
         };
     },
-    props: {
-        entries: Array
-    },
     methods: {
         canHandle(entry) {
             return getFileTypeGroup(entry) === 'text' || entry.mimeType === 'application/json' || entry.mimeType === 'application/javascript' || entry.mimeType === 'application/x-shellscript';

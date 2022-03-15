@@ -10,6 +10,7 @@
 
 <script>
 
+import superagent from 'superagent';
 import { getDirectLink, getFileTypeGroup } from '../utils.js';
 
 export default {
@@ -18,25 +19,34 @@ export default {
     data() {
         return {
             currentIndex: 0,
-            entry: {}
+            entry: {},
+            entries: []
         };
-    },
-    props: {
-        entries: Array
     },
     methods: {
         canHandle(entry) {
             return getFileTypeGroup(entry) === 'image';
         },
         open(entry) {
+            const that = this;
+
             if (!entry || entry.isDirectory || !this.canHandle(entry)) return;
 
             this.$refs.image.style.backgroundImage = 'url("' + getDirectLink(entry) + '")';
             this.currentIndex = this.entries.filter(function (e) { return getFileTypeGroup(e) === 'image'; }).findIndex(function (e) { return e.fileName === entry.fileName; });
             this.entry = entry;
+            this.entries = [];
 
             // TODO come up with something better here
             setTimeout(() => this.$refs.imageContainer.focus(), 1000);
+
+            // TODO support shares here apiPath wise
+            const folderPath = entry.filePath.slice(0, -entry.fileName.length);
+            superagent.get('/api/v1/files').query({ path: folderPath, access_token: localStorage.accessToken }).end(function (error, result) {
+                if (error) return console.error('Failed to load directory:', error);
+
+                that.entries = result.body.files;
+            });
         },
         onDownload() {
             this.$emit('download', [ this.entry ]);

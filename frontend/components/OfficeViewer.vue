@@ -36,7 +36,6 @@ export default {
         };
     },
     props: {
-        entries: Array,
         config: {}
     },
     methods: {
