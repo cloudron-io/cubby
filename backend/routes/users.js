@@ -32,7 +32,7 @@ async function login(req, res, next) {
 }
 
 async function tokenAuth(req, res, next) {
-    var accessToken = req.query.access_token || req.body.accessToken;
+    var accessToken = req.query.access_token || req.body.accessToken || '';
 
     try {
         req.user = await users.getByAccessToken(accessToken);
@@ -45,7 +45,7 @@ async function tokenAuth(req, res, next) {
 }
 
 async function optionalTokenAuth(req, res, next) {
-    var accessToken = req.query.access_token || req.body.accessToken;
+    var accessToken = req.query.access_token || req.body.accessToken || '';
 
     if (!accessToken) {
         req.user = null;
