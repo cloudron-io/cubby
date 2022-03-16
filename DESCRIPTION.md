@@ -1,5 +1,3 @@
-This app packages Cubby <upstream>0.4.0</upstream>
-
 ### Overview
 
 Plain awesome Filesharing.
