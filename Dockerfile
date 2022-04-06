@@ -11,8 +11,7 @@ ENV CLOUDRON_POSTGRESQL_USERNAME="postgres" \
     DEBUG="cubby*"
 
 RUN mkdir -p /app/code \
-    && mkdir /app/data \
-    && chmod -R 777 /app
+    && mkdir /app/data
 
 WORKDIR /app/code
 
