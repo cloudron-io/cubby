@@ -93,6 +93,8 @@ async function addOrOverwriteFile(username, filePath, sourceFilePath, mtime, ove
         fs.futimesSync(fd, mtime, mtime);
     } catch (error) {
         throw new MainError(MainError.FS_ERROR, error);
+    } finally {
+        fs.unlink(sourceFilePath)
     }
 }
 
