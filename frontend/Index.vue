@@ -30,7 +30,7 @@
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
-          <EntryList :entries="entries" :sort-folders-first="true" :editable="!isReadonly()"
+          <EntryList :entries="entries" :sort-folders-first="true" :editable="!isReadonly()" :active="viewer === ''"
             @entry-shared="onShare"
             @entry-renamed="onRename"
             @entry-activated="onOpen"

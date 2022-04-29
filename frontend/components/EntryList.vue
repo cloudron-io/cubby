@@ -49,7 +49,7 @@ export default {
     emits: [ 'selection-changed', 'entry-activated', 'entry-renamed', 'delete', 'dropped', 'entry-shared', 'download' ],
     data() {
         return {
-            active: {},
+            activeEntry: null,
             selected: [],
             selectedEntries: [],
             sort: {
@@ -91,6 +91,10 @@ export default {
             default: 'Folder is empty'
         },
         editable: {
+            type: Boolean,
+            default: false
+        },
+        active: {
             type: Boolean,
             default: false
         },
@@ -139,6 +143,9 @@ export default {
         prettyDate,
         prettyFileSize,
         prettyLongDate,
+        onEnter() {
+            console.log('enter', this.active)
+        },
         previewLoaded: function (entry) {
             entry.previewLoading = false;
         },
@@ -178,6 +185,9 @@ export default {
                 this.selected = [ fileIdentifier ];
                 this.selectedEntries = [ entry ];
             }
+
+            // update the last active Entry (basically the one with focus)
+            this.activeEntry = entry;
 
             this.$emit('selection-changed', this.selectedEntries);
         },
@@ -263,9 +273,9 @@ export default {
     mounted() {
         var that = this;
 
-        // TODO fix this to be component local to avoid interaction with viewers
-        // global key handler for up/down selection
-        window.addEventListener('keydown', function () {
+        window.addEventListener('keydown', function (event) {
+            if (!that.active) return;
+
             if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
                 if (that.selected.length === 0) return;
 
@@ -285,12 +295,26 @@ export default {
             }
         });
 
+        window.addEventListener('keyup', function (event) {
+            if (!that.active) return;
+
+            if (event.key === 'Enter') {
+                if (!that.activeEntry) return;
+
+                that.onEntryOpen(that.activeEntry, false);
+
+                // prevents scrolling the viewport
+                event.preventDefault();
+            }
+        });
+
         var keys = new Combokeys(document.documentElement);
         keys.bind([ 'command+a', 'ctrl+a' ], function () {
             that.onSelectAll();
             return false;
         });
     }
+
 };
 
 </script>
