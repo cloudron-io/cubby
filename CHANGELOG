@@ -62,3 +62,8 @@
 [0.5.0]
 * Improve browser history handling
 
+[0.6.0]
+* Update dependencies
+* Improve key input handling
+* Fix tmp file cleanup
+
