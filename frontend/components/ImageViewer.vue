@@ -102,7 +102,6 @@ export default {
     background-position: center;
 }
 
-
 .action-nav {
     display: flex;
     justify-content: center;

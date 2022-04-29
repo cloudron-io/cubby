@@ -1,11 +1,11 @@
 <template>
     <div class="container">
         <Toolbar>
-            <template #left>
+            <template #start>
                 <div>{{ entry ? entry.fileName : '' }}</div>
             </template>
 
-            <template #right>
+            <template #end>
                 <Button icon="pi pi-times" class="p-ml-2 p-button-sm" label="Close" @click="onClose"/>
             </template>
         </Toolbar>

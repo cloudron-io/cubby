@@ -158,6 +158,7 @@
   <TextEditor ref="textEditor" @close="onViewerClose" @saved="onFileSaved" v-show="viewer === 'text'" />
   <PdfViewer ref="pdfViewer" @close="onViewerClose" v-show="viewer === 'pdf'" />
   <OfficeViewer ref="officeViewer" :config="config.viewers.collabora" @close="onViewerClose" v-show="viewer === 'office'" />
+  <GenericViewer ref="genericViewer" @close="onViewerClose" v-show="viewer === 'generic'" />
 </template>
 
 <script>
@@ -830,9 +831,8 @@ export default {
                         that.$refs.officeViewer.open(entry);
                         that.viewer = 'office';
                     } else {
-                        that.viewer = '';
-                        console.warn('TODO implement viewer');
-                        window.open(getDirectLink(entry));
+                        that.viewer = 'generic';
+                        that.$refs.genericViewer.open(entry);
                     }
                 }
 

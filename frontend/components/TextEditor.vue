@@ -1,12 +1,12 @@
 <template>
     <div class="container">
         <Toolbar>
-            <template #left>
+            <template #start>
                 <Button :icon="busySave ? 'pi pi-spin pi-spinner' : 'pi pi-save'" class="p-mr-2 p-button-sm" label="Save" @click="onSave" :disabled="busySave || !isChanged"/>
                 <div>{{ entry ? entry.fileName : '' }}</div>
             </template>
 
-            <template #right>
+            <template #end>
                 <Button icon="pi pi-times" class="p-ml-2 p-button-sm" label="Close" @click="onClose"/>
             </template>
         </Toolbar>
