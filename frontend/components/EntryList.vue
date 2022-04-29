@@ -18,7 +18,7 @@
       <div class="tr" v-for="entry in filteredAndSortedEntries" :key="entry.id" @contextmenu="onContextMenu(entry, $event)" @dblclick="onEntryOpen(entry, false)" @click="onEntrySelect(entry, $event)" @drop.stop.prevent="drop(entry)" @dragover.stop.prevent="dragOver(entry)" :class="{ 'selected': selected.includes(getEntryIdentifier(entry)), 'drag-active': entry === dragActive }">
         <div class="td icon"><img :src="getPreviewUrl(entry)" @load="previewLoaded(entry)" @error="previewError(entry, $event)" style="object-fit: cover;" v-show="!entry.previewLoading"/><i class="pi pi-spin pi-spinner" v-show="entry.previewLoading"></i></div>
         <div class="td" style="flex-grow: 2;">
-          <InputText @click.stop @keyup.enter="onRenameSubmit(entry)" @keyup.esc="onRenameEnd(entry)" @blur="onRenameEnd(entry)" v-model="entry.filePathNew" :id="'filePathRenameInputId-' + entry.fileName" v-show="entry.rename" class="rename-input"/>
+          <InputText @click.stop @keyup.enter="onRenameSubmit(entry)" @keyup.esc="onRenameEnd(entry)" @blur="onRenameEnd(entry)" v-model="entry.filePathNew" :id="'filePathRenameInputId-' + entry.fileName" v-show="entry.rename" class="rename-input p-inputtext-sm"/>
           <a v-show="!entry.rename" :href="entry.filePath" @click.stop.prevent="onEntryOpen(entry, true)">{{ entry.fileName }}</a>
           <Button class="p-button-sm p-button-rounded p-button-text rename-action" icon="pi pi-pencil" v-show="editable && !entry.rename" @click.stop="onRename(entry)"/>
         </div>
