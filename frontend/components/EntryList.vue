@@ -111,6 +111,8 @@ export default {
     watch: {
         entries(/*val, oldVal*/) {
             this.onSelectClear();
+
+            if (this.entries[0]) this.onEntrySelect(this.entries[0]);
         }
     },
     computed: {
