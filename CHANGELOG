@@ -67,4 +67,5 @@
 * Improve key input handling
 * Fix tmp file cleanup
 * Improve side bar
+* Do not crash on malformed URI input
 

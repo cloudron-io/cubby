@@ -77,7 +77,12 @@ async function get(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
     const type = req.query.type;
-    const filePath = req.query.path ? decodeURIComponent(req.query.path) : '';
+    let filePath;
+    try {
+        filePath = req.query.path ? decodeURIComponent(req.query.path) : '';
+    } catch (e) {
+        console.error(e);
+    }
 
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
     if (type && (type !== 'raw' && type !== 'download')) return next(new HttpError(400, 'type must be either empty, "download" or "raw"'));
