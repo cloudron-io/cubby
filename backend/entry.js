@@ -46,7 +46,7 @@ Entry.prototype.asShare = function (shareFilePath) {
 };
 
 Entry.prototype.getPreviewUrl = function () {
-    if (!this.mimeType) return '';
+    if (!this.mimeType) return '/mime-types/application-octet-stream.svg';
     if (this.mimeType === 'inode/recent') return '/folder-temp.svg';
     if (this.mimeType === 'inode/share') return '/folder-network.svg';
 
@@ -64,7 +64,8 @@ Entry.prototype.getPreviewUrl = function () {
 
     previewUrl = '/mime-types/' + mime[0] + '-x-generic.svg';
     if (fs.existsSync(constants.FRONTEND_ROOT + previewUrl)) return previewUrl;
-    else return '';
+
+    return '/mime-types/application-octet-stream.svg';
 };
 
 Entry.prototype.withoutPrivate = function () {
