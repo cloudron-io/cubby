@@ -45,8 +45,6 @@ import PdfViewer from './components/PdfViewer.vue';
 import OfficeViewer from './components/OfficeViewer.vue';
 import GenericViewer from './components/GenericViewer.vue';
 
-import LazyLoadDirective from "./LazyLoadDirective.js";
-
 const app = createApp(Index);
 
 // dummy router for breadcrumb component
@@ -93,7 +91,5 @@ app.component('TextEditor', TextEditor);
 app.component('PdfViewer', PdfViewer);
 app.component('OfficeViewer', OfficeViewer);
 app.component('GenericViewer', GenericViewer);
-
-app.directive('lazyload', LazyLoadDirective);
 
 app.mount('#app');
