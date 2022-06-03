@@ -16,7 +16,7 @@
       <div class="tr-placeholder" v-show="entries.length === 0">{{ emptyPlaceholder }}</div>
       <div class="tr-placeholder" v-show="entries.length !== 0 && filteredAndSortedEntries.length === 0">Nothing found</div>
       <div class="tr" v-for="entry in filteredAndSortedEntries" :key="entry.id" @contextmenu="onContextMenu(entry, $event)" @dblclick="onEntryOpen(entry, false)" @click="onEntrySelect(entry, $event)" @drop.stop.prevent="drop(entry)" @dragover.stop.prevent="dragOver(entry)" :class="{ 'selected': selected.includes(getEntryIdentifier(entry)), 'drag-active': entry === dragActive }">
-        <div class="td icon"><img :src="getPreviewUrl(entry)" @load="previewLoaded(entry)" @error="previewError(entry, $event)" style="object-fit: cover;" v-show="!entry.previewLoading"/><i class="pi pi-spin pi-spinner" v-show="entry.previewLoading"></i></div>
+        <div class="td icon" v-lazyload><img :data-url="getPreviewUrl(entry)" @load="previewLoaded(entry)" @error="previewError(entry, $event)" style="object-fit: cover;" v-show="entry.previewLoaded"/><i class="pi pi-spin pi-spinner" v-show="!entry.previewLoaded"></i></div>
         <div class="td" style="flex-grow: 2;">
           <InputText @click.stop @keyup.enter="onRenameSubmit(entry)" @keyup.esc="onRenameEnd(entry)" @blur="onRenameEnd(entry)" v-model="entry.filePathNew" :id="'filePathRenameInputId-' + entry.fileName" v-show="entry.rename" class="rename-input p-inputtext-sm"/>
           <a v-show="!entry.rename" :href="entry.filePath" @click.stop.prevent="onEntryOpen(entry, true)">{{ entry.fileName }}</a>
@@ -149,10 +149,9 @@ export default {
             console.log('enter', this.active)
         },
         previewLoaded: function (entry) {
-            entry.previewLoading = false;
+            entry.previewLoaded = true;
         },
         previewError: function (entry, event) {
-            entry.previewLoading = true;
             var url = new URL(event.target.src);
 
             setTimeout(function () {
