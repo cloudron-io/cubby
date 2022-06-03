@@ -69,3 +69,6 @@
 * Improve side bar
 * Do not crash on malformed URI input
 
+[0.6.1]
+* Ensure we have a fallback preview
+* Support previews for uppercase file extensions
