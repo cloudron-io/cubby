@@ -36,7 +36,7 @@ exports = module.exports = function (filePath) {
     if (!gTypes) init();
 
     const typeKey = Object.keys(gTypes).find(function (type) {
-        return filePath.endsWith(type);
+        return filePath.toLowerCase().endsWith(type);
     });
 
     if (!typeKey) return 'application/octet-stream';
