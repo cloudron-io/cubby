@@ -360,6 +360,10 @@ thead {
   background-color: transparent;
 }
 
+.drag-active .entry.selected {
+  background-color: unset;
+}
+
 .rename-input {
     width: 100%;
 }
