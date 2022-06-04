@@ -517,14 +517,17 @@ export default {
 
             if (items.length === 0) return;
 
+            const list = [];
+            for (let i = 0; i < items.length; i++) list.push(items[i]);
+
             // figure if a folder was dropped on a modern browser, in this case the first would have to be a directory
             var folderItem;
             var targetPath = targetEntry ? targetEntry.filePath : null;
             try {
-                folderItem = items[0].webkitGetAsEntry();
-                if (folderItem.isFile) return that.uploadFiles(items.map(function (item) { return item.getAsFile(); }), targetPath);
+                folderItem = list[0].webkitGetAsEntry();
+                if (folderItem.isFile) return that.uploadFiles(list.map(function (item) { return item.getAsFile(); }), targetPath);
             } catch (e) {
-                return that.uploadFiles(items.map(function (item) { return item.getAsFile(); }), targetPath);
+                return that.uploadFiles(list.map(function (item) { return item.getAsFile(); }), targetPath);
             }
 
             // if we got here we have a folder drop and a modern browser
