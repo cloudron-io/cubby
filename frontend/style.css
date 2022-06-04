@@ -54,9 +54,9 @@ a:hover {
 }
 
 .main-container-content {
-    display: flex;
-    overflow: hidden;
+    overflow: scroll;
     flex-grow: 1;
+    padding: 0 10px;
 }
 
 .main-container-footer {

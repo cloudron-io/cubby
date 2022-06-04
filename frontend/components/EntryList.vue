@@ -4,27 +4,29 @@
   <div class="loading" v-show="$parent.busy">
     <i class="pi pi-spin pi-spinner" style="fontSize: 2rem"></i>
   </div>
-  <div class="table" v-show="!$parent.busy" @drop.stop.prevent="drop(null)" @dragover.stop.prevent="dragOver(null)" @dragexit="dragExit" :class="{ 'drag-active': dragActive === 'table' }" v-cloak>
-    <div class="th p-d-none p-d-md-flex">
-      <div class="td" style="max-width: 50px;"></div>
-      <div class="td hand" style="flex-grow: 2;" @click="onSort('fileName')">Name <i class="pi" :class="{'pi-sort-alpha-down': sort.desc, 'pi-sort-alpha-up-alt': !sort.desc }" v-show="sort.prop === 'fileName'"></i></div>
-      <div class="td hand" style="max-width: 150px;" @click="onSort('mtime')">Updated <i class="pi" :class="{'pi-sort-numeric-down': sort.desc, 'pi-sort-numeric-up-alt': !sort.desc }" v-show="sort.prop === 'mtime'"></i></div>
-      <div class="td hand" style="max-width: 100px;" @click="onSort('size')">Size <i class="pi" :class="{'pi-sort-numeric-down': sort.desc, 'pi-sort-numeric-up-alt': !sort.desc }" v-show="sort.prop === 'size'"></i></div>
-      <div class="td" style="min-width: 180px; justify-content: flex-end;"></div>
-    </div>
-    <div class="tbody">
-      <div class="tr-placeholder" v-show="entries.length === 0">{{ emptyPlaceholder }}</div>
-      <div class="tr-placeholder" v-show="entries.length !== 0 && filteredAndSortedEntries.length === 0">Nothing found</div>
-      <div class="tr" v-for="entry in filteredAndSortedEntries" :key="entry.id" @contextmenu="onContextMenu(entry, $event)" @dblclick="onEntryOpen(entry, false)" @click="onEntrySelect(entry, $event)" @drop.stop.prevent="drop(entry)" @dragover.stop.prevent="dragOver(entry)" :class="{ 'selected': selected.includes(getEntryIdentifier(entry)), 'drag-active': entry === dragActive }">
-        <div class="td icon"><img :src="getPreviewUrl(entry)" @load="previewLoaded(entry)" @error="previewError(entry, $event)" style="object-fit: cover;" v-show="!entry.previewLoading"/><i class="pi pi-spin pi-spinner" v-show="entry.previewLoading"></i></div>
-        <div class="td" style="flex-grow: 2;">
+  <table v-show="!$parent.busy" @drop.stop.prevent="drop(null)" @dragover.stop.prevent="dragOver(null)" @dragexit="dragExit" :class="{ 'drag-active': dragActive === 'table' }" v-cloak>
+    <thead>
+      <tr>
+        <th style="height: 40px;"></th>
+        <th class="hand" style="" @click="onSort('fileName')">Name <i class="pi" :class="{'pi-sort-alpha-down': sort.desc, 'pi-sort-alpha-up-alt': !sort.desc }" v-show="sort.prop === 'fileName'"></i></th>
+        <th class="hand" style="max-width: 150px;" @click="onSort('mtime')">Updated <i class="pi" :class="{'pi-sort-numeric-down': sort.desc, 'pi-sort-numeric-up-alt': !sort.desc }" v-show="sort.prop === 'mtime'"></i></th>
+        <th class="hand" style="max-width: 100px;" @click="onSort('size')">Size <i class="pi" :class="{'pi-sort-numeric-down': sort.desc, 'pi-sort-numeric-up-alt': !sort.desc }" v-show="sort.prop === 'size'"></i></th>
+        <th style="min-width: 180px"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr colspan="5" v-show="entries.length === 0">{{ emptyPlaceholder }}</tr>
+      <tr colspan="5" v-show="entries.length !== 0 && filteredAndSortedEntries.length === 0">Nothing found</tr>
+      <tr class="entry" v-for="entry in filteredAndSortedEntries" :key="entry.id" @contextmenu="onContextMenu(entry, $event)" @dblclick="onEntryOpen(entry, false)" @click="onEntrySelect(entry, $event)" @drop.stop.prevent="drop(entry)" @dragover.stop.prevent="dragOver(entry)" :class="{ 'selected': selected.includes(getEntryIdentifier(entry)), 'drag-active': entry === dragActive }">
+        <td class="icon" style="width: 40px; height: 40px;"><img :src="getPreviewUrl(entry)" @load="previewLoaded(entry)" @error="previewError(entry, $event)" style="object-fit: cover;" v-show="!entry.previewLoading"/><i class="pi pi-spin pi-spinner" v-show="entry.previewLoading"></i></td>
+        <td>
           <InputText @click.stop @keyup.enter="onRenameSubmit(entry)" @keyup.esc="onRenameEnd(entry)" @blur="onRenameEnd(entry)" v-model="entry.filePathNew" :id="'filePathRenameInputId-' + entry.fileName" v-show="entry.rename" class="rename-input p-inputtext-sm"/>
           <a v-show="!entry.rename" :href="entry.filePath" @click.stop.prevent="onEntryOpen(entry, true)">{{ entry.fileName }}</a>
-          <Button class="p-button-sm p-button-rounded p-button-text rename-action" icon="pi pi-pencil" v-show="editable && !entry.rename" @click.stop="onRename(entry)"/>
-        </div>
-        <div class="td p-d-none p-d-md-flex" style="max-width: 150px;"><span v-tooltip.top="prettyLongDate(entry.mtime)">{{ prettyDate(entry.mtime) }}</span></div>
-        <div class="td p-d-none p-d-md-flex" style="max-width: 100px;">{{ prettyFileSize(entry.size) }}</div>
-        <div class="td" style="min-width: 180px; justify-content: flex-end;">
+          <Button class="p-button-sm p-button-rounded p-button-text rename-action" style="vertical-align: middle;" icon="pi pi-pencil" v-show="editable && !entry.rename" @click.stop="onRename(entry)"/>
+        </td>
+        <td style="max-width: 150px;"><span v-tooltip.top="prettyLongDate(entry.mtime)">{{ prettyDate(entry.mtime) }}</span></td>
+        <td style="max-width: 100px;">{{ prettyFileSize(entry.size) }}</td>
+        <td style="min-width: 180px; text-align: right;">
           <a :href="getDirectLink(entry)" target="_blank" @click.stop>
             <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-external-link" v-tooltip.top="'Open'" v-show="!entry.rename && entry.isFile && selectedEntries.length <= 1" />
           </a>
@@ -32,10 +34,10 @@
           <Button class="action-buttons p-button-sm p-button-rounded p-button-text p-button-danger" icon="pi pi-trash" v-tooltip.top="'Delete'" v-show="editable && !entry.rename && selectedEntries.length <= 1" @click.stop="onDelete(entry)"/>
 
           <Button class="action-buttons p-button-sm p-button-rounded p-button-text" :class="{ 'action-buttons-visible': entry.sharedWith.length }" icon="pi pi-share-alt" v-tooltip.top="entry.sharedWith.length ? 'Edit Shares' : 'Create Share'" v-show="editable && (entry.sharedWith.length || (shareable && !entry.rename && selectedEntries.length <= 1))" @click.stop="onShare(entry)"/>
-        </div>
-      </div>
-    </div>
-  </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </template>
 
 <script>
@@ -330,23 +332,32 @@ export default {
     width: 100%;
 }
 
-.table {
-    display: flex;
-    flex-flow: column nowrap;
-    flex: 1 1 auto;
-    margin: 10px;
-    transition: background-color 200ms, color 200ms;
-    border-radius: 3px;
+table {
+  width: 100%;
+  border-collapse: collapse;
+  padding: 10px 0;
+  transition: background-color 200ms, color 200ms;
+  border-radius: 3px;
 }
 
-.tbody {
-    overflow-x: hidden;
-    overflow-y: auto;
+th {
+  text-align: left;
+}
+
+thead {
+  position: sticky;
+  top: 0px;
+  background-color: white;
+  z-index: 20;
 }
 
 .drag-active {
     background-color: #2196f3;
     color: white;
+}
+
+.drag-active > thead {
+  background-color: transparent;
 }
 
 .rename-input {
@@ -357,35 +368,21 @@ export default {
     margin-left: 20px;
 }
 
-.tr .rename-action {
+tr .rename-action {
     visibility: hidden;
 }
 
-.tr:hover .rename-action {
+tr:hover .rename-action {
     visibility: visible;
 }
 
-.th {
-    font-weight: 700;
-    width: 100%;
-    display: flex;
-    flex-flow: row nowrap;
-}
-
-.th > .td {
+th > td {
     white-space: normal;
     display: block;
     user-select: none;
 }
 
-.tr {
-    width: 100%;
-    display: flex;
-    flex-flow: row nowrap;
-    cursor: default;
-}
-
-.tr:hover {
+.entry:hover {
     background-color: #f5f7fa;
 }
 
@@ -393,8 +390,8 @@ export default {
     visibility: hidden;
 }
 
-.tr:hover .action-buttons,
-.tr.selected .action-buttons {
+.entry:hover .action-buttons,
+.entry.selected .action-buttons {
     visibility: visible;
 }
 
@@ -402,7 +399,7 @@ export default {
     visibility: visible;
 }
 
-.tr.selected {
+.entry.selected {
     background-color: #dbedfb;
 }
 
@@ -412,32 +409,23 @@ export default {
     margin-top: 20vh;
 }
 
-.td > a {
+td > a {
     color: inherit;
     margin: auto 0px;
 }
 
-.td > a:hover {
+td > a:hover {
     text-decoration: underline;
 }
 
-.td {
-    display: flex;
-    flex-flow: row nowrap;
-    flex-grow: 1;
-    flex-basis: 0;
-    padding: 0.2em;
-    min-width: 0px;
-    margin: auto;
-}
-
-.tr > .td.icon {
+.icon {
+    padding: 4px;
     max-width: 40px;
 }
 
-.tr > .td.icon > img {
-    width: 24px;
-    height: 24px;
+.icon > img {
+    width: 32px;
+    height: 32px;
     vertical-align: middle;
 }
 

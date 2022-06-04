@@ -154,11 +154,13 @@
     </template>
   </Dialog>
 
-  <ImageViewer ref="imageViewer" @close="onViewerClose" @download="onDownload" v-show="viewer === 'image'" />
-  <TextEditor ref="textEditor" @close="onViewerClose" @saved="onFileSaved" v-show="viewer === 'text'" />
-  <PdfViewer ref="pdfViewer" @close="onViewerClose" v-show="viewer === 'pdf'" />
-  <OfficeViewer ref="officeViewer" :config="config.viewers.collabora" @close="onViewerClose" v-show="viewer === 'office'" />
-  <GenericViewer ref="genericViewer" @close="onViewerClose" v-show="viewer === 'generic'" />
+  <div class="viewer-container" v-show="viewer">
+    <ImageViewer ref="imageViewer" @close="onViewerClose" @download="onDownload" v-show="viewer === 'image'" />
+    <TextEditor ref="textEditor" @close="onViewerClose" @saved="onFileSaved" v-show="viewer === 'text'" />
+    <PdfViewer ref="pdfViewer" @close="onViewerClose" v-show="viewer === 'pdf'" />
+    <OfficeViewer ref="officeViewer" :config="config.viewers.collabora" @close="onViewerClose" v-show="viewer === 'office'" />
+    <GenericViewer ref="genericViewer" @close="onViewerClose" v-show="viewer === 'generic'" />
+  </div>
 </template>
 
 <script>
@@ -934,6 +936,15 @@ label {
     height: 100%;
 }
 
+.viewer-container {
+  z-index: 30;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
 .sidebar {
     display: flex;
     height: 100%;
@@ -971,6 +982,7 @@ label {
     position: absolute;
     right: 10px;
     top: 3px;
+    z-index: 30;
 }
 
 </style>
