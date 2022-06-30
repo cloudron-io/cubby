@@ -36,6 +36,7 @@ import './style.css';
 
 import Index from './Index.vue';
 import EntryList from './components/EntryList.vue';
+import EntryListItem from './components/EntryListItem.vue';
 import SideBar from './components/SideBar.vue';
 import Login from './components/Login.vue';
 import MainToolbar from './components/MainToolbar.vue';
@@ -85,6 +86,7 @@ app.directive('badge', BadgeDirective);
 app.component('Login', Login);
 app.component('MainToolbar', MainToolbar);
 app.component('EntryList', EntryList);
+app.component('EntryListItem', EntryListItem);
 app.component('SideBar', SideBar);
 app.component('ImageViewer', ImageViewer);
 app.component('TextEditor', TextEditor);

@@ -4,46 +4,39 @@
   <div class="loading" v-show="$parent.busy">
     <i class="pi pi-spin pi-spinner" style="fontSize: 2rem"></i>
   </div>
-  <table v-show="!$parent.busy" @drop.stop.prevent="drop(null)" @dragover.stop.prevent="dragOver(null)" @dragexit="dragExit" :class="{ 'drag-active': dragActive === 'table' }" v-cloak>
-    <thead>
-      <tr>
-        <th style="height: 40px;"></th>
-        <th class="hand" style="" @click="onSort('fileName')">Name <i class="pi" :class="{'pi-sort-alpha-down': sort.desc, 'pi-sort-alpha-up-alt': !sort.desc }" v-show="sort.prop === 'fileName'"></i></th>
-        <th class="hand" style="max-width: 150px;" @click="onSort('mtime')">Updated <i class="pi" :class="{'pi-sort-numeric-down': sort.desc, 'pi-sort-numeric-up-alt': !sort.desc }" v-show="sort.prop === 'mtime'"></i></th>
-        <th class="hand" style="max-width: 100px;" @click="onSort('size')">Size <i class="pi" :class="{'pi-sort-numeric-down': sort.desc, 'pi-sort-numeric-up-alt': !sort.desc }" v-show="sort.prop === 'size'"></i></th>
-        <th style="min-width: 180px"></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr colspan="5" v-show="entries.length === 0">{{ emptyPlaceholder }}</tr>
-      <tr colspan="5" v-show="entries.length !== 0 && filteredAndSortedEntries.length === 0">Nothing found</tr>
-      <tr class="entry" v-for="entry in filteredAndSortedEntries" :key="entry.id" @contextmenu="onContextMenu(entry, $event)" @dblclick="onEntryOpen(entry, false)" @click="onEntrySelect(entry, $event)" @drop.stop.prevent="drop(entry)" @dragover.stop.prevent="dragOver(entry)" :class="{ 'selected': selected.includes(getEntryIdentifier(entry)), 'drag-active': entry === dragActive }">
-        <td class="icon" style="width: 40px; height: 40px;"><img :src="getPreviewUrl(entry)" @load="previewLoaded(entry)" @error="previewError(entry, $event)" style="object-fit: cover;" v-show="!entry.previewLoading"/><i class="pi pi-spin pi-spinner" v-show="entry.previewLoading"></i></td>
-        <td>
-          <InputText @click.stop @keyup.enter="onRenameSubmit(entry)" @keyup.esc="onRenameEnd(entry)" @blur="onRenameEnd(entry)" v-model="entry.filePathNew" :id="'filePathRenameInputId-' + entry.fileName" v-show="entry.rename" class="rename-input p-inputtext-sm"/>
-          <a v-show="!entry.rename" :href="entry.filePath" @click.stop.prevent="onEntryOpen(entry, true)">{{ entry.fileName }}</a>
-          <Button class="p-button-sm p-button-rounded p-button-text rename-action" style="vertical-align: middle;" icon="pi pi-pencil" v-show="editable && !entry.rename" @click.stop="onRename(entry)"/>
-        </td>
-        <td style="max-width: 150px;"><span v-tooltip.top="prettyLongDate(entry.mtime)">{{ prettyDate(entry.mtime) }}</span></td>
-        <td style="max-width: 100px;">{{ prettyFileSize(entry.size) }}</td>
-        <td style="min-width: 180px; text-align: right;">
-          <a :href="getDirectLink(entry)" target="_blank" @click.stop>
-            <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-external-link" v-tooltip.top="'Open'" v-show="!entry.rename && entry.isFile && selectedEntries.length <= 1" />
-          </a>
-          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-download" v-tooltip.top="'Download'" v-show="!entry.rename && entry.isFile && selectedEntries.length <= 1" @click.stop="onDownload(entry)"/>
-          <Button class="action-buttons p-button-sm p-button-rounded p-button-text p-button-danger" icon="pi pi-trash" v-tooltip.top="'Delete'" v-show="editable && !entry.rename && selectedEntries.length <= 1" @click.stop="onDelete(entry)"/>
-
-          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" :class="{ 'action-buttons-visible': entry.sharedWith.length }" icon="pi pi-share-alt" v-tooltip.top="entry.sharedWith.length ? 'Edit Shares' : 'Create Share'" v-show="editable && (entry.sharedWith.length || (shareable && !entry.rename && selectedEntries.length <= 1))" @click.stop="onShare(entry)"/>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div v-cloak v-show="!$parent.busy" class="list-container" :class="{ 'drag-active': dragActive === 'table' }" @drop.stop.prevent="onDrop(null)" @dragover.stop.prevent="onDragOver(null)" @dragexit="onDragExit">
+    <table>
+      <thead>
+        <tr>
+          <th style="height: 40px;"></th>
+          <th class="hand" style="" @click="onSort('fileName')">Name <i class="pi" :class="{'pi-sort-alpha-down': sort.desc, 'pi-sort-alpha-up-alt': !sort.desc }" v-show="sort.prop === 'fileName'"></i></th>
+          <th class="hand" style="max-width: 150px;" @click="onSort('mtime')">Updated <i class="pi" :class="{'pi-sort-numeric-down': sort.desc, 'pi-sort-numeric-up-alt': !sort.desc }" v-show="sort.prop === 'mtime'"></i></th>
+          <th class="hand" style="max-width: 100px;" @click="onSort('size')">Size <i class="pi" :class="{'pi-sort-numeric-down': sort.desc, 'pi-sort-numeric-up-alt': !sort.desc }" v-show="sort.prop === 'size'"></i></th>
+          <th style="min-width: 180px"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr colspan="5" v-show="entries.length === 0">{{ emptyPlaceholder }}</tr>
+        <tr colspan="5" v-show="entries.length !== 0 && filteredAndSortedEntries.length === 0">Nothing found</tr>
+        <template v-for="entry in filteredAndSortedEntries">
+          <EntryListItem :entry="entry" :selected="selected" :selectedEntries="selectedEntries"
+            @entry-open="onEntryOpen"
+            @entry-select="onEntrySelect"
+            @context-menu="onContextMenu"
+            @share="onShare"
+            @drop="onDrop"
+            @drag-over="onDragOver"
+          />
+        </template>
+      </tbody>
+    </table>
+  </div>
 </template>
 
 <script>
 
 import { nextTick } from 'vue';
-import { getPreviewUrl, prettyDate, prettyLongDate, prettyFileSize, getDirectLink, clearSelection } from '../utils.js';
+import { getPreviewUrl, prettyDate, prettyLongDate, prettyFileSize, getDirectLink, clearSelection, getEntryIdentifier } from '../utils.js';
 import * as Combokeys from 'combokeys';
 
 export default {
@@ -147,22 +140,9 @@ export default {
         prettyDate,
         prettyFileSize,
         prettyLongDate,
+        getEntryIdentifier,
         onEnter() {
             console.log('enter', this.active)
-        },
-        previewLoaded: function (entry) {
-            entry.previewLoading = false;
-        },
-        previewError: function (entry, event) {
-            entry.previewLoading = true;
-            var url = new URL(event.target.src);
-
-            setTimeout(function () {
-                event.target.src = url.pathname + '?access_token=' + url.searchParams.get('access_token') + '&refresh=' + Date.now();
-            }, 1000);
-        },
-        getEntryIdentifier(entry) {
-            return (entry.share ? (entry.share.id + '/') : '') + entry.filePath;
         },
         onContextMenu(entry, $event) {
             this.onEntrySelect(entry, $event);
@@ -252,10 +232,10 @@ export default {
         onShare: function (entry) {
             this.$emit('entry-shared', entry);
         },
-        dragExit: function () {
+        onDragExit: function () {
             this.dragActive = '';
         },
-        dragOver: function (entry) {
+        onDragOver: function (entry) {
             if (!this.editable) return;
 
             event.dataTransfer.dropEffect = 'copy';
@@ -263,12 +243,14 @@ export default {
             if (!entry || entry.isFile) this.dragActive = 'table';
             else this.dragActive = entry;
         },
-        drop: function (entry) {
+        onDrop: function (entry) {
             if (!this.editable) return;
 
             this.dragActive = '';
 
             if (!event.dataTransfer.items[0]) return;
+
+            console.log('---', entry)
 
             if (entry && entry.isDirectory) this.$emit('dropped', event.dataTransfer.items, entry);
             else this.$emit('dropped', event.dataTransfer.items, null);
@@ -326,18 +308,28 @@ export default {
 <style scoped>
 
 .loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.list-container {
+  width: 100%;
+  height: 100%;
+  transition: background-color 200ms, color 200ms;
+  border-radius: 3px;
+}
+
+.drag-active {
+  background-color: #2196f3;
+  color: white;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
   padding: 10px 0;
-  transition: background-color 200ms, color 200ms;
-  border-radius: 3px;
 }
 
 th {
@@ -351,86 +343,8 @@ thead {
   z-index: 20;
 }
 
-.drag-active {
-    background-color: #2196f3;
-    color: white;
-}
-
-.drag-active > thead {
+.drag-active thead {
   background-color: transparent;
-}
-
-.drag-active .entry.selected {
-  background-color: unset;
-}
-
-.rename-input {
-    width: 100%;
-}
-
-.rename-action {
-    margin-left: 20px;
-}
-
-tr .rename-action {
-    visibility: hidden;
-}
-
-tr:hover .rename-action {
-    visibility: visible;
-}
-
-th > td {
-    white-space: normal;
-    display: block;
-    user-select: none;
-}
-
-.entry:hover {
-    background-color: #f5f7fa;
-}
-
-.action-buttons {
-    visibility: hidden;
-}
-
-.entry:hover .action-buttons,
-.entry.selected .action-buttons {
-    visibility: visible;
-}
-
-.action-buttons-visible {
-    visibility: visible;
-}
-
-.entry.selected {
-    background-color: #dbedfb;
-}
-
-.tr-placeholder {
-    width: 100%;
-    text-align: center;
-    margin-top: 20vh;
-}
-
-td > a {
-    color: inherit;
-    margin: auto 0px;
-}
-
-td > a:hover {
-    text-decoration: underline;
-}
-
-.icon {
-    padding: 4px;
-    max-width: 40px;
-}
-
-.icon > img {
-    width: 32px;
-    height: 32px;
-    vertical-align: middle;
 }
 
 .hand {

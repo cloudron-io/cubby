@@ -142,6 +142,10 @@ function parseResourcePath(resourcePath) {
     return result;
 }
 
+function getEntryIdentifier(entry) {
+    return (entry.share ? (entry.share.id + '/') : '') + entry.filePath;
+}
+
 export {
     getDirectLink,
     getPreviewUrl,
@@ -158,5 +162,6 @@ export {
     copyToClipboard,
     clearSelection,
     urlSearchQuery,
-    parseResourcePath
+    parseResourcePath,
+    getEntryIdentifier
 };
