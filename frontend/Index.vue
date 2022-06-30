@@ -522,7 +522,7 @@ export default {
 
             // figure if a folder was dropped on a modern browser, in this case the first would have to be a directory
             var folderItem;
-            var targetPath = targetEntry ? targetEntry.filePath : null;
+            var targetPath = targetEntry ? (that.currentResourcePath + targetEntry.filePath) : null;
             try {
                 folderItem = list[0].webkitGetAsEntry();
                 if (folderItem.isFile) return that.uploadFiles(list.map(function (item) { return item.getAsFile(); }), targetPath);
