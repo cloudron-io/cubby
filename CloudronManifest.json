@@ -10,6 +10,7 @@
   "icon": "file://logo.png",
   "description": "file://DESCRIPTION.md",
   "forumUrl": "https://forum.cloudron.io/category/132/cubby",
+  "documentationUrl": "https://docs.cloudron.io/apps/cubby/",
   "website": "https://getcubby.org",
   "contactEmail": "support@cloudron.io",
   "tags": [ "files", "sharing", "documents", "file sharing" ],
