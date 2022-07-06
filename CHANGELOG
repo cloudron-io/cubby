@@ -72,3 +72,9 @@
 [0.6.1]
 * Ensure we have a fallback preview
 * Support previews for uppercase file extensions
+
+[0.6.2]
+* Fix previews for shares
+* Refactor list component to lazy load large lists
+* Fix file dropping for upload
+
