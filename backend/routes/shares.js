@@ -3,6 +3,7 @@
 exports = module.exports = {
     attachOwner,
     attachReceiver,
+    optionalAttachReceiver,
     listShares,
     createShare,
     removeShare,
@@ -59,6 +60,29 @@ async function attachReceiver(req, res, next) {
     assert.strictEqual(typeof req.params.shareId, 'string');
 
     const shareId = req.params.shareId;
+
+    debug(`attach: ${shareId}`);
+
+    try {
+        req.share = await shares.get(shareId);
+    } catch (error) {
+        if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'share not found'));
+        return next(new HttpError(500, error));
+    }
+
+    if (req.user && req.share.receiverUsername && req.share.receiverUsername !== req.user.username) return next(new HttpError(403, 'not allowed'));
+
+    next();
+}
+
+async function optionalAttachReceiver(req, res, next) {
+    assert.strictEqual(typeof req.user, 'object');
+    assert.strictEqual(typeof req.params.id, 'string');
+    assert.strictEqual(typeof req.params.type, 'string');
+
+    if (req.params.type !== 'shares') return next();
+
+    const shareId = req.params.id;
 
     debug(`attach: ${shareId}`);
 

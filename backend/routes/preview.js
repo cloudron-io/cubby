@@ -27,7 +27,12 @@ async function get(req, res, next) {
 
         return next(new HttpError(412, 'try again later'));
     } else if (type === 'shares') {
-       // TODO handle share previews with permission check based on req.user and shareId
+        // req.share is verified and attached by now via optionalAttachReceiver
+
+        const localPreviewPath = preview.getLocalPath(hash);
+        if (localPreviewPath) return res.sendFile(localPreviewPath);
+
+        return next(new HttpError(412, 'try again later'));
     }
 
     next(new HttpError(404, 'not found'));

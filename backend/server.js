@@ -101,7 +101,7 @@ function init(callback) {
     router.put ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.update);
     router.del ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.remove);
 
-    router.get ('/api/v1/preview/:type/:id/:hash', users.optionalTokenAuth, preview.get);
+    router.get ('/api/v1/preview/:type/:id/:hash', users.optionalTokenAuth, shares.optionalAttachReceiver, preview.get);
 
     router.get ('/api/v1/office/handle', users.tokenAuth, office.getHandle);
     router.get ('/api/v1/office/wopi/files/:shareId', users.tokenAuth, office.checkFileInfo);
