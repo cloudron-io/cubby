@@ -34,9 +34,13 @@ function init(callback) {
     // for rate limiting
     app.enable('trust proxy');
 
+    var FileStore = require('session-file-store')(session);
+    var fileStoreOptions = {
+        path: process.env.CLOUDRON ? '/run/sessions' : path.resolve('./.sessions')
+    };
+
     app.use(session({
-        resave: false, // don't save session if unmodified
-        saveUninitialized: false, // don't create session until something stored
+        store: new FileStore(fileStoreOptions),
         secret: 'cubby goes lightly'
     }));
 
