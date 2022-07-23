@@ -50,7 +50,7 @@ export default {
                 }
                 if (error) return console.error(error);
 
-                that.$emit('success', result.body.accessToken, result.body.user);
+                that.$emit('success', result.body.user);
 
                 that.username = '';
                 that.password = '';

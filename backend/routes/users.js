@@ -2,7 +2,9 @@
 
 exports = module.exports = {
     login,
+    logout,
     tokenAuth,
+    sessionAuth,
     optionalTokenAuth,
     profile,
     list
@@ -28,11 +30,36 @@ async function login(req, res, next) {
 
     user.diskusage = await diskusage.getByUsername(user.username);
 
+    req.session.username = user.username;
+
     next(new HttpSuccess(200, { user, accessToken }));
+}
+
+async function logout(req, res, next) {
+    req.session.username = null;
+
+    next(new HttpSuccess(200, {}));
+}
+
+async function sessionAuth(req, res, next) {
+
+    console.log('session', req.session);
+    if (!req.session || !req.session.username) return next(new HttpError(401, 'No login session'));
+
+    try {
+        req.user = await users.get(req.session.username);
+        if (!req.user) return next(new HttpError(401, 'Invalid login session'));
+    } catch (error) {
+        return next(new HttpError(500, error));
+    }
+
+    next();
 }
 
 async function tokenAuth(req, res, next) {
     var accessToken = req.query.access_token || req.body.accessToken || '';
+
+    console.log('session', req.session);
 
     try {
         req.user = await users.getByAccessToken(accessToken);

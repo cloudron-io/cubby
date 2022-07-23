@@ -175,7 +175,6 @@ export default {
         return {
             ready: false,
             busy: true,
-            accessToken: '',
             search: '',
             viewer: '',
             profile: {
@@ -249,28 +248,26 @@ export default {
             window.location.hash = 'files/';
         },
         onLogout() {
-            this.accessToken = '';
-            this.profile.username = '';
-            this.profile.email = '';
-            this.profile.displayName = '';
-            this.profile.diskusage = {
-                used: 0,
-                size: 0,
-                available: 0
-            };
+            var that = this;
 
-            delete localStorage.accessToken;
+            superagent.get('/api/v1/logout').end(function (error) {
+                if (error) return console.error(error.message);
+
+                that.profile.username = '';
+                that.profile.email = '';
+                that.profile.displayName = '';
+                that.profile.diskusage = {
+                    used: 0,
+                    size: 0,
+                    available: 0
+                };
+            });
         },
-        onLoggedIn(accessToken, profile) {
-            this.accessToken = accessToken;
-
+        onLoggedIn(profile) {
             this.profile.username = profile.username;
             this.profile.displayName = profile.displayName;
             this.profile.email = profile.email;
             this.profile.diskusage = profile.diskusage;
-
-            // stash locally
-            localStorage.accessToken = accessToken;
 
             this.loadPath(window.location.hash.slice(1));
         },
@@ -297,7 +294,7 @@ export default {
             var formData = new FormData();
             formData.append('file', new Blob());
 
-            superagent.post('/api/v1/files').query({ path: path, access_token: localStorage.accessToken }).send(formData).end(function (error, result) {
+            superagent.post('/api/v1/files').query({ path: path }).send(formData).end(function (error, result) {
                 if (result && result.statusCode === 401) return that.onLogout();
                 if (result && result.statusCode === 403) return that.newFileDialog.error = 'File name not allowed';
                 if (result && result.statusCode === 409) return that.newFileDialog.error = 'File already exists';
@@ -314,7 +311,7 @@ export default {
 
             var path = sanitize(this.currentPath + '/' + this.newFolderDialog.folderName);
 
-            superagent.post('/api/v1/files').query({ path: path, access_token: localStorage.accessToken, directory: true }).end(function (error, result) {
+            superagent.post('/api/v1/files').query({ path: path, directory: true }).end(function (error, result) {
                 if (result && result.statusCode === 401) return that.onLogout();
                 if (result && result.statusCode === 403) return that.newFolderDialog.error = 'Folder name not allowed';
                 if (result && result.statusCode === 409) return that.newFolderDialog.error = 'Folder already exists';
@@ -343,7 +340,7 @@ export default {
             var formData = new FormData();
             formData.append('file', new File([ content ], 'file'));
 
-            superagent.post('/api/v1/files').query({ path: entry.filePath, access_token: localStorage.accessToken, overwrite: true }).send(formData).end(function (error, result) {
+            superagent.post('/api/v1/files').query({ path: entry.filePath, overwrite: true }).send(formData).end(function (error, result) {
                 if (result && result.statusCode === 401) return that.logout();
                 if (result && result.statusCode !== 200) return console.error('Error saving file: ', result.statusCode);
                 if (error) return console.error(error);
@@ -372,7 +369,7 @@ export default {
             var finishedUploadSize = 0;
 
             superagent.post(file.apiPath)
-              .query({ path: fullTargetPath, access_token: localStorage.accessToken, overwrite: !!file.overwrite })
+              .query({ path: fullTargetPath, overwrite: !!file.overwrite })
               .send(formData)
               .on('progress', function (event) {
                 // only handle upload events
@@ -418,7 +415,7 @@ export default {
             file.shareId = resource.shareId;
 
             // check first for conflict to avoid double upload
-            superagent.head(resource.apiPath).query({ path: fullTargetPath, access_token: localStorage.accessToken }).end(function (error, result) {
+            superagent.head(resource.apiPath).query({ path: fullTargetPath }).end(function (error, result) {
                 if (result && result.statusCode === 401) return that.logout();
 
                 // This stops the uploadNext flow waiting for user input
@@ -572,7 +569,7 @@ export default {
                     async.eachSeries(entries, function (entry, callback) {
                         var resource = parseResourcePath(that.currentResourcePath + '/' + entry.fileName);
 
-                        superagent.del(resource.apiPath).query({ path: resource.path, access_token: localStorage.accessToken }).end(function (error, result) {
+                        superagent.del(resource.apiPath).query({ path: resource.path }).end(function (error, result) {
                             if (result && result.statusCode === 401) return that.logout();
                             if (result && result.statusCode !== 200) console.error('Error deleting entry.', entry);
                             if (error) console.error(error.message);
@@ -595,7 +592,7 @@ export default {
             var resource = parseResourcePath(that.currentResourcePath + '/' + entry.fileName);
             var newResource = parseResourcePath(that.currentResourcePath + '/' + newFileName);
 
-            superagent.put(resource.apiPath).query({ path: resource.path, action: 'move', new_path: newResource.path, access_token: localStorage.accessToken }).end(function (error, result) {
+            superagent.put(resource.apiPath).query({ path: resource.path, action: 'move', new_path: newResource.path }).end(function (error, result) {
                 if (result && result.statusCode === 401) return that.logout();
                 if (result && result.statusCode !== 200) return console.error('Error moving file or folder');
                 if (error) return console.error(error.message);
@@ -612,7 +609,7 @@ export default {
             this.clearSelection();
 
             that.busy = true;
-            superagent.get('/api/v1/recent').query({ access_token: that.accessToken }).end(function (error, result) {
+            superagent.get('/api/v1/recent').end(function (error, result) {
                 that.busy = false;
 
                 if (error) {
@@ -663,7 +660,7 @@ export default {
             // start with tomorrow
             that.shareDialog.shareLink.expiresAt.setDate(that.shareDialog.shareLink.expiresAt.getDate() + 1);
 
-            superagent.get('/api/v1/users').query({ access_token: that.accessToken }).end(function (error, result) {
+            superagent.get('/api/v1/users').end(function (error, result) {
                 if (error) return console.error('Failed to get user list.', error);
 
                 that.shareDialog.users = result.body.users.filter(function (u) { return u.username !== that.profile.username; });
@@ -687,7 +684,7 @@ export default {
             var readonly = true; // always readonly for now
             var expires_at = this.shareDialog.shareLink.expires ? this.shareDialog.shareLink.expiresAt : 0;
 
-            superagent.post('/api/v1/shares').query({ path, readonly, expires_at, access_token: localStorage.accessToken }).end(function (error, result) {
+            superagent.post('/api/v1/shares').query({ path, readonly, expires_at }).end(function (error, result) {
                 if (result && result.statusCode === 401) return that.onLogout();
                 if (result && result.statusCode !== 200) return that.shareDialog.error = 'Error creating link share: ' + result.statusCode;
                 if (error) return console.error(error.message);
@@ -706,7 +703,7 @@ export default {
             var readonly = this.shareDialog.readonly;
             var receiver_username = this.shareDialog.receiverUsername;
 
-            superagent.post('/api/v1/shares').query({ path, readonly, receiver_username, access_token: localStorage.accessToken }).end(function (error, result) {
+            superagent.post('/api/v1/shares').query({ path, readonly, receiver_username }).end(function (error, result) {
                 if (result && result.statusCode === 401) return that.onLogout();
                 if (result && result.statusCode !== 200) return that.shareDialog.error = 'Error creating share: ' + result.statusCode;
                 if (error) return console.error(error.message);
@@ -716,7 +713,7 @@ export default {
                 that.shareDialog.receiverUsername = '';
                 that.shareDialog.readonly = false;
 
-                superagent.get('/api/v1/files').query({ path: that.shareDialog.entry.filePath, access_token: localStorage.accessToken }).end(function (error, result) {
+                superagent.get('/api/v1/files').query({ path: that.shareDialog.entry.filePath }).end(function (error, result) {
                     if (result && result.statusCode === 401) return that.logout();
                     if (result && result.statusCode !== 200) return console.error('Error getting file or folder');
                     if (error) return console.error(error.message);
@@ -730,12 +727,12 @@ export default {
         onDeleteShare(share) {
             var that = this;
 
-            superagent.delete('/api/v1/shares').query({ share_id: share.id, access_token: localStorage.accessToken }).end(function (error, result) {
+            superagent.delete('/api/v1/shares').query({ share_id: share.id }).end(function (error, result) {
                 if (result && result.statusCode === 401) return that.logout();
                 if (result && result.statusCode !== 200) return console.error('Error deleting share');
                 if (error) return console.error(error.message);
 
-                superagent.get('/api/v1/files').query({ path: that.shareDialog.entry.filePath, access_token: localStorage.accessToken }).end(function (error, result) {
+                superagent.get('/api/v1/files').query({ path: that.shareDialog.entry.filePath }).end(function (error, result) {
                     if (result && result.statusCode === 401) return that.logout();
                     if (result && result.statusCode !== 200) return console.error('Error getting file or folder');
                     if (error) return console.error(error.message);
@@ -757,7 +754,7 @@ export default {
             // only show busy state if it takes more than 2 seconds to avoid flickering
             var busyTimer = setTimeout(function () { that.busy = true; }, 2000);
 
-            superagent.get(resource.apiPath).query({ path: resource.path, access_token: that.accessToken }).end(function (error, result) {
+            superagent.get(resource.apiPath).query({ path: resource.path }).end(function (error, result) {
                 clearTimeout(busyTimer);
                 that.busy = false;
 
@@ -887,14 +884,7 @@ export default {
             window.confirm('Uploads are still in progress. Please wait for them to finish.');
         }, { capture: true });
 
-        if (!localStorage.accessToken) {
-            this.ready = true;
-            return;
-        }
-
-        that.accessToken = localStorage.accessToken;
-
-        superagent.get('/api/v1/profile').query({ access_token: that.accessToken }).end(function (error, result) {
+        superagent.get('/api/v1/profile').end(function (error, result) {
             if (error) {
                 if (error.status !== 401) console.error(error);
                 that.ready = true;
@@ -906,7 +896,7 @@ export default {
             that.profile.displayName = result.body.displayName;
             that.profile.diskusage = result.body.diskusage;
 
-            superagent.get('/api/v1/config').query({ access_token: that.accessToken }).end(function (error, result) {
+            superagent.get('/api/v1/config').end(function (error, result) {
                 if (error) return console.error('Cant load config', error);
 
                 // ensure we know what we get so we can properly reference

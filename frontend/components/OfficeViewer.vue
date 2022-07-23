@@ -31,7 +31,7 @@ export default {
     data() {
         return {
             entry: null,
-            wopiToken: '',  //  in our case this is the same as accesstoken
+            wopiToken: '',
             wopiUrl: ''
         };
     },
@@ -50,12 +50,12 @@ export default {
 
             this.entry = entry;
 
-            superagent.get('/api/v1/office/handle').query({ access_token: localStorage.accessToken, filePath: entry.filePath }).end(function (error, result) {
+            superagent.get('/api/v1/office/handle').query({ filePath: entry.filePath }).end(function (error, result) {
                 if (error) return console.error('Failed to get office handle.', error);
 
                 var wopiSrc = window.location.origin + '/api/v1/office/wopi/files/' + result.body.shareId;
                 that.wopiUrl = result.body.url + 'WOPISrc=' + wopiSrc;
-                that.wopiToken = localStorage.accessToken;
+                that.wopiToken = result.body.wopiToken;
 
                 setTimeout(function () {
                     that.$refs.wopiForm.submit();

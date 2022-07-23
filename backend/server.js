@@ -16,6 +16,7 @@ var express = require('express'),
     preview = require('./routes/preview.js'),
     multipart = require('./routes/multipart.js'),
     morgan = require('morgan'),
+    session = require('express-session'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
 
@@ -25,12 +26,19 @@ exports = module.exports = {
 
 function init(callback) {
     var app = express();
+
     var router = new express.Router();
 
     app.set('json spaces', 2); // pretty json
 
     // for rate limiting
     app.enable('trust proxy');
+
+    app.use(session({
+        resave: false, // don't save session if unmodified
+        saveUninitialized: false, // don't create session until something stored
+        secret: 'cubby goes lightly'
+    }));
 
     app.use(morgan(function (tokens, req, res) {
         return [
@@ -51,8 +59,10 @@ function init(callback) {
     router.del = router.delete; // amend router.del for readability further on
 
     router.post('/api/v1/login', users.login);
-    router.get ('/api/v1/profile', users.tokenAuth, users.profile);
-    router.get ('/api/v1/config', users.tokenAuth, async function (req, res, next) {
+    router.get ('/api/v1/logout', users.logout);
+
+    router.get ('/api/v1/profile', users.sessionAuth, users.profile);
+    router.get ('/api/v1/config', users.sessionAuth, async function (req, res, next) {
         // currently we only send configs for collabora
 
         const tmp = {
@@ -81,19 +91,19 @@ function init(callback) {
         next(new HttpSuccess(200, tmp));
     });
 
-    router.get ('/api/v1/users', users.tokenAuth, users.list);
+    router.get ('/api/v1/users', users.sessionAuth, users.list);
 
-    router.get ('/api/v1/recent', users.tokenAuth, files.recent);
+    router.get ('/api/v1/recent', users.sessionAuth, files.recent);
 
-    router.head('/api/v1/files', users.tokenAuth, files.head);
-    router.get ('/api/v1/files', users.tokenAuth, files.get);
-    router.post('/api/v1/files', users.tokenAuth, multipart({ maxFieldsSize: 2 * 1024, limit: '512mb', timeout: 3 * 60 * 1000 }), files.add);
-    router.put ('/api/v1/files', users.tokenAuth, files.update);
-    router.del ('/api/v1/files', users.tokenAuth, files.remove);
+    router.head('/api/v1/files', users.sessionAuth, files.head);
+    router.get ('/api/v1/files', users.sessionAuth, files.get);
+    router.post('/api/v1/files', users.sessionAuth, multipart({ maxFieldsSize: 2 * 1024, limit: '512mb', timeout: 3 * 60 * 1000 }), files.add);
+    router.put ('/api/v1/files', users.sessionAuth, files.update);
+    router.del ('/api/v1/files', users.sessionAuth, files.remove);
 
-    router.get ('/api/v1/shares', users.tokenAuth, shares.listShares);
-    router.post('/api/v1/shares', users.tokenAuth, shares.createShare);
-    router.del ('/api/v1/shares', users.tokenAuth, shares.removeShare);
+    router.get ('/api/v1/shares', users.sessionAuth, shares.listShares);
+    router.post('/api/v1/shares', users.sessionAuth, shares.createShare);
+    router.del ('/api/v1/shares', users.sessionAuth, shares.removeShare);
 
     router.head('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.head);
     router.get ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.get);
@@ -101,9 +111,9 @@ function init(callback) {
     router.put ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.update);
     router.del ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.remove);
 
-    router.get ('/api/v1/preview/:type/:id/:hash', users.optionalTokenAuth, shares.optionalAttachReceiver, preview.get);
+    router.get ('/api/v1/preview/:type/:id/:hash', users.sessionAuth, shares.optionalAttachReceiver, preview.get);
 
-    router.get ('/api/v1/office/handle', users.tokenAuth, office.getHandle);
+    router.get ('/api/v1/office/handle', users.sessionAuth, office.getHandle);
     router.get ('/api/v1/office/wopi/files/:shareId', users.tokenAuth, office.checkFileInfo);
     router.get ('/api/v1/office/wopi/files/:shareId/contents', users.tokenAuth, office.getFile);
     router.post('/api/v1/office/wopi/files/:shareId/contents', users.tokenAuth, bodyParser.raw(), office.putFile);

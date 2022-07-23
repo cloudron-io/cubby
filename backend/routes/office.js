@@ -57,7 +57,7 @@ async function getHandle(req, res, next) {
     res.json({
         shareId: shareId,
         url: onlineUrl,
-        token: 'unused'
+        token: 'unused' // TODO need to provide some real token here
     });
 }
 

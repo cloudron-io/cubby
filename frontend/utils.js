@@ -52,19 +52,16 @@ function decode(path) {
 function getDirectLink(entry) {
     if (entry.share) {
         let link = window.location.origin + '/api/v1/shares/' + entry.share.id + '?type=raw&path=' + encodeURIComponent(entry.filePath);
-
-        if (localStorage.accessToken) link += '&access_token=' + localStorage.accessToken;
-
         return link;
     } else {
-        return window.location.origin + '/api/v1/files?type=raw&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(entry.filePath);
+        return window.location.origin + '/api/v1/files?type=raw&path=' + encodeURIComponent(entry.filePath);
     }
 }
 
 // TODO the url might actually return a 412 in which case we have to keep reloading
 function getPreviewUrl(entry) {
     if (!entry.previewUrl) return '';
-    return entry.previewUrl + '?access_token=' + localStorage.accessToken;
+    return entry.previewUrl;
 }
 
 function getShareLink(shareId) {
@@ -75,9 +72,9 @@ function download(entry) {
     if (entry.isDirectory) return;
 
     if (entry.share) {
-        window.location.href = '/api/v1/shares/' + entry.share.id + '?type=download&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(entry.filePath);
+        window.location.href = '/api/v1/shares/' + entry.share.id + '?type=download&path=' + encodeURIComponent(entry.filePath);
     } else {
-        window.location.href = '/api/v1/files?type=download&access_token=' + localStorage.accessToken + '&path=' + encodeURIComponent(entry.filePath);
+        window.location.href = '/api/v1/files?type=download&path=' + encodeURIComponent(entry.filePath);
     }
 }
 

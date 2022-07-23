@@ -42,7 +42,7 @@ export default {
 
             // TODO support shares here apiPath wise
             const folderPath = entry.filePath.slice(0, -entry.fileName.length);
-            superagent.get('/api/v1/files').query({ path: folderPath, access_token: localStorage.accessToken }).end(function (error, result) {
+            superagent.get('/api/v1/files').query({ path: folderPath }).end(function (error, result) {
                 if (error) return console.error('Failed to load directory:', error);
 
                 that.entries = result.body.files;

@@ -37,7 +37,6 @@ export default {
         return {
             ready: false,
             busy: true,
-            accessToken: '',
             search: '',
             viewer: '',
             viewers: [],

@@ -100,7 +100,7 @@ export default {
             var url = new URL(event.target.src);
 
             setTimeout(function () {
-                event.target.src = url.pathname + '?access_token=' + url.searchParams.get('access_token') + '&refresh=' + Date.now();
+                event.target.src = url.pathname + '?refresh=' + Date.now();
             }, 1000);
         }
     },
