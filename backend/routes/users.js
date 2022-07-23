@@ -30,6 +30,7 @@ async function login(req, res, next) {
 
     user.diskusage = await diskusage.getByUsername(user.username);
 
+    // req.session.username indicates a valid login session
     req.session.username = user.username;
 
     next(new HttpSuccess(200, { user, accessToken }));
@@ -42,8 +43,6 @@ async function logout(req, res, next) {
 }
 
 async function sessionAuth(req, res, next) {
-
-    console.log('session', req.session);
     if (!req.session || !req.session.username) return next(new HttpError(401, 'No login session'));
 
     try {
@@ -58,8 +57,6 @@ async function sessionAuth(req, res, next) {
 
 async function tokenAuth(req, res, next) {
     var accessToken = req.query.access_token || req.body.accessToken || '';
-
-    console.log('session', req.session);
 
     try {
         req.user = await users.getByAccessToken(accessToken);
