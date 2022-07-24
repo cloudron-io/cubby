@@ -10,7 +10,7 @@ if [[ ! -f "/app/data/config.json" ]]; then
 fi
 
 echo "=> Ensure permissions"
-chown -R cloudron:cloudron /app/data
+chown -R cloudron:cloudron /app/data /run
 
 echo "=> Run db-migration"
 DATABASE_URL="postgres://${CLOUDRON_POSTGRESQL_USERNAME}:${CLOUDRON_POSTGRESQL_PASSWORD}@${CLOUDRON_POSTGRESQL_HOST}/${CLOUDRON_POSTGRESQL_DATABASE}" /app/code/node_modules/.bin/db-migrate up
