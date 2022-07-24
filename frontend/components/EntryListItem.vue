@@ -1,5 +1,5 @@
 <template>
-    <tr class="entry" :key="entry.id" @contextmenu="onContextMenu($event)" @dblclick="onEntryOpen(false)" @click="onEntrySelect($event)" @drop.stop.prevent="onDrop()" @dragexit.stop.prevent="onDragExit()" @dragover.stop.prevent="onDragOver()" :class="{ 'selected': selected.includes(getEntryIdentifier(entry)), 'drag-active': dragActive }">
+    <tr class="entry" :key="entry.id" @contextmenu="onContextMenu($event)" @dblclick="onEntryOpen(false)" @click="onEntrySelect($event)" @drop.stop.prevent="onDrop()" @dragexit.stop.prevent="onDragExit()" @dragover.stop.prevent="onDragOver()" :class="{ 'selected': entry.selected, 'drag-active': dragActive }">
       <td v-if="!isVisible()" class="icon" style="width: 40px; height: 40px;"></td>
       <td v-if="!isVisible()" colspan="4" style="height: 40px;">
         <a v-show="!entry.rename" :href="entry.filePath" @click.stop.prevent="onEntryOpen(true)">{{ entry.fileName }}</a>
@@ -15,12 +15,12 @@
       <td v-if="isVisible()" style="max-width: 100px;">{{ prettyFileSize(entry.size) }}</td>
       <td v-if="isVisible()" style="min-width: 180px; text-align: right;">
         <a :href="getDirectLink(entry)" target="_blank" @click.stop>
-          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-external-link" v-tooltip.top="'Open'" v-show="!entry.rename && entry.isFile && selectedEntries.length <= 1" />
+          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-external-link" v-tooltip.top="'Open'" v-show="!entry.rename && entry.isFile" />
         </a>
-        <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-download" v-tooltip.top="'Download'" v-show="!entry.rename && entry.isFile && selectedEntries.length <= 1" @click.stop="onDownload(entry)"/>
-        <Button class="action-buttons p-button-sm p-button-rounded p-button-text p-button-danger" icon="pi pi-trash" v-tooltip.top="'Delete'" v-show="editable && !entry.rename && selectedEntries.length <= 1" @click.stop="onDelete(entry)"/>
+        <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-download" v-tooltip.top="'Download'" v-show="!entry.rename && entry.isFile" @click.stop="onDownload(entry)"/>
+        <Button class="action-buttons p-button-sm p-button-rounded p-button-text p-button-danger" icon="pi pi-trash" v-tooltip.top="'Delete'" v-show="editable && !entry.rename" @click.stop="onDelete(entry)"/>
 
-        <Button class="action-buttons p-button-sm p-button-rounded p-button-text" :class="{ 'action-buttons-visible': entry.sharedWith.length }" icon="pi pi-share-alt" v-tooltip.top="entry.sharedWith.length ? 'Edit Shares' : 'Create Share'" v-show="editable && (entry.sharedWith.length || (shareable && !entry.rename && selectedEntries.length <= 1))" @click.stop="onShare()"/>
+        <Button class="action-buttons p-button-sm p-button-rounded p-button-text" :class="{ 'action-buttons-visible': entry.sharedWith.length }" icon="pi pi-share-alt" v-tooltip.top="entry.sharedWith.length ? 'Edit Shares' : 'Create Share'" v-show="editable && (entry.sharedWith.length || (shareable && !entry.rename))" @click.stop="onShare()"/>
       </td>
     </tr>
 </template>
@@ -36,12 +36,6 @@ export default {
         entry: {
             type: Object,
             default: () => { return {}; }
-        },
-        selected: {
-            type: Array
-        },
-        selectedEntries: {
-            type: Array
         },
         editable: {
             type: Boolean,

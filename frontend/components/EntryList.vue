@@ -19,7 +19,7 @@
         <tr colspan="5" v-show="entries.length === 0">{{ emptyPlaceholder }}</tr>
         <tr colspan="5" v-show="entries.length !== 0 && filteredAndSortedEntries.length === 0">Nothing found</tr>
         <template v-for="entry in filteredAndSortedEntries">
-          <EntryListItem :entry="entry" :selected="selected" :selectedEntries="selectedEntries" :editable="editable" :shareable="shareable"
+          <EntryListItem :entry="entry" :editable="editable" :shareable="shareable"
             @entry-open="onEntryOpen"
             @entry-select="onEntrySelect"
             @context-menu="onContextMenu"
@@ -45,8 +45,6 @@ export default {
     data() {
         return {
             activeEntry: null,
-            selected: [],
-            selectedEntries: [],
             sort: {
                 prop: 'fileName',
                 desc: true
@@ -55,12 +53,12 @@ export default {
             contextMenuItem: [{
                 label:'Open',
                 icon:'pi pi-fw pi-external-link',
-                command: () => this.onEntryOpen(this.selectedEntries[0])
+                command: () => this.onEntryOpen(this.activeEntry)
             }, {
                 label:'Download',
                 icon:'pi pi-fw pi-download',
-                visible: () => !this.selectedEntries[0].isDirectory,
-                command: () => this.onDownload(this.selectedEntries[0])
+                visible: () => !this.activeEntry.isDirectory,
+                command: () => this.onDownload(this.activeEntry)
             }, {
                 separator: true,
                 visible: () => this.editable
@@ -68,7 +66,7 @@ export default {
                 label:'Share',
                 icon:'pi pi-fw pi-share-alt',
                 visible: () => this.editable,
-                command: () => this.onShare(this.selectedEntries[0])
+                command: () => this.onShare(this.activeEntry)
             }, {
                 separator: true,
                 visible: () => this.editable
@@ -76,7 +74,7 @@ export default {
                 label:'Delete',
                 icon:'pi pi-fw pi-trash',
                 visible: () => this.editable,
-                command: () => this.onDelete(this.selectedEntries[0])
+                command: () => this.onDelete(this.activeEntry)
             }]
         };
     },
@@ -153,37 +151,27 @@ export default {
             else this.sort.prop = prop;
         },
         onEntrySelect: function (entry, $event) {
-            const fileIdentifier = this.getEntryIdentifier(entry);
-
             // FIXME mac might not use ctrl Key
             if ($event && $event.ctrlKey) {
-                let exists = this.selected.indexOf(fileIdentifier);
-                if (exists === -1) {
-                    this.selected.push(fileIdentifier);
-                    this.selectedEntries.push(entry);
-                } else {
-                    this.selected.splice(exists, 1);
-                    this.selectedEntries.splice(exists, 1);
-                }
+                entry.selected = !entry.selected;
             } else {
-                this.selected = [ fileIdentifier ];
-                this.selectedEntries = [ entry ];
+                // clear all selection
+                this.entries.forEach(function (e) { e.selected = false; });
+                entry.selected = true;
             }
 
             // update the last active Entry (basically the one with focus)
             this.activeEntry = entry;
 
-            this.$emit('selection-changed', this.selectedEntries);
+            this.$emit('selection-changed', this.entries.filter(function (e) { return e.selected; }));
         },
         onSelectAll() {
-            this.selected = this.entries.map(function (e) { return e.filePath; });
-            this.selectedEntries = this.entries;
+            this.entries.forEach(function (e) { e.selected = true; });
 
-            this.$emit('selection-changed', this.selectedEntries);
+            this.$emit('selection-changed', this.entries.filter(function (e) { return e.selected; }));
         },
         onSelectClear() {
-            this.selected = [];
-            this.selectedEntries = [];
+            this.entries.forEach(function (e) { e.selected = false; });
         },
         onEntryOpen: function (entry, select) {
             clearSelection();
@@ -195,7 +183,7 @@ export default {
             if (select) this.onEntrySelect(entry);
         },
         onDownload: function (entry) {
-            this.$emit('download', entry ? [ entry ] : this.selectedEntries);
+            this.$emit('download', entry ? [ entry ] : this.entries.filter(function (e) { return e.selected; }));
         },
         onRename: function (entry) {
             if (entry.rename) {
@@ -227,7 +215,7 @@ export default {
             this.$emit('entry-renamed', entry, entry.filePathNew);
         },
         onDelete: function (entry) {
-            this.$emit('delete', entry ? [ entry ] : this.selectedEntries);
+            this.$emit('delete', entry ? [ entry ] : this.entries.filter(function (e) { return e.selected; }));
         },
         onShare: function (entry) {
             this.$emit('entry-shared', entry);
@@ -263,9 +251,7 @@ export default {
             if (!that.active) return;
 
             if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-                if (that.selected.length === 0) return;
-
-                var index = that.filteredAndSortedEntries.findIndex(function (entry) { return entry.filePath === that.selected[0]; });
+                var index = that.filteredAndSortedEntries.findIndex(function (entry) { return entry.filePath === that.activeEntry.filePath; });
                 if (index === -1) return;
 
                 if (event.key === 'ArrowUp') {
