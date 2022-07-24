@@ -55,7 +55,7 @@ export default {
 
                 var wopiSrc = window.location.origin + '/api/v1/office/wopi/files/' + result.body.shareId;
                 that.wopiUrl = result.body.url + 'WOPISrc=' + wopiSrc;
-                that.wopiToken = result.body.wopiToken;
+                that.wopiToken = result.body.token;
 
                 setTimeout(function () {
                     that.$refs.wopiForm.submit();
