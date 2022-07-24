@@ -78,3 +78,6 @@
 * Refactor list component to lazy load large lists
 * Fix file dropping for upload
 
+[0.7.0]
+* Move from access tokens to cookie sessions
+
