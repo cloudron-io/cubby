@@ -36,7 +36,7 @@ function init(callback) {
 
     var FileStore = require('session-file-store')(session);
     var fileStoreOptions = {
-        path: process.env.CLOUDRON ? '/run/sessions' : path.resolve('./.sessions')
+        path: process.env.CLOUDRON ? '/app/data/sessions' : path.resolve('./.sessions')
     };
 
     app.use(session({

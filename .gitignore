@@ -4,6 +4,7 @@ node_modules
 
 .data/
 .thumbnails/
+.sessions/
 
 # local env files
 .env.local
