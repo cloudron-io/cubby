@@ -31,18 +31,22 @@ function init(callback) {
 
     app.set('json spaces', 2); // pretty json
 
-    // for rate limiting
-    app.enable('trust proxy');
+    const FileStore = require('session-file-store')(session);
 
-    var FileStore = require('session-file-store')(session);
-    var fileStoreOptions = {
-        path: process.env.CLOUDRON ? '/app/data/sessions' : path.resolve('./.sessions')
+    const sessionOptions = {
+        store: new FileStore({ path: process.env.CLOUDRON ? '/app/data/sessions' : path.resolve('./.sessions') }),
+        secret: 'cubby goes lightly',
+        cookie: {
+            maxAge: 1000 * 60 * 60 * 24 * 7 // one week
+        }
     };
 
-    app.use(session({
-        store: new FileStore(fileStoreOptions),
-        secret: 'cubby goes lightly'
-    }));
+    if (process.env.CLOUDRON) {
+        app.enable('trust proxy');
+        sessionOptions.cookie.secure = true;
+    }
+
+    app.use(session(sessionOptions));
 
     app.use(morgan(function (tokens, req, res) {
         return [
