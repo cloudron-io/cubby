@@ -14,6 +14,7 @@ var assert = require('assert'),
     files = require('../files.js'),
     shares = require('../shares.js'),
     config = require('../config.js'),
+    tokens = require('../tokens.js'),
     Dom = require('xmldom').DOMParser,
     xpath = require('xpath'),
     HttpError = require('connect-lastmile').HttpError,
@@ -53,11 +54,13 @@ async function getHandle(req, res, next) {
         return next(new HttpError(500, error));
     }
 
+    const token = await tokens.add(req.user.username);
+
     var onlineUrl = nodes[0].getAttribute('urlsrc');
     res.json({
         shareId: shareId,
         url: onlineUrl,
-        token: 'unused' // TODO need to provide some real token here
+        token: token
     });
 }
 
