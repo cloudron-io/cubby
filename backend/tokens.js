@@ -35,9 +35,8 @@ async function get(token) {
     return postProcess(result.rows[0]);
 }
 
-async function remove(token, callback) {
+async function remove(token) {
     assert.strictEqual(typeof token, 'string');
-    assert.strictEqual(typeof callback, 'function');
 
     await database.query('DELETE FROM tokens WHERE id = $1', [ token ]);
 }
