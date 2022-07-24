@@ -19,7 +19,7 @@
         <tr colspan="5" v-show="entries.length === 0">{{ emptyPlaceholder }}</tr>
         <tr colspan="5" v-show="entries.length !== 0 && filteredAndSortedEntries.length === 0">Nothing found</tr>
         <template v-for="entry in filteredAndSortedEntries">
-          <EntryListItem :entry="entry" :selected="selected" :selectedEntries="selectedEntries"
+          <EntryListItem :entry="entry" :selected="selected" :selectedEntries="selectedEntries" :editable="editable" :shareable="shareable"
             @entry-open="onEntryOpen"
             @entry-select="onEntrySelect"
             @context-menu="onContextMenu"

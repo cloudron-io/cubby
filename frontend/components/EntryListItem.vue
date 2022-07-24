@@ -42,6 +42,14 @@ export default {
         },
         selectedEntries: {
             type: Array
+        },
+        editable: {
+            type: Boolean,
+            default: true
+        },
+        shareable: {
+            type: Boolean,
+            default: true
         }
     },
     data() {
