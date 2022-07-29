@@ -5,6 +5,7 @@ exports = module.exports = {
     logout,
     tokenAuth,
     sessionAuth,
+    optionalSessionAuth,
     optionalTokenAuth,
     profile,
     list
@@ -44,6 +45,22 @@ async function logout(req, res, next) {
 
 async function sessionAuth(req, res, next) {
     if (!req.session || !req.session.username) return next(new HttpError(401, 'No login session'));
+
+    try {
+        req.user = await users.get(req.session.username);
+        if (!req.user) return next(new HttpError(401, 'Invalid login session'));
+    } catch (error) {
+        return next(new HttpError(500, error));
+    }
+
+    next();
+}
+
+async function optionalSessionAuth(req, res, next) {
+    if (!req.session || !req.session.username) {
+        req.user = null;
+        return next();
+    }
 
     try {
         req.user = await users.get(req.session.username);

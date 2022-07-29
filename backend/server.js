@@ -119,7 +119,7 @@ function init(callback) {
     router.put ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.update);
     router.del ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.remove);
 
-    router.get ('/api/v1/preview/:type/:id/:hash', users.sessionAuth, shares.optionalAttachReceiver, preview.get);
+    router.get ('/api/v1/preview/:type/:id/:hash', users.optionalSessionAuth, preview.get);
 
     router.get ('/api/v1/office/handle', users.sessionAuth, office.getHandle);
     router.get ('/api/v1/office/wopi/files/:shareId', users.tokenAuth, office.checkFileInfo);
