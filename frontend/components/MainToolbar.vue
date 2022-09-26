@@ -13,7 +13,7 @@
             </div>
 
             <!-- Always visible if we have a login session-->
-            <Button v-show="displayName" icon="pi pi-upload" class="pp-button-sm" label="Upload" @click="onToggleMenuUpload"/>
+            <Button v-show="displayName" icon="pi pi-upload" class="p-button-sm" label="Upload" @click="onToggleMenuUpload"/>
             <Button v-show="displayName" icon="pi pi-plus" class="p-button-sm" label="New" @click="onToggleMenuNew"/>
 
             <div class="profile-actions">
