@@ -6,12 +6,12 @@
             </template>
 
             <template #end>
-                <Button icon="pi pi-times" class="p-ml-2 p-button-sm" label="Close" @click="onClose"/>
+                <Button icon="pi pi-times" class="p-button-sm" label="Close" @click="onClose"/>
             </template>
         </Toolbar>
         <div class="content">
             <h1>{{ entry ? entry.fileName: '' }}</h1>
-            <Button class="p-ml-2 p-button-sm" label="Close" @click="onClose"/>
+            <Button class="p-button-sm" label="Close" @click="onClose"/>
         </div>
     </div>
 </template>

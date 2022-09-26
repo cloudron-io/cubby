@@ -6,7 +6,7 @@
             </template>
 
             <template #end>
-                <Button icon="pi pi-times" class="p-ml-2 p-button-sm" label="Close" @click="onClose"/>
+                <Button icon="pi pi-times" class="p-button-sm" label="Close" @click="onClose"/>
             </template>
         </Toolbar>
 

@@ -72,4 +72,14 @@ export default {
     padding: 20px;
 }
 
+.p-field {
+    margin-bottom: 1rem;
+
+}
+
+.p-field > label {
+    display: inline-block;
+    margin-bottom: 0.5rem;
+}
+
 </style>
