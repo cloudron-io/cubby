@@ -3,7 +3,7 @@
         <Toolbar>
             <template #start>
                 <Button :icon="busySave ? 'pi pi-spin pi-spinner' : 'pi pi-save'" class="p-button-sm" label="Save" @click="onSave" :disabled="busySave || !isChanged"/>
-                <div>{{ entry ? entry.fileName : '' }}</div>
+                <div class="file-name">{{ entry ? entry.fileName : '' }}</div>
             </template>
 
             <template #end>
@@ -107,6 +107,10 @@ export default {
     top: 10px;
     right: 10px;
     width: 35px;
+}
+
+.file-name {
+    margin: 0 0.5rem;
 }
 
 </style>
