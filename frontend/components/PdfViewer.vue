@@ -17,9 +17,14 @@
 
 <script>
 
-import pdfjsLib from "pdfjs-dist/build/pdf";
-import { PDFViewer } from "pdfjs-dist/web/pdf_viewer";
-import "pdfjs-dist/web/pdf_viewer.css";
+const pdfjs = require('pdfjs-dist');
+
+const pdfjsWorker = require('pdfjs-dist/build/pdf.worker.entry');
+pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+
+import { EventBus, PDFViewer, PDFLinkService } from 'pdfjs-dist/web/pdf_viewer.js';
+import 'pdfjs-dist/web/pdf_viewer.css';
+
 import { getDirectLink } from '../utils.js';
 
 export default {
@@ -39,7 +44,7 @@ export default {
 
             this.entry = entry;
 
-            var loadingTask = pdfjsLib.getDocument(getDirectLink(entry));
+            var loadingTask = pdfjs.getDocument(getDirectLink(entry));
             var pdf = await loadingTask.promise;
             this.pdfViewer.setDocument(pdf);
         },
@@ -48,7 +53,17 @@ export default {
         }
     },
     mounted() {
-        this.pdfViewer = new PDFViewer({ container: this.$refs.pdfView });
+        const eventBus = new EventBus();
+        const linkService = new PDFLinkService({ eventBus })
+
+        // somewhere from https://github.com/mozilla/pdf.js/blob/master/web/pdf_viewer.js#L239 there are no api docs
+        const options = {
+            container: this.$refs.pdfView,
+            eventBus: eventBus,
+            linkService: linkService
+        };
+
+        this.pdfViewer = new PDFViewer(options);
     }
 };
 

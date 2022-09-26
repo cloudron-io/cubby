@@ -28,7 +28,7 @@
     "morgan": "^1.10.0",
     "multiparty": "^4.2.3",
     "once": "^1.4.0",
-    "pdfjs-dist": "2.0.943",
+    "pdfjs-dist": "^2.16.105",
     "primeicons": "^6.0.1",
     "primevue": "^3.17.0",
     "safetydance": "^2.2.0",
