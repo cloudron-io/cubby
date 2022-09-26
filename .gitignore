@@ -5,6 +5,7 @@ node_modules
 .data/
 .thumbnails/
 .sessions/
+config.js
 
 # local env files
 .env.local
