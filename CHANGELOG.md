@@ -85,3 +85,9 @@
 * Improve Image viewer
 * Update dependencies
 
+[1.0.0]
+* Update monaco editor
+* Update pdfjs
+* Remove primeflex layout engine
+* Fixup file deletion
+
