@@ -36,6 +36,8 @@ function init(callback) {
     const sessionOptions = {
         store: new FileStore({ path: process.env.CLOUDRON ? '/app/data/sessions' : path.resolve('./.sessions') }),
         secret: 'cubby goes lightly',
+        resave: false,
+        saveUninitialized: false,
         cookie: {
             maxAge: 1000 * 60 * 60 * 24 * 7 // one week
         }
