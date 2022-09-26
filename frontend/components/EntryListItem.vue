@@ -187,10 +187,6 @@ td > a:hover {
     text-decoration: underline;
 }
 
-td::selection {
-    background-color: blue;
-}
-
 .icon {
     padding: 4px;
     max-width: 40px;
