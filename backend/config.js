@@ -22,7 +22,7 @@ function init(configFilePath) {
     try {
         gConfig = require(path.resolve(configFilePath));
     } catch (e) {
-        debug('Unable to load config file. Using defaults.');
+        debug(`Unable to load config file at ${configFilePath}. Using defaults.`);
     }
 
     debug('loaded config:', gConfig);
