@@ -90,4 +90,5 @@
 * Update pdfjs
 * Remove primeflex layout engine
 * Fixup file deletion
+* Fix crash in texteditor language detection
 
