@@ -114,16 +114,12 @@
           <small class="p-invalid" v-show="shareDialog.error">{{ shareDialog.error }}</small>
         </div>
       </div>
-      <div class="p-grid p-jc-between">
-        <div class="p-col-4">
-          <div class="p-field-checkbox">
-            <Checkbox id="binary" v-model="shareDialog.readonly" :binary="true" />
-            <label for="binary">Share read-only</label>
-          </div>
+      <div>
+        <div class="p-field-checkbox">
+          <Checkbox id="binary" v-model="shareDialog.readonly" :binary="true" />
+          <label for="binary">Share read-only</label>
         </div>
-        <div class="p-col-4">
-          <Button label="Create share" icon="pi pi-check" class="p-button p-button-success" @click="onCreateShare" :disabled="!shareDialog.receiverUsername"/>
-        </div>
+        <Button label="Create share" icon="pi pi-check" class="p-button p-button-success" @click="onCreateShare" :disabled="!shareDialog.receiverUsername"/>
       </div>
     </form>
 

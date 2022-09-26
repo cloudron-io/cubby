@@ -103,3 +103,16 @@ a:hover {
 .p-toolbar {
     border-radius: 0;
 }
+
+.p-checkbox {
+    margin-right: 0.5rem;
+}
+
+.p-field, .p-field-checkbox {
+    margin-bottom: 1rem;
+}
+
+.p-field > label {
+    display: inline-block;
+    margin-bottom: 0.5rem;
+}
