@@ -81,3 +81,7 @@
 [0.7.0]
 * Move from access tokens to cookie sessions
 
+[0.8.0]
+* Improve Image viewer
+* Update dependencies
+
