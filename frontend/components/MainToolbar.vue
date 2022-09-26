@@ -1,23 +1,28 @@
 <template>
     <Toolbar>
         <template #start>
-          <Button icon="pi pi-chevron-left" class="p-mr-2 p-button-sm p-button-text" :disabled="breadCrumbs.length === 0" @click="onUp"/>
+          <Button icon="pi pi-chevron-left" class="p-button-sm p-button-text" :disabled="breadCrumbs.length === 0" @click="onUp"/>
           <Breadcrumb :home="breadCrumbHome" :model="breadCrumbs"/>
         </template>
 
         <template #end>
             <!-- file action buttons -->
-            <Button v-show="selectedEntries.length > 1" icon="pi pi-download" class="p-ml-2 p-button-outlined p-button-sm" v-tooltip="'Download'" @click="onDownload"/>
-            <Button v-show="displayName && selectedEntries.length > 1" icon="pi pi-trash" class="p-ml-2 p-mr-6 p-button-outlined p-button-sm p-button-danger" v-tooltip="'Delete'" @click="onDelete"/>
+            <div class="file-actions">
+                <Button v-show="selectedEntries.length > 1" icon="pi pi-download" class="p-button-outlined p-button-sm" v-tooltip="'Download'" @click="onDownload"/>
+                <Button v-show="displayName && selectedEntries.length > 1" icon="pi pi-trash" class="p-button-outlined p-button-sm p-button-danger" v-tooltip="'Delete'" @click="onDelete"/>
+            </div>
 
             <!-- Always visible if we have a login session-->
-            <Button v-show="displayName" icon="pi pi-upload" class="p-ml-2 p-button-sm" label="Upload" @click="onToggleMenuUpload"/>
-            <Button v-show="displayName" icon="pi pi-plus" class="p-ml-2 p-button-sm" label="New" @click="onToggleMenuNew"/>
-            <Button v-show="displayName" icon="pi pi-user" class="p-ml-6 p-button-sm p-button-secondary" @click="onToggleMenuMain" :label="displayName"/>
+            <Button v-show="displayName" icon="pi pi-upload" class="pp-button-sm" label="Upload" @click="onToggleMenuUpload"/>
+            <Button v-show="displayName" icon="pi pi-plus" class="p-button-sm" label="New" @click="onToggleMenuNew"/>
 
-            <Menu ref="menuUpload" :model="uploadMenu" :popup="true"/>
-            <Menu ref="menuNew" :model="newMenu" :popup="true"/>
-            <Menu ref="menuMain" :model="mainMenu" :popup="true"/>
+            <div class="profile-actions">
+                <Button v-show="displayName" icon="pi pi-user" class="p-button-sm p-button-secondary" @click="onToggleMenuMain" :label="displayName"/>
+
+                <Menu ref="menuUpload" :model="uploadMenu" :popup="true"/>
+                <Menu ref="menuNew" :model="newMenu" :popup="true"/>
+                <Menu ref="menuMain" :model="mainMenu" :popup="true"/>
+            </div>
         </template>
     </Toolbar>
 
@@ -148,6 +153,18 @@ export default {
 
 .p-toolbar {
     padding: 0.5rem;
+}
+
+.p-toolbar-group-right button {
+    margin: 0 2px;
+}
+
+.file-actions {
+    margin-right: 50px;
+}
+
+.profile-actions {
+    margin-left: 50px;
 }
 
 .p-breadcrumb {
