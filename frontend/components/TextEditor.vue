@@ -22,7 +22,10 @@ import { getFileTypeGroup, getDirectLink } from '../utils.js';
 
 function getLanguage(filename) {
     var ext = '.' + filename.split('.').pop();
-    var language = languages.getLanguages().find(function (l) { return !!l.extensions.find(function (e) { return e === ext; }); }) || '';
+    var language = languages.getLanguages().find(function (l) {
+        if (!l.extensions) return false;
+        return !!l.extensions.find(function (e) { return e === ext; });
+    }) || '';
     return language ? language.id : '';
 }
 
