@@ -3,15 +3,15 @@
         <div ref="image" class="image"></div>
         <div class="action-nav action-download" @click="onDownload" v-tooltip.right="'Download'"><i class="pi pi-download" style="fontSize: 2rem"></i></div>
         <div class="action-nav action-close" @click="onClose" v-tooltip.left="'Close'"><i class="pi pi-times" style="fontSize: 2rem"></i></div>
-        <div class="action-nav action-prev" @click="onPrev" v-tooltip.right="'Previous'"><i class="pi pi-chevron-left" style="fontSize: 2rem"></i></div>
-        <div class="action-nav action-next" @click="onNext" v-tooltip.left="'Next'"><i class="pi pi-chevron-right" style="fontSize: 2rem"></i></div>
+        <div class="action-nav action-prev" @click="onPrev" v-show="currentIndex > 0" v-tooltip.right="'Previous'"><i class="pi pi-chevron-left" style="fontSize: 2rem"></i></div>
+        <div class="action-nav action-next" @click="onNext" v-show="currentIndex < entries.length-1" v-tooltip.left="'Next'"><i class="pi pi-chevron-right" style="fontSize: 2rem"></i></div>
     </div>
 </template>
 
 <script>
 
 import superagent from 'superagent';
-import { getDirectLink, getFileTypeGroup } from '../utils.js';
+import { getDirectLink, getFileTypeGroup, entryListSort } from '../utils.js';
 
 export default {
     name: 'ImageViewer',
@@ -25,7 +25,12 @@ export default {
     },
     methods: {
         canHandle(entry) {
-            return getFileTypeGroup(entry) === 'image';
+            if (getFileTypeGroup(entry) !== 'image') return false;
+
+            // handle things which are images but browsers can't display
+            if (entry.mimeType === 'image/vnd.adobe.photoshop') return false;
+
+            return true;
         },
         open(entry) {
             const that = this;
@@ -33,8 +38,8 @@ export default {
             if (!entry || entry.isDirectory || !this.canHandle(entry)) return;
 
             this.$refs.image.style.backgroundImage = 'url("' + getDirectLink(entry) + '")';
-            this.currentIndex = this.entries.filter(function (e) { return getFileTypeGroup(e) === 'image'; }).findIndex(function (e) { return e.fileName === entry.fileName; });
             this.entry = entry;
+            this.currentIndex = 0;
             this.entries = [];
 
             // TODO come up with something better here
@@ -45,7 +50,12 @@ export default {
             superagent.get('/api/v1/files').query({ path: folderPath }).end(function (error, result) {
                 if (error) return console.error('Failed to load directory:', error);
 
-                that.entries = result.body.files;
+                // TODO fetch those from the EntryList to be in sync
+                const prop = 'fileName';
+                const desc = true;
+
+                that.entries = entryListSort(result.body.files.filter(that.canHandle), prop, desc);
+                that.currentIndex = that.entries.findIndex(function (e) { return e.fileName === entry.fileName; });
             });
         },
         onDownload() {
@@ -55,26 +65,24 @@ export default {
             this.$emit('close');
         },
         onNext() {
-            var images = this.entries.filter(function (e) { return getFileTypeGroup(e) === 'image'; });
-            if (images.length <= 1) return;
+            if (this.entries.length <= 1) return;
 
-            if (this.currentIndex >= images.length-1) return;
+            if (this.currentIndex >= this.entries.length-1) return;
 
             this.currentIndex += 1;
-            this.entry = images[this.currentIndex];
+            this.entry = this.entries[this.currentIndex];
 
-            this.$refs.image.style.backgroundImage = 'url("' + getDirectLink(images[this.currentIndex]) + '")';
+            this.$refs.image.style.backgroundImage = 'url("' + getDirectLink(this.entries[this.currentIndex]) + '")';
         },
         onPrev() {
-            var images = this.entries.filter(function (e) { return getFileTypeGroup(e) === 'image'; });
-            if (images.length <= 1) return;
+            if (this.entries.length <= 1) return;
 
             if (this.currentIndex <= 0) return;
 
             this.currentIndex -= 1;
-            this.entry = images[this.currentIndex];
+            this.entry = this.entries[this.currentIndex];
 
-            this.$refs.image.style.backgroundImage = 'url("' + getDirectLink(images[this.currentIndex]) + '")';
+            this.$refs.image.style.backgroundImage = 'url("' + getDirectLink(this.entries[this.currentIndex]) + '")';
         }
     },
     mounted() {

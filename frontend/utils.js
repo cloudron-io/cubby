@@ -143,6 +143,19 @@ function getEntryIdentifier(entry) {
     return (entry.share ? (entry.share.id + '/') : '') + entry.filePath;
 }
 
+function entryListSort(list, prop, desc) {
+    var tmp = list.sort(function (a, b) {
+        var av = a[prop];
+        var bv = b[prop];
+
+        if (typeof av === 'string') return (av.toUpperCase() < bv.toUpperCase()) ? -1 : 1;
+        else return (av < bv) ? -1 : 1;
+    });
+
+    if (desc) return tmp;
+    return tmp.reverse();
+}
+
 export {
     getDirectLink,
     getPreviewUrl,
@@ -160,5 +173,6 @@ export {
     clearSelection,
     urlSearchQuery,
     parseResourcePath,
-    getEntryIdentifier
+    getEntryIdentifier,
+    entryListSort
 };

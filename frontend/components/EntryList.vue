@@ -36,7 +36,7 @@
 <script>
 
 import { nextTick } from 'vue';
-import { getPreviewUrl, prettyDate, prettyLongDate, prettyFileSize, getDirectLink, clearSelection, getEntryIdentifier } from '../utils.js';
+import { getPreviewUrl, prettyDate, prettyLongDate, prettyFileSize, getDirectLink, clearSelection, getEntryIdentifier, entryListSort } from '../utils.js';
 import * as Combokeys from 'combokeys';
 
 export default {
@@ -112,23 +112,12 @@ export default {
         filteredAndSortedEntries: function () {
             var that = this;
 
-            function sorting(list) {
-                var tmp = list.sort(function (a, b) {
-                    var av = a[that.sort.prop];
-                    var bv = b[that.sort.prop];
-
-                    if (typeof av === 'string') return (av.toUpperCase() < bv.toUpperCase()) ? -1 : 1;
-                    else return (av < bv) ? -1 : 1;
-                });
-
-                if (that.sort.desc) return tmp;
-                return tmp.reverse();
-            }
-
             if (this.sortFoldersFirst) {
-                return sorting(this.entries.filter(function (e) { return e.isDirectory; })).concat(sorting(this.entries.filter(function (e) { return !e.isDirectory; })));
+                const sortedFolders = entryListSort(this.entries.filter(function (e) { return e.isDirectory; }), that.sort.prop, that.sort.desc);
+                const sortedFiles = entryListSort(this.entries.filter(function (e) { return !e.isDirectory; }), that.sort.prop, that.sort.desc);
+                return sortedFolders.concat(sortedFiles);
             } else {
-                return sorting(this.entries);
+                return entryListSort(this.entries, that.sort.prop, that.sort.desc);
             }
         }
     },
@@ -139,9 +128,6 @@ export default {
         prettyFileSize,
         prettyLongDate,
         getEntryIdentifier,
-        onEnter() {
-            console.log('enter', this.active)
-        },
         onContextMenu(entry, $event) {
             this.onEntrySelect(entry, $event);
             this.$refs.entryListContextMenu.show($event);
@@ -237,8 +223,6 @@ export default {
             this.dragActive = '';
 
             if (!event.dataTransfer.items[0]) return;
-
-            console.log('---', entry)
 
             if (entry && entry.isDirectory) this.$emit('dropped', event.dataTransfer.items, entry);
             else this.$emit('dropped', event.dataTransfer.items, null);
