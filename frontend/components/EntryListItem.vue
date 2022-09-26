@@ -27,11 +27,11 @@
 
 <script>
 
-import { getDirectLink, prettyLongDate, prettyDate, prettyFileSize, getPreviewUrl, getEntryIdentifier } from '../utils.js';
+import { getDirectLink, prettyLongDate, prettyDate, prettyFileSize, getPreviewUrl } from '../utils.js';
 
 export default {
     name: 'EntryListItem',
-    emits: [ 'share', 'rename-submit', 'entry-open', 'entry-select', 'context-menu', 'drag-exit', 'drag-active', 'drop' ],
+    emits: [ 'delete', 'share', 'rename-submit', 'entry-open', 'entry-select', 'context-menu', 'drag-exit', 'drag-active', 'drop' ],
     props: {
         entry: {
             type: Object,
@@ -55,7 +55,6 @@ export default {
     methods: {
         prettyLongDate,
         prettyDate,
-        getEntryIdentifier,
         getPreviewUrl,
         prettyFileSize,
         getDirectLink,
@@ -93,6 +92,9 @@ export default {
         },
         onShare() {
             this.$emit('share', this.entry);
+        },
+        onDelete() {
+            this.$emit('delete', this.entry);
         },
         previewLoaded() {
             this.entry.previewLoading = false;

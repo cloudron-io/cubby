@@ -24,6 +24,7 @@
             @entry-select="onEntrySelect"
             @context-menu="onContextMenu"
             @share="onShare"
+            @delete="onDelete"
             @drop="onDrop"
             @drag-over="onDragOver"
           />
