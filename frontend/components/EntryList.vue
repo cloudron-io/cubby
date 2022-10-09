@@ -5,32 +5,28 @@
     <i class="pi pi-spin pi-spinner" style="fontSize: 2rem"></i>
   </div>
   <div v-cloak v-show="!$parent.busy" class="list-container" :class="{ 'drag-active': dragActive === 'table' }" @drop.stop.prevent="onDrop(null)" @dragover.stop.prevent="onDragOver(null)" @dragexit="onDragExit">
-    <table>
-      <thead>
-        <tr>
-          <th style="height: 40px;"></th>
-          <th class="hand" style="" @click="onSort('fileName')">Name <i class="pi" :class="{'pi-sort-alpha-down': sort.desc, 'pi-sort-alpha-up-alt': !sort.desc }" v-show="sort.prop === 'fileName'"></i></th>
-          <th class="hand" style="max-width: 150px;" @click="onSort('mtime')">Updated <i class="pi" :class="{'pi-sort-numeric-down': sort.desc, 'pi-sort-numeric-up-alt': !sort.desc }" v-show="sort.prop === 'mtime'"></i></th>
-          <th class="hand" style="max-width: 100px;" @click="onSort('size')">Size <i class="pi" :class="{'pi-sort-numeric-down': sort.desc, 'pi-sort-numeric-up-alt': !sort.desc }" v-show="sort.prop === 'size'"></i></th>
-          <th style="min-width: 180px"></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr colspan="5" v-show="entries.length === 0">{{ emptyPlaceholder }}</tr>
-        <tr colspan="5" v-show="entries.length !== 0 && filteredAndSortedEntries.length === 0">Nothing found</tr>
-        <template v-for="entry in filteredAndSortedEntries">
-          <EntryListItem :entry="entry" :editable="editable" :shareable="shareable"
-            @entry-open="onEntryOpen"
-            @entry-select="onEntrySelect"
-            @context-menu="onContextMenu"
-            @share="onShare"
-            @delete="onDelete"
-            @drop="onDrop"
-            @drag-over="onDragOver"
-          />
-        </template>
-      </tbody>
-    </table>
+    <div class="list-header">
+      <div class="list-header-cell icon"></div>
+      <div class="list-header-cell filename hand" @click="onSort('fileName')">Name <i class="pi" :class="{'pi-sort-alpha-down': sort.desc, 'pi-sort-alpha-up-alt': !sort.desc }" v-show="sort.prop === 'fileName'"></i></div>
+      <div class="list-header-cell mtime hand" @click="onSort('mtime')">Updated <i class="pi" :class="{'pi-sort-numeric-down': sort.desc, 'pi-sort-numeric-up-alt': !sort.desc }" v-show="sort.prop === 'mtime'"></i></div>
+      <div class="list-header-cell size hand" @click="onSort('size')">Size <i class="pi" :class="{'pi-sort-numeric-down': sort.desc, 'pi-sort-numeric-up-alt': !sort.desc }" v-show="sort.prop === 'size'"></i></div>
+      <div class="list-header-cell actions"></div>
+    </div>
+    <div class="list-body">
+      <div class="empty-placeholder" v-show="entries.length === 0">{{ emptyPlaceholder }}</div>
+      <div class="empty-filter-placeholder" v-show="entries.length !== 0 && filteredAndSortedEntries.length === 0">Nothing found</div>
+      <template v-for="entry in filteredAndSortedEntries">
+        <EntryListItem :entry="entry" :editable="editable" :shareable="shareable"
+          @entry-open="onEntryOpen"
+          @entry-select="onEntrySelect"
+          @context-menu="onContextMenu"
+          @share="onShare"
+          @delete="onDelete"
+          @drop="onDrop"
+          @drag-over="onDragOver"
+        />
+      </template>
+    </div>
   </div>
 </template>
 
@@ -279,43 +275,69 @@ export default {
 <style scoped>
 
 .loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
 }
 
 .list-container {
-  width: 100%;
-  height: 100%;
-  transition: background-color 200ms, color 200ms;
-  border-radius: 3px;
+    width: 100%;
+    height: 100%;
+    transition: background-color 200ms, color 200ms;
+    border-radius: 3px;
+    position: absolute;
+    padding: 0 5px;
+    left: 0;
 }
 
 .drag-active {
-  background-color: #2196f3;
-  color: white;
+    background-color: #2196f3;
+    color: white;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  padding: 10px 0;
+.list-header {
+    display: flex;
+    width: 100%;
+    position: sticky;
+    top: 0px;
+    background-color: white;
+    z-index: 20;
 }
 
-th {
-  text-align: left;
+.list-header-cell {
+    height: 40px;
+    line-height: 40px;
 }
 
-thead {
-  position: sticky;
-  top: 0px;
-  background-color: white;
-  z-index: 20;
+.list-header-cell.icon {
+    width: 50px;
+}
+
+.list-header-cell.filename {
+    flex-grow: 1;
+}
+
+.list-header-cell.mtime {
+    width: 130px;
+}
+
+.list-header-cell.size {
+    width: 130px;
+    text-align: right;
+}
+
+.list-header-cell.actions {
+    width: 160px;
+}
+
+.empty-placeholder {
+    text-align: center;
+    margin-top: 100px;
 }
 
 .drag-active thead {
-  background-color: transparent;
+    background-color: transparent;
 }
 
 .hand {

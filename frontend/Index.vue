@@ -968,10 +968,10 @@ label {
 }
 
 .side-bar-toggle {
-    position: absolute;
-    right: 10px;
-    top: 3px;
+    position: sticky;
+    float: right;
     z-index: 30;
+    top: 3px;
 }
 
 </style>

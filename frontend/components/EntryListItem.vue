@@ -1,19 +1,19 @@
 <template>
-    <tr class="entry" :key="entry.id" @contextmenu="onContextMenu($event)" @dblclick="onEntryOpen(false)" @click="onEntrySelect($event)" @drop.stop.prevent="onDrop()" @dragexit.stop.prevent="onDragExit()" @dragover.stop.prevent="onDragOver()" :class="{ 'selected': entry.selected, 'drag-active': dragActive }">
-      <td v-if="!isVisible()" class="icon" style="width: 40px; height: 40px;"></td>
-      <td v-if="!isVisible()" colspan="4" style="height: 40px;">
+    <div class="entry-row" :key="entry.id" @contextmenu="onContextMenu($event)" @dblclick="onEntryOpen(false)" @click="onEntrySelect($event)" @drop.stop.prevent="onDrop()" @dragexit.stop.prevent="onDragExit()" @dragover.stop.prevent="onDragOver()" :class="{ 'selected': entry.selected, 'drag-active': dragActive }">
+      <div v-if="!isVisible()" class="entry-cell icon"></div>
+      <div v-if="!isVisible()" class="entry-cell filename">
         <a v-show="!entry.rename" :href="entry.filePath" @click.stop.prevent="onEntryOpen(true)">{{ entry.fileName }}</a>
-      </td>
+      </div>
 
-      <td v-if="isVisible()" class="icon" style="width: 40px; height: 40px;"><img :src="getPreviewUrl(entry)" @load="previewLoaded()" @error="previewError($event)" style="object-fit: cover;" v-show="!entry.previewLoading"/><i class="pi pi-spin pi-spinner" v-show="entry.previewLoading"></i></td>
-      <td v-if="isVisible()">
+      <div v-if="isVisible()" class="entry-cell icon"><img :src="getPreviewUrl(entry)" @load="previewLoaded()" @error="previewError($event)" style="object-fit: cover;" v-show="!entry.previewLoading"/><i class="pi pi-spin pi-spinner" v-show="entry.previewLoading"></i></div>
+      <div v-if="isVisible()" class="entry-cell filename">
         <InputText @click.stop @keyup.enter="onRenameSubmit()" @keyup.esc="onRenameEnd()" @blur="onRenameEnd()" v-model="entry.filePathNew" :id="'filePathRenameInputId-' + entry.fileName" v-show="entry.rename" class="rename-input p-inputtext-sm"/>
         <a v-show="!entry.rename" :href="entry.filePath" @click.stop.prevent="onEntryOpen(true)">{{ entry.fileName }}</a>
         <Button class="p-button-sm p-button-rounded p-button-text rename-action" style="vertical-align: middle;" icon="pi pi-pencil" v-show="editable && !entry.rename" @click.stop="onRenameStart()"/>
-      </td>
-      <td v-if="isVisible()" style="max-width: 150px;"><span v-tooltip.top="prettyLongDate(entry.mtime)">{{ prettyDate(entry.mtime) }}</span></td>
-      <td v-if="isVisible()" style="max-width: 100px;">{{ prettyFileSize(entry.size) }}</td>
-      <td v-if="isVisible()" style="min-width: 180px; text-align: right;">
+      </div>
+      <div v-if="isVisible()" class="entry-cell mtime" v-tooltip.top="prettyLongDate(entry.mtime)">{{ prettyDate(entry.mtime) }}</div>
+      <div v-if="isVisible()" class="entry-cell size">{{ prettyFileSize(entry.size) }}</div>
+      <div v-if="isVisible()" class="entry-cell actions">
         <a :href="getDirectLink(entry)" target="_blank" @click.stop>
           <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-external-link" v-tooltip.top="'Open'" v-show="!entry.rename && entry.isFile" />
         </a>
@@ -21,8 +21,8 @@
         <Button class="action-buttons p-button-sm p-button-rounded p-button-text p-button-danger" icon="pi pi-trash" v-tooltip.top="'Delete'" v-show="editable && !entry.rename" @click.stop="onDelete(entry)"/>
 
         <Button class="action-buttons p-button-sm p-button-rounded p-button-text" :class="{ 'action-buttons-visible': entry.sharedWith.length }" icon="pi pi-share-alt" v-tooltip.top="entry.sharedWith.length ? 'Edit Shares' : 'Create Share'" v-show="editable && (entry.sharedWith.length || (shareable && !entry.rename))" @click.stop="onShare()"/>
-      </td>
-    </tr>
+      </div>
+    </div>
 </template>
 
 <script>
@@ -126,16 +126,63 @@ export default {
 
 <style scoped>
 
-.entry:hover {
+.entry-row {
+    display: flex;
+    width: 100%;
+    border-radius: 3px;
+}
+
+.entry-row:hover {
     background-color: #f5f7fa;
+}
+
+.entry-cell {
+    display: block;
+    height: 40px;
+    line-height: 40px;
+}
+
+.entry-cell.icon {
+    padding: 4px;
+    width: 50px;
+    height: 40px;
+    line-height: normal;
+}
+
+.entry-cell.filename {
+    flex-grow: 1;
+}
+
+.entry-cell.filename > a {
+    color: inherit;
+    margin: auto 0px;
+}
+
+.entry-cell.filename > a:hover {
+    text-decoration: underline;
+}
+
+.entry-cell.mtime {
+    width: 130px;
+}
+
+.entry-cell.size {
+    width: 130px;
+    text-align: right;
+}
+
+.entry-cell.actions {
+    width: 160px;
+    text-align: right;
+    line-height: normal;
 }
 
 .action-buttons {
     visibility: hidden;
 }
 
-.entry:hover .action-buttons,
-.entry.selected .action-buttons {
+.entry-row:hover .action-buttons,
+.entry-row.selected .action-buttons {
     visibility: visible;
 }
 
@@ -143,13 +190,12 @@ export default {
     visibility: visible;
 }
 
-.entry.selected {
+.entry-row.selected {
     background-color: #dbedfb;
 }
 
-
-.drag-active .entry.selected {
-  background-color: unset;
+.drag-active .entry-row.selected {
+    background-color: unset;
 }
 
 .rename-input {
@@ -160,38 +206,12 @@ export default {
     margin-left: 20px;
 }
 
-tr .rename-action {
+.entry-row .rename-action {
     visibility: hidden;
 }
 
-tr:hover .rename-action {
+.entry-row:hover .rename-action {
     visibility: visible;
-}
-
-th > td {
-    white-space: normal;
-    display: block;
-    user-select: none;
-}
-
-.tr-placeholder {
-    width: 100%;
-    text-align: center;
-    margin-top: 20vh;
-}
-
-td > a {
-    color: inherit;
-    margin: auto 0px;
-}
-
-td > a:hover {
-    text-decoration: underline;
-}
-
-.icon {
-    padding: 4px;
-    max-width: 40px;
 }
 
 .icon > img {
@@ -199,6 +219,5 @@ td > a:hover {
     height: 32px;
     vertical-align: middle;
 }
-
 
 </style>
