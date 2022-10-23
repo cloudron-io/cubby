@@ -92,3 +92,7 @@
 * Fixup file deletion
 * Fix crash in texteditor language detection
 
+[1.0.1]
+* Make multiselect archive download work
+* Update dependencies
+
