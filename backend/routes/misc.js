@@ -9,6 +9,8 @@ var assert = require('assert'),
     archiver = require('archiver'),
     debug = require('debug')('cubby:routes:preview'),
     files = require('../files.js'),
+    path = require('path'),
+    shares = require('../shares.js'),
     preview = require('../preview.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
@@ -77,12 +79,23 @@ async function download(req, res, next) {
     // collect and attach all requested files
     for (const entry of entries) {
         try {
-            const result = await files.get(req.user.username, entry.filePath);
+            let file;
+            if (entry.shareId) {
+                const share = await shares.get(entry.shareId);
+                if (!share) {
+                    console.error(`Failed to get share ${entry.shareId}.`);
+                    continue;
+                }
 
-            debug(`download: add ${entry.isDirectory ? 'directory' : 'file'} to archive: ${result._fullFilePath} as ${result.filePath.slice(skipPath.length)}`);
+                file = await files.get(share.owner, path.join(share.filePath, entry.filePath));
+            } else {
+                file = await files.get(req.user.username, entry.filePath);
+            }
 
-            if (result.isDirectory) archive.directory(result._fullFilePath, result.filePath.slice(skipPath.length));
-            else archive.file(result._fullFilePath, { name: result.filePath.slice(skipPath.length) });
+            debug(`download: add ${entry.isDirectory ? 'directory' : 'file'} to archive: ${file._fullFilePath} as ${file.filePath.slice(skipPath.length)}`);
+
+            if (file.isDirectory) archive.directory(file._fullFilePath, file.filePath.slice(skipPath.length));
+            else archive.file(file._fullFilePath, { name: file.filePath.slice(skipPath.length) });
         } catch (error) {
             console.error('download: cannot get entry', entry, error);
         }

@@ -69,7 +69,7 @@ function getShareLink(shareId) {
     return window.location.origin + '/api/v1/shares/' + shareId + '?type=raw';
 }
 
-function download(entries) {
+function download(entries, name) {
     if (!entries.length) return;
 
     if (entries.length === 1) {
@@ -83,7 +83,7 @@ function download(entries) {
 
     // be a bit smart about the archive name and folder tree
     const folderPath = entries[0].filePath.slice(0, -entries[0].fileName.length);
-    const archiveName = folderPath.slice(folderPath.slice(0, -1).lastIndexOf('/')+1).slice(0, -1);
+    const archiveName = name || folderPath.slice(folderPath.slice(0, -1).lastIndexOf('/')+1).slice(0, -1);
     params.append('name', archiveName);
     params.append('skipPath', folderPath);
 

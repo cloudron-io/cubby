@@ -503,7 +503,9 @@ export default {
         },
         onDownload(entries) {
             if (!entries) entries = this.selectedEntries;
-            download(entries);
+
+            // use the
+            download(entries, this.currentShare ? this.currentShare.filePath.slice(1) : '');
         },
         onDrop(items, targetEntry) {
             var that = this;
