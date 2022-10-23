@@ -58,6 +58,7 @@ export default {
         }
     },
     mounted() {
+        // TODO check if valid session then redirect to /
         setTimeout(function () { document.getElementById('usernameInput').focus(); }, 0);
     }
 };

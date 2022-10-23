@@ -62,9 +62,7 @@ export default {
         },
         onDownload(entries) {
             if (!entries) entries = this.selectedEntries;
-
-            // TODO use zipping for multiple files
-            download(entries[0]);
+            download(entries);
         },
         loadPath(path) {
             var that = this;

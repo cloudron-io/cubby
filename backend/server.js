@@ -13,7 +13,7 @@ var express = require('express'),
     shares = require('./routes/shares.js'),
     office = require('./routes/office.js'),
     webdav = require('./routes/webdav.js'),
-    preview = require('./routes/preview.js'),
+    misc = require('./routes/misc.js'),
     multipart = require('./routes/multipart.js'),
     morgan = require('morgan'),
     session = require('express-session'),
@@ -121,7 +121,9 @@ function init(callback) {
     router.put ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.update);
     router.del ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.remove);
 
-    router.get ('/api/v1/preview/:type/:id/:hash', users.optionalSessionAuth, preview.get);
+    router.get ('/api/v1/preview/:type/:id/:hash', users.optionalSessionAuth, misc.getPreview);
+
+    router.get ('/api/v1/download', users.sessionAuth, misc.download);
 
     router.get ('/api/v1/office/handle', users.sessionAuth, office.getHandle);
     router.get ('/api/v1/office/wopi/files/:shareId', users.tokenAuth, office.checkFileInfo);

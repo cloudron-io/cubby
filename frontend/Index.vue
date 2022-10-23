@@ -161,6 +161,8 @@
 
 <script>
 
+'use strict';
+
 import superagent from 'superagent';
 import async from 'async';
 import { parseResourcePath, decode, getExtension, getShareLink, copyToClipboard, sanitize, download, getDirectLink, prettyFileSize } from './utils.js';
@@ -501,9 +503,7 @@ export default {
         },
         onDownload(entries) {
             if (!entries) entries = this.selectedEntries;
-
-            // TODO use zipping for multiple files
-            download(entries[0]);
+            download(entries);
         },
         onDrop(items, targetEntry) {
             var that = this;
