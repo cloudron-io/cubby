@@ -95,4 +95,5 @@
 [1.0.1]
 * Make multiselect archive download work
 * Update dependencies
+* File list is now based on flexbox instead of table layouts
 
