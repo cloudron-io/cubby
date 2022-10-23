@@ -40,7 +40,7 @@ Entry.prototype.asShare = function (shareFilePath) {
     var result = this;
 
     result.files = result.files.map(function (f) { return f.asShare(shareFilePath); });
-    result.filePath = result.filePath.slice(shareFilePath.length);
+    result.filePath = result.filePath.slice(shareFilePath.length) || '/';
 
     return result;
 };
