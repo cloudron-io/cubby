@@ -845,8 +845,16 @@ export default {
             this.onUp();
         },
         onUp() {
-            const hash = window.location.hash.slice(1);
-            window.location.hash = hash.split('/')[0] + sanitize(hash.split('/').slice(1, -1).filter(function (p) { return !!p; }).join('/'));
+            if (window.location.hash.indexOf('#shares/') === 0) {
+                const hash = window.location.hash.slice('#shares/'.length);
+
+                // if we are first level of that share, go back to all shares
+                if (!hash.split('/')[1]) window.location.hash = 'shares/';
+                else window.location.hash = hash.split('/')[0] + sanitize(hash.split('/').slice(1, -1).filter(function (p) { return !!p; }).join('/'));
+            } else {
+                const hash = window.location.hash.slice(1);
+                window.location.hash = hash.split('/')[0] + sanitize(hash.split('/').slice(1, -1).filter(function (p) { return !!p; }).join('/'));
+            }
         }
     },
     mounted() {
