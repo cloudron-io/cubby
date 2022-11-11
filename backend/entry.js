@@ -42,6 +42,9 @@ Entry.prototype.asShare = function (shareFilePath) {
     result.files = result.files.map(function (f) { return f.asShare(shareFilePath); });
     result.filePath = result.filePath.slice(shareFilePath.length) || '/';
 
+    // don't leak info
+    result.sharedWith = [];
+
     return result;
 };
 
