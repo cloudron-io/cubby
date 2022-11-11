@@ -9,7 +9,7 @@
       <div v-if="isVisible()" class="entry-cell filename">
         <InputText @click.stop @keyup.enter="onRenameSubmit()" @keyup.esc="onRenameEnd()" @blur="onRenameEnd()" v-model="entry.filePathNew" :id="'filePathRenameInputId-' + entry.fileName" v-show="entry.rename" class="rename-input p-inputtext-sm"/>
         <a v-show="!entry.rename" :href="entry.filePath" @click.stop.prevent="onEntryOpen(true)">{{ entry.fileName }}</a>
-        <Button class="p-button-sm p-button-rounded p-button-text rename-action" style="vertical-align: middle;" icon="pi pi-pencil" v-show="editable && !entry.rename" @click.stop="onRenameStart()"/>
+        <Button class="p-button-sm p-button-rounded p-button-text rename-action" style="vertical-align: middle;" icon="pi pi-pencil" v-show="editable && !entry.rename && !entry.isShare" @click.stop="onRenameStart()"/>
       </div>
       <div v-if="isVisible()" class="entry-cell mtime" v-tooltip.top="prettyLongDate(entry.mtime)">{{ prettyDate(entry.mtime) }}</div>
       <div v-if="isVisible()" class="entry-cell size">{{ prettyFileSize(entry.size) }}</div>

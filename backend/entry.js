@@ -8,14 +8,16 @@ const assert = require('assert'),
 
 exports = module.exports = Entry;
 
-function Entry({ fullFilePath, filePath, fileName, owner, size = 0, mtime = new Date(), isDirectory, isFile, mimeType, files = [], sharedWith = [], share = null }) {
+function Entry({ fullFilePath, filePath, fileName, owner, size = 0, mtime = new Date(), isDirectory, isFile, isShare = false, mimeType, files = [], sharedWith = [], share = null }) {
     assert(fullFilePath && typeof fullFilePath === 'string');
     assert(filePath && typeof filePath === 'string');
     assert(owner && typeof owner === 'string');
     assert(typeof fileName === 'string');
     assert.strictEqual(typeof size, 'number');
     assert(mtime instanceof Date && !isNaN(mtime.valueOf()));
+    assert.strictEqual(typeof isFile, 'boolean');
     assert.strictEqual(typeof isDirectory, 'boolean');
+    assert.strictEqual(typeof isShare, 'boolean');
     assert(mimeType && typeof mimeType === 'string');
     assert(Array.isArray(sharedWith));
     assert.strictEqual(typeof share, 'object');
@@ -33,7 +35,8 @@ function Entry({ fullFilePath, filePath, fileName, owner, size = 0, mtime = new 
     this.mimeType = mimeType;
     this.files = files;
     this.sharedWith = sharedWith;
-    this.share = share;
+    this.isShare = isShare;     // true if virtual toplevel share item or the actual shared file/folder
+    this.share = share;         // contains the share info of the share this item belongs to if any
 }
 
 Entry.prototype.asShare = function (shareFilePath) {
@@ -81,6 +84,7 @@ Entry.prototype.withoutPrivate = function () {
         mtime: this.mtime,
         isDirectory: this.isDirectory,
         isFile: this.isFile,
+        isShare: this.isShare,
         mimeType: this.mimeType,
         files: this.files.map(function (f) { return f.withoutPrivate(); }),
         share: this.share,

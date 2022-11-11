@@ -156,6 +156,7 @@ async function listShares(req, res, next) {
         await async.each(result, async function (share) {
             let file = await files.get(share.owner, share.filePath);
 
+            file.isShare = true;
             file.share = share;
             file = file.asShare(share.filePath);
 
@@ -172,6 +173,7 @@ async function listShares(req, res, next) {
         filePath: '/',
         isDirectory: true,
         isFile: false,
+        isShare: true,
         owner: req.user.username,
         mimeType: 'inode/share',
         files: sharedFiles
