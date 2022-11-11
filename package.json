@@ -31,12 +31,12 @@
     "once": "^1.4.0",
     "pdfjs-dist": "^2.16.105",
     "primeicons": "^6.0.1",
-    "primevue": "^3.17.0",
+    "primevue": "^3.18.1",
     "safetydance": "^2.2.0",
     "session-file-store": "^1.5.0",
-    "superagent": "^8.0.0",
-    "vue": "^3.2.41",
-    "vue-router": "^4.1.5",
+    "superagent": "^8.0.3",
+    "vue": "^3.2.45",
+    "vue-router": "^4.1.6",
     "webdav-server": "^2.6.2",
     "xmldom": "^0.6.0",
     "xpath": "0.0.32"
@@ -45,10 +45,10 @@
     "@vue/cli-plugin-babel": "~5.0.8",
     "@vue/cli-plugin-router": "^5.0.8",
     "@vue/cli-service": "^5.0.8",
-    "@vue/compiler-sfc": "^3.2.41",
+    "@vue/compiler-sfc": "^3.2.45",
     "babel-eslint": "^10.1.0",
-    "eslint": "^8.26.0",
-    "eslint-plugin-vue": "^9.6.0"
+    "eslint": "^8.27.0",
+    "eslint-plugin-vue": "^9.7.0"
   },
   "eslintConfig": {
     "root": true,
