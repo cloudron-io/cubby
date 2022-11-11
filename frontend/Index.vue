@@ -30,7 +30,7 @@
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
-          <EntryList :entries="entries" :sort-folders-first="true" :editable="!isReadonly()" :active="viewer === ''"
+          <EntryList :entries="entries" :sort-folders-first="true" :editable="!isReadonly()" :shareable="isShareable()" :active="viewer === ''"
             @entry-shared="onShare"
             @entry-renamed="onRename"
             @entry-activated="onOpen"
@@ -644,6 +644,10 @@ export default {
             if (window.location.hash === '/shares/') return true;
             if (!this.currentShare) return false;
             return this.currentShare.readonly;
+        },
+        isShareable() {
+            var resource = parseResourcePath(this.currentResourcePath || 'files/');
+            return resource.type !== 'shares';
         },
         onShare(entry) {
             var that = this;
