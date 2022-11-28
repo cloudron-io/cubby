@@ -759,7 +759,6 @@ export default {
             // FIXME rework this to not make the listview flicker that much
             var resource = parseResourcePath(path || that.currentResourcePath || 'files/');
 
-
             // check if we actually have a new path to fetch
             var currentResource = null;
             if (!alwaysRefresh || that.currentResourcePath) {
@@ -787,58 +786,59 @@ export default {
 
                 const entry = result.body;
 
-                if (resource.type === 'files') {
-                    that.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
-                        return {
-                            label: decode(e),
-                            url: '#files' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
-                        };
-                    });
-                    that.breadCrumbHome = {
-                        icon: 'pi pi-home',
-                        url: '#files/'
-                    };
-                } else if (resource.type === 'shares') {
-                    that.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
-                        return {
-                            label: decode(e),
-                            url: '#shares/' + resource.shareId  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
-                        };
-                    });
-                    that.breadCrumbHome = {
-                        icon: 'pi pi-share-alt',
-                        url: '#shares/'
-                    };
-
-                    // if we are not toplevel, add the share information
-                    if (result.body.share) {
-                        that.breadCrumbs.unshift({
-                            label: result.body.share.filePath.slice(1), // remove slash at the beginning
-                            url: '#shares/' + resource.shareId + '/'
-                        });
-                    }
-                } else {
-                    console.error('FIXME breadcrumbs for resource type', resource.type);
-                }
-
-                that.currentPath = resource.path;
-                that.currentResourcePath = resource.resourcePath;
-                that.currentShare = result.body.share || null;
-
                 // update the browser hash
-                window.location.hash = that.currentResourcePath;
+                window.location.hash = resource.resourcePath;
 
-                if (result.body.isDirectory) {
-                    result.body.files.forEach(function (entry) {
-                        entry.extension = getExtension(entry);
-                        entry.rename = false;
-                        entry.filePathNew = entry.fileName;
+                if (entry.isDirectory) {
+                    that.currentPath = resource.path;
+                    that.currentResourcePath = resource.resourcePath;
+                    that.currentShare = entry.share || null;
+
+                    if (resource.type === 'files') {
+                        that.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
+                            return {
+                                label: decode(e),
+                                url: '#files' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
+                            };
+                        });
+                        that.breadCrumbHome = {
+                            icon: 'pi pi-home',
+                            url: '#files/'
+                        };
+                    } else if (resource.type === 'shares') {
+                        that.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
+                            return {
+                                label: decode(e),
+                                url: '#shares/' + resource.shareId  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
+                            };
+                        });
+                        that.breadCrumbHome = {
+                            icon: 'pi pi-share-alt',
+                            url: '#shares/'
+                        };
+
+                        // if we are not toplevel, add the share information
+                        if (result.body.share) {
+                            that.breadCrumbs.unshift({
+                                label: entry.share.filePath.slice(1), // remove slash at the beginning
+                                url: '#shares/' + resource.shareId + '/'
+                            });
+                        }
+                    } else {
+                        console.error('FIXME breadcrumbs for resource type', resource.type);
+                    }
+
+                    entry.files.forEach(function (e) {
+                        e.extension = getExtension(e);
+                        e.rename = false;
+                        e.filePathNew = e.fileName;
                     });
+
+                    that.entries = entry.files;
                     that.viewer = '';
-                    that.entries = result.body.files;
+
                     that.clearSelection();
                 } else {
-                    // TODO load parent directory for that.entries
                     if (that.$refs.imageViewer.canHandle(entry)) {
                         that.$refs.imageViewer.open(entry);
                         that.viewer = 'image';
@@ -863,7 +863,7 @@ export default {
             else window.location.hash = 'files' + entry.filePath;
         },
         onViewerClose() {
-            this.onUp();
+            this.viewer = '';
         },
         onUp() {
             if (window.location.hash.indexOf('#shares/') === 0) {

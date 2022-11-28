@@ -97,3 +97,5 @@
 * Update dependencies
 * File list is now based on flexbox instead of table layouts
 
+[1.0.2]
+* Ensure config is loaded on fresh login
