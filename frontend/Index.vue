@@ -304,7 +304,7 @@ export default {
                 if (result && result.statusCode !== 200) return that.newFileDialog.error = 'Error creating file: ' + result.statusCode;
                 if (error) return console.error(error.message);
 
-                that.loadPath();
+                that.refresh();
 
                 that.newFileDialog.visible = false;
             });
@@ -321,7 +321,7 @@ export default {
                 if (result && result.statusCode !== 200) return that.newFolderDialog.error = 'Error creating folder: ' + result.statusCode;
                 if (error) return console.error(error.message);
 
-                that.loadPath();
+                that.refresh();
 
                 that.newFolderDialog.visible = false;
             });
@@ -401,7 +401,7 @@ export default {
                 that.uploadStatus.done = 0;
                 that.uploadStatus.percentDone = 0;
 
-                that.loadPath();
+                that.refresh();
 
                 return;
             }
@@ -583,7 +583,7 @@ export default {
                     }, function (error) {
                         if (error) console.error('Failed to delete entries.', entries, error);
 
-                        that.loadPath();
+                        that.refresh();
                     });
                 },
                 reject: () => {}
@@ -600,7 +600,7 @@ export default {
                 if (result && result.statusCode !== 200) return console.error('Error moving file or folder');
                 if (error) return console.error(error.message);
 
-                that.loadPath();
+                that.refresh();
             });
         },
         showAllRecent() {
@@ -727,7 +727,7 @@ export default {
 
                     that.shareDialog.entry = result.body;
 
-                    that.loadPath();
+                    that.refresh();
                 });
             });
         },
@@ -746,17 +746,27 @@ export default {
 
                     that.shareDialog.entry = result.body;
 
-                    that.loadPath();
+                    that.refresh();
                 });
             });
         },
-        loadPath(path) {
+        refresh() {
+            this.loadPath(null, true);
+        },
+        loadPath(path, alwaysRefresh) {
             var that = this;
-
-            this.clearSelection();
 
             // FIXME rework this to not make the listview flicker that much
             var resource = parseResourcePath(path || that.currentResourcePath || 'files/');
+
+
+            // check if we actually have a new path to fetch
+            var currentResource = null;
+            if (!alwaysRefresh || that.currentResourcePath) {
+                currentResource = parseResourcePath(that.currentResourcePath);
+
+                if (currentResource.resourcePath === resource.resourcePath) return;
+            }
 
             // only show busy state if it takes more than 2 seconds to avoid flickering
             var busyTimer = setTimeout(function () { that.busy = true; }, 2000);
@@ -825,6 +835,8 @@ export default {
                         entry.filePathNew = entry.fileName;
                     });
                     that.viewer = '';
+                    that.entries = result.body.files;
+                    that.clearSelection();
                 } else {
                     // TODO load parent directory for that.entries
                     if (that.$refs.imageViewer.canHandle(entry)) {
@@ -844,8 +856,6 @@ export default {
                         that.$refs.genericViewer.open(entry);
                     }
                 }
-
-                that.entries = result.body.files;
             });
         },
         onOpen(entry) {
