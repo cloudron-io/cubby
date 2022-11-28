@@ -262,12 +262,17 @@ export default {
             });
         },
         onLoggedIn(profile) {
+            var that = this;
+
             this.profile.username = profile.username;
             this.profile.displayName = profile.displayName;
             this.profile.email = profile.email;
             this.profile.diskusage = profile.diskusage;
 
-            this.loadPath(window.location.hash.slice(1));
+            this.refreshConfig(function (error) {
+                if (error) return console.error('Failed to load config.', error);
+                that.loadPath(window.location.hash.slice(1));
+            });
         },
         onUploadFile() {
             // reset the form first to make the change handler retrigger even on the same file selected
@@ -861,6 +866,18 @@ export default {
                 const hash = window.location.hash.slice(1);
                 window.location.hash = hash.split('/')[0] + sanitize(hash.split('/').slice(1, -1).filter(function (p) { return !!p; }).join('/'));
             }
+        },
+        refreshConfig(callback) {
+            var that = this;
+
+            superagent.get('/api/v1/config').end(function (error, result) {
+                if (error) return callback(error);
+
+                // ensure we know what we get so we can properly reference
+                that.config.viewers.collabora = result.body.viewers.collabora || {};
+
+                callback();
+            });
         }
     },
     mounted() {
@@ -906,11 +923,8 @@ export default {
             that.profile.displayName = result.body.displayName;
             that.profile.diskusage = result.body.diskusage;
 
-            superagent.get('/api/v1/config').end(function (error, result) {
+            that.refreshConfig(function (error) {
                 if (error) return console.error('Cant load config', error);
-
-                // ensure we know what we get so we can properly reference
-                that.config.viewers.collabora = result.body.viewers.collabora || {};
 
                 that.ready = true;
 
