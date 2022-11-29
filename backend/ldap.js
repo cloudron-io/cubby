@@ -87,7 +87,7 @@ async function login(username, password) {
 }
 
 async function sync(callback) {
-    callback = callback || function (error) { console.error('ldap sync failed:', error); };
+    callback = callback || function (error) { if (error) console.error('ldap sync failed:', error); };
 
     if (!LDAP_URL) return callback();
 
