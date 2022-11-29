@@ -864,6 +864,10 @@ export default {
         },
         onViewerClose() {
             this.viewer = '';
+
+            // update the browser hash
+            const resource = parseResourcePath(this.currentResourcePath || 'files/');
+            window.location.hash = resource.resourcePath;
         },
         onUp() {
             if (window.location.hash.indexOf('#shares/') === 0) {
