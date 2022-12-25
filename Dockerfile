@@ -1,5 +1,4 @@
-FROM cloudron/base:3.2.0@sha256:ba1d566164a67c266782545ea9809dc611c4152e27686fd14060332dd88263ea
-
+FROM cloudron/base:4.0.0@sha256:31b195ed0662bdb06a6e8a5ddbedb6f191ce92e8bee04c03fb02dd4e9d0286df
 
 ENV CLOUDRON_POSTGRESQL_USERNAME="postgres" \
     CLOUDRON_POSTGRESQL_PASSWORD="password" \
@@ -14,6 +13,11 @@ RUN mkdir -p /app/code \
     && mkdir /app/data
 
 WORKDIR /app/code
+
+ARG NODE_VERSION=16.14.2
+RUN mkdir -p /usr/local/node-$NODE_VERSION && \
+    curl -L https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz | tar zxf - --strip-components 1 -C /usr/local/node-$NODE_VERSION
+ENV PATH /usr/local/node-$NODE_VERSION/bin:$PATH
 
 COPY frontend /app/code/frontend
 COPY public /app/code/public
