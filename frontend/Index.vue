@@ -271,7 +271,7 @@ export default {
 
             this.refreshConfig(function (error) {
                 if (error) return console.error('Failed to load config.', error);
-                that.loadPath(window.location.hash.slice(1));
+                that.loadPath(window.location.hash.slice(1), true);
             });
         },
         onUploadFile() {
@@ -761,7 +761,7 @@ export default {
 
             // check if we actually have a new path to fetch
             var currentResource = null;
-            if (!alwaysRefresh || that.currentResourcePath) {
+            if (!alwaysRefresh && that.currentResourcePath) {
                 currentResource = parseResourcePath(that.currentResourcePath);
 
                 if (currentResource.resourcePath === resource.resourcePath) return;
@@ -942,7 +942,12 @@ export default {
 
                 that.ready = true;
 
-                hashChange();
+                // initial load with has if present
+                const hash = window.location.hash.slice(1);
+                if (hash.indexOf('files/') === 0) that.loadPath(hash, true);
+                else if (hash.indexOf('recent/') === 0) that.onRecent();
+                else if (hash.indexOf('shares/') === 0) that.loadPath(hash, true);
+                else that.loadPath(null, true);
             });
         });
     }
