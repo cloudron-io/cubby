@@ -99,3 +99,10 @@
 
 [1.0.2]
 * Ensure config is loaded on fresh login
+
+[1.1.0]
+* Update Cloudron base image to 4.0.0
+* Cleanup tmp after successful file upload
+* Fix initial load view
+* Update dependencies
+
