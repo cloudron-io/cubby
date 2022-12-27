@@ -81,7 +81,7 @@ async function addOrOverwriteFile(username, filePath, sourceFilePath, mtime, ove
 
     try {
         await fs.ensureDir(path.dirname(fullFilePath));
-        await fs.copy(sourceFilePath, fullFilePath);
+        await fs.move(sourceFilePath, fullFilePath, { overwrite: true });
     } catch (error) {
         throw new MainError(MainError.FS_ERROR, error);
     }
@@ -93,8 +93,6 @@ async function addOrOverwriteFile(username, filePath, sourceFilePath, mtime, ove
         fs.futimesSync(fd, mtime, mtime);
     } catch (error) {
         throw new MainError(MainError.FS_ERROR, error);
-    } finally {
-        fs.unlink(sourceFilePath)
     }
 }
 
