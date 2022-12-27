@@ -27,9 +27,9 @@ diskusage.calculate();
 // sync user listing
 ldap.sync();
 
-// currently just update this every hour to put less strain on the disk and ldap server
+// currently just update this every hour to put less strain on the disk
 setInterval(diskusage.calculate, 1000 * 60 * 60);
-setInterval(ldap.sync, 1000 * 60 * 60);
+setInterval(ldap.sync, 1000 * 60);
 
 server.init(function (error) {
     if (error) exit(error);
