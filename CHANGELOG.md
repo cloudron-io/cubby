@@ -106,3 +106,6 @@
 * Fix initial load view
 * Update dependencies
 
+[1.1.1]
+* Reduce LDAP queries
+* Hide multi select action buttons on single entries
