@@ -16,7 +16,7 @@
       <div class="empty-placeholder" v-show="entries.length === 0">{{ emptyPlaceholder }}</div>
       <div class="empty-filter-placeholder" v-show="entries.length !== 0 && filteredAndSortedEntries.length === 0">Nothing found</div>
       <template v-for="entry in filteredAndSortedEntries">
-        <EntryListItem :entry="entry" :editable="editable" :shareable="shareable"
+        <EntryListItem :entry="entry" :editable="editable" :shareable="shareable" :multi="multiSelect"
           @entry-open="onEntryOpen"
           @entry-select="onEntrySelect"
           @context-menu="onContextMenu"
@@ -116,6 +116,9 @@ export default {
             } else {
                 return entryListSort(this.entries, that.sort.prop, that.sort.desc);
             }
+        },
+        multiSelect: function () {
+            return this.entries.filter(function (e) { return e.selected; }).length > 1;
         }
     },
     methods: {

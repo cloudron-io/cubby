@@ -15,12 +15,12 @@
       <div v-if="isVisible()" class="entry-cell size">{{ prettyFileSize(entry.size) }}</div>
       <div v-if="isVisible()" class="entry-cell actions">
         <a :href="getDirectLink(entry)" target="_blank" @click.stop>
-          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-external-link" v-tooltip.top="'Open'" v-show="!entry.rename && entry.isFile" />
+          <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-external-link" v-tooltip.top="'Open'" v-show="!entry.rename && entry.isFile && !multi" />
         </a>
-        <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-download" v-tooltip.top="'Download'" v-show="!entry.rename && entry.isFile" @click.stop="onDownload(entry)"/>
-        <Button class="action-buttons p-button-sm p-button-rounded p-button-text p-button-danger" icon="pi pi-trash" v-tooltip.top="'Delete'" v-show="editable && !entry.rename" @click.stop="onDelete(entry)"/>
+        <Button class="action-buttons p-button-sm p-button-rounded p-button-text" icon="pi pi-download" v-tooltip.top="'Download'" v-show="!entry.rename && entry.isFile && !multi" @click.stop="onDownload(entry)"/>
+        <Button class="action-buttons p-button-sm p-button-rounded p-button-text p-button-danger" icon="pi pi-trash" v-tooltip.top="'Delete'" v-show="editable && !entry.rename && !multi" @click.stop="onDelete(entry)"/>
 
-        <Button class="action-buttons p-button-sm p-button-rounded p-button-text" :class="{ 'action-buttons-visible': entry.sharedWith.length }" icon="pi pi-share-alt" v-tooltip.top="entry.sharedWith.length ? 'Edit Shares' : 'Create Share'" v-show="editable && (entry.sharedWith.length || (shareable && !entry.rename))" @click.stop="onShare()"/>
+        <Button class="action-buttons p-button-sm p-button-rounded p-button-text" :class="{ 'action-buttons-visible': entry.sharedWith.length }" icon="pi pi-share-alt" v-tooltip.top="entry.sharedWith.length ? 'Edit Shares' : 'Create Share'" v-show="editable && (entry.sharedWith.length || (shareable && !entry.rename)) && !multi" @click.stop="onShare()"/>
       </div>
     </div>
 </template>
@@ -44,6 +44,10 @@ export default {
         shareable: {
             type: Boolean,
             default: true
+        },
+        multi: {
+            type: Boolean,
+            default: false
         }
     },
     data() {
