@@ -109,3 +109,9 @@
 [1.1.1]
 * Reduce LDAP queries
 * Hide multi select action buttons on single entries
+
+[1.1.2]
+* Fix file rename regression
+* Add initial Cloudron tests
+* Update dependencies
+
