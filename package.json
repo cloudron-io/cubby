@@ -1,6 +1,6 @@
 {
   "name": "Cubby",
-  "version": "1.0.1",
+  "version": "1.1.2",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -14,7 +14,7 @@
     "async": "^3.2.4",
     "body-parser": "^1.20.1",
     "combokeys": "^3.0.1",
-    "commander": "^9.4.1",
+    "commander": "^9.5.0",
     "connect-lastmile": "^2.1.1",
     "connect-timeout": "^1.9.0",
     "db-migrate": "^0.11.13",
@@ -29,7 +29,7 @@
     "morgan": "^1.10.0",
     "multiparty": "^4.2.3",
     "once": "^1.4.0",
-    "pdfjs-dist": "^3.1.81",
+    "pdfjs-dist": "^3.2.146",
     "primeicons": "^6.0.1",
     "primevue": "^3.21.0",
     "safetydance": "^2.2.0",
@@ -47,8 +47,12 @@
     "@vue/cli-service": "^5.0.8",
     "@vue/compiler-sfc": "^3.2.45",
     "babel-eslint": "^10.1.0",
-    "eslint": "^8.30.0",
-    "eslint-plugin-vue": "^9.8.0"
+    "chromedriver": "^108.0.0",
+    "eslint": "^8.31.0",
+    "eslint-plugin-vue": "^9.8.0",
+    "expect.js": "^0.3.1",
+    "mocha": "^10.2.0",
+    "selenium-webdriver": "^4.7.1"
   },
   "eslintConfig": {
     "root": true,
