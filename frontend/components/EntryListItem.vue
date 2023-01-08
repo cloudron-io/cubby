@@ -7,7 +7,7 @@
 
       <div v-if="isVisible()" class="entry-cell icon"><img :src="getPreviewUrl(entry)" @load="previewLoaded()" @error="previewError($event)" style="object-fit: cover;" v-show="!entry.previewLoading"/><i class="pi pi-spin pi-spinner" v-show="entry.previewLoading"></i></div>
       <div v-if="isVisible()" class="entry-cell filename">
-        <InputText @click.stop @keyup.enter="onRenameSubmit()" @keyup.esc="onRenameEnd()" @blur="onRenameEnd()" v-model="entry.filePathNew" v-show="entry.rename" class="rename-input p-inputtext-sm"/>
+        <InputText @click.stop @keyup.enter.stop="onRenameSubmit()" @keyup.esc="onRenameEnd()" @blur="onRenameEnd()" v-model="entry.filePathNew" v-show="entry.rename" class="rename-input p-inputtext-sm"/>
         <a v-show="!entry.rename" :href="entry.filePath" @click.stop.prevent="onEntryOpen(true)">{{ entry.fileName }}</a>
         <Button class="p-button-sm p-button-rounded p-button-text rename-action" style="vertical-align: middle;" icon="pi pi-pencil" v-show="editable && !entry.rename && !entry.isShare" @click.stop="onRenameStart()"/>
       </div>
