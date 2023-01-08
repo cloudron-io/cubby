@@ -19,6 +19,7 @@
         <EntryListItem :entry="entry" :editable="editable" :shareable="shareable" :multi="multiSelect"
           @entry-open="onEntryOpen"
           @entry-select="onEntrySelect"
+          @rename-submit="onRenameSubmit"
           @context-menu="onContextMenu"
           @share="onShare"
           @delete="onDelete"
@@ -32,7 +33,6 @@
 
 <script>
 
-import { nextTick } from 'vue';
 import { getPreviewUrl, prettyDate, prettyLongDate, prettyFileSize, getDirectLink, clearSelection, getEntryIdentifier, entryListSort } from '../utils.js';
 import * as Combokeys from 'combokeys';
 
@@ -170,28 +170,6 @@ export default {
         },
         onDownload: function (entry) {
             this.$emit('download', entry ? [ entry ] : this.entries.filter(function (e) { return e.selected; }));
-        },
-        onRename: function (entry) {
-            if (entry.rename) {
-                entry.rename = false;
-                return;
-            }
-
-            entry.filePathNew = entry.fileName;
-            entry.rename = true;
-
-            nextTick(function () {
-                var elem = document.getElementById('filePathRenameInputId-' + entry.fileName);
-                elem.focus();
-
-                if (typeof elem.selectionStart != "undefined") {
-                    elem.selectionStart = 0;
-                    elem.selectionEnd = entry.fileName.lastIndexOf('.');
-                }
-            });
-        },
-        onRenameEnd: function (entry) {
-            entry.rename = false;
         },
         onRenameSubmit: function (entry) {
             entry.rename = false;

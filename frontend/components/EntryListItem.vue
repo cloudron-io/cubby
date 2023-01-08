@@ -7,7 +7,7 @@
 
       <div v-if="isVisible()" class="entry-cell icon"><img :src="getPreviewUrl(entry)" @load="previewLoaded()" @error="previewError($event)" style="object-fit: cover;" v-show="!entry.previewLoading"/><i class="pi pi-spin pi-spinner" v-show="entry.previewLoading"></i></div>
       <div v-if="isVisible()" class="entry-cell filename">
-        <InputText @click.stop @keyup.enter="onRenameSubmit()" @keyup.esc="onRenameEnd()" @blur="onRenameEnd()" v-model="entry.filePathNew" :id="'filePathRenameInputId-' + entry.fileName" v-show="entry.rename" class="rename-input p-inputtext-sm"/>
+        <InputText @click.stop @keyup.enter="onRenameSubmit()" @keyup.esc="onRenameEnd()" @blur="onRenameEnd()" v-model="entry.filePathNew" v-show="entry.rename" class="rename-input p-inputtext-sm"/>
         <a v-show="!entry.rename" :href="entry.filePath" @click.stop.prevent="onEntryOpen(true)">{{ entry.fileName }}</a>
         <Button class="p-button-sm p-button-rounded p-button-text rename-action" style="vertical-align: middle;" icon="pi pi-pencil" v-show="editable && !entry.rename && !entry.isShare" @click.stop="onRenameStart()"/>
       </div>
@@ -27,6 +27,7 @@
 
 <script>
 
+import { nextTick } from 'vue';
 import { getDirectLink, prettyLongDate, prettyDate, prettyFileSize, getPreviewUrl } from '../utils.js';
 
 export default {
@@ -66,12 +67,25 @@ export default {
             return this.visible;
         },
         onRenameStart() {
+            var that = this;
+
             this.entry.rename = true;
+
+            nextTick(function () {
+                var elem = that.$el.querySelector('input');
+                elem.focus();
+
+                if (typeof elem.selectionStart != "undefined") {
+                    elem.selectionStart = 0;
+                    elem.selectionEnd = that.entry.fileName.lastIndexOf('.');
+                }
+            });
         },
         onRenameEnd() {
             this.entry.rename = false;
         },
         onRenameSubmit() {
+            this.entry.rename = false;
             this.$emit('rename-submit', this.entry);
         },
         onEntryOpen(select) {
