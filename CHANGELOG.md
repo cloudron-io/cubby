@@ -115,3 +115,6 @@
 * Add initial Cloudron tests
 * Update dependencies
 
+[1.1.3]
+* Update dependencies
+
