@@ -289,6 +289,7 @@ export default {
 .list-header-cell {
     height: 40px;
     line-height: 40px;
+    white-space: nowrap;
 }
 
 .list-header-cell.icon {
@@ -300,16 +301,16 @@ export default {
 }
 
 .list-header-cell.mtime {
-    width: 130px;
+    min-width: 100px;
 }
 
 .list-header-cell.size {
-    width: 130px;
+    min-width: 100px;
     text-align: right;
 }
 
 .list-header-cell.actions {
-    width: 160px;
+    min-width: 160px;
 }
 
 .empty-placeholder {

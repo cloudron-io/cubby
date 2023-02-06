@@ -158,6 +158,7 @@ export default {
     display: block;
     height: 40px;
     line-height: 40px;
+    white-space: nowrap;
 }
 
 .entry-cell.icon {
@@ -169,6 +170,8 @@ export default {
 
 .entry-cell.filename {
     flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .entry-cell.filename > a {
@@ -181,16 +184,16 @@ export default {
 }
 
 .entry-cell.mtime {
-    width: 130px;
+    min-width: 100px;
 }
 
 .entry-cell.size {
-    width: 130px;
+    min-width: 100px;
     text-align: right;
 }
 
 .entry-cell.actions {
-    width: 160px;
+    min-width: 160px;
     text-align: right;
     line-height: normal;
 }
