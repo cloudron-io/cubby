@@ -118,3 +118,6 @@
 [1.1.3]
 * Update dependencies
 
+[1.1.4]
+* Fix various overflow issues
+* Update dependencies
