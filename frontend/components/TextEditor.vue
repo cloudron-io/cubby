@@ -3,7 +3,7 @@
         <Toolbar>
             <template #start>
                 <Button :icon="busySave ? 'pi pi-spin pi-spinner' : 'pi pi-save'" class="p-button-sm" label="Save" @click="onSave" :disabled="busySave || !isChanged"/>
-                <div class="file-name">{{ entry ? entry.fileName : '' }}</div>
+                <div class="file-name">{{ item ? item.fileName : '' }}</div>
             </template>
 
             <template #end>
@@ -31,29 +31,29 @@ function getLanguage(filename) {
 
 export default {
     name: 'TextEditor',
-    emits: [ 'close', 'saved' ],
+    emits: [ 'close', 'save' ],
     data() {
         return {
-            entry: {},
+            item: {},
             isChanged: false,
             busySave: false
         };
     },
     methods: {
-        canHandle(entry) {
-            return getFileTypeGroup(entry) === 'text' || entry.mimeType === 'application/json' || entry.mimeType === 'application/javascript' || entry.mimeType === 'application/x-shellscript';
+        canHandle(item) {
+            return getFileTypeGroup(item) === 'text' || item.mimeType === 'application/json' || item.mimeType === 'application/javascript' || item.mimeType === 'application/x-shellscript';
         },
-        open(entry) {
+        openItem(item, content) {
             var that = this;
 
-            if (!entry || entry.isDirectory || !this.canHandle(entry)) return;
+            if (!item || item.isDirectory || !this.canHandle(item)) return;
 
-            this.entry = entry;
+            this.item = item;
 
-            superagent.get(getDirectLink(entry)).end(function (error, result) {
+            superagent.get(getDirectLink(item)).end(function (error, result) {
                 if (error) return console.error(error);
 
-                that.editor.setModel(editor.createModel(result.text, getLanguage(entry.fileName)));
+                that.editor.setModel(editor.createModel(result.text, getLanguage(item.fileName)));
                 that.editor.getModel().onDidChangeContent(function () { that.isChanged = true; });
             });
         },
@@ -68,7 +68,7 @@ export default {
             this.isChanged = false;
             this.busySave = true;
 
-            this.$emit('saved', this.entry, this.editor.getValue(), function () {
+            this.$emit('save', this.item, this.editor.getValue(), function () {
                 that.busySave = false;
             });
         }
