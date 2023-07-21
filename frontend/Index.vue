@@ -10,7 +10,7 @@
 
   <div class="container" v-show="ready && profile.username">
     <div class="sidebar">
-      <h1 style="margin-bottom: 50px; text-align: center;"><img src="logo.png" height="60" width="60"/><br/>Cubby</h1>
+      <h1 style="margin-bottom: 50px; text-align: center;"><img src="/logo.png" height="60" width="60"/><br/>Cubby</h1>
 
       <Button icon="pi pi-folder-open" class="p-button-text p-button-primary" label="All Files" @click="showAllFiles"/>
       <Button icon="pi pi-clock" class="p-button-text p-button-primary" label="Recent Files" @click="showAllRecent"/>
@@ -153,8 +153,8 @@
   <div class="viewer-container" v-show="viewer">
     <ImageViewer ref="imageViewer" @close="onViewerClose" @download="onDownload" v-show="viewer === 'image'" />
     <TextEditor ref="textEditor" @close="onViewerClose" @saved="onFileSaved" v-show="viewer === 'text'" />
-    <PdfViewer ref="pdfViewer" @close="onViewerClose" v-show="viewer === 'pdf'" />
-    <OfficeViewer ref="officeViewer" :config="config.viewers.collabora" @close="onViewerClose" v-show="viewer === 'office'" />
+    <!-- <PdfViewer ref="pdfViewer" @close="onViewerClose" v-show="viewer === 'pdf'" /> -->
+    <!-- <OfficeViewer ref="officeViewer" :config="config.viewers.collabora" @close="onViewerClose" v-show="viewer === 'office'" /> -->
     <GenericViewer ref="genericViewer" @close="onViewerClose" v-show="viewer === 'generic'" />
   </div>
 </template>

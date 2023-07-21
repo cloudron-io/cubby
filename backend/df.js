@@ -1,7 +1,7 @@
 // This file is a copy of https://raw.githubusercontent.com/sindresorhus/df/v3.1.1/index.js since v4 only supports es modules via import statement
 
 'use strict';
-const execa = require('execa');
+const execSync = require('child_process').execSync;
 
 const getColumnBoundaries = async header => {
 	// Regex captures each individual column
@@ -46,8 +46,14 @@ const parseOutput = async output => {
 };
 
 const run = async args => {
-	const {stdout} = await execa('df', args);
-	return parseOutput(stdout);
+	let output = '';
+	try {
+		output = execSync('df ' + args.join(' '), { encoding: 'utf8' });
+	} catch (e) {
+		console.error('Faild to run df', args.join(' '), e);
+	}
+
+	return parseOutput(output);
 };
 
 const df = async () => run(['-kP']);

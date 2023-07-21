@@ -41,8 +41,8 @@ import Login from './components/Login.vue';
 import MainToolbar from './components/MainToolbar.vue';
 import ImageViewer from './components/ImageViewer.vue';
 import TextEditor from './components/TextEditor.vue';
-import PdfViewer from './components/PdfViewer.vue';
-import OfficeViewer from './components/OfficeViewer.vue';
+// import PdfViewer from './components/PdfViewer.vue';
+// import OfficeViewer from './components/OfficeViewer.vue';
 import GenericViewer from './components/GenericViewer.vue';
 
 const app = createApp(Index);
@@ -89,8 +89,8 @@ app.component('EntryListItem', EntryListItem);
 app.component('SideBar', SideBar);
 app.component('ImageViewer', ImageViewer);
 app.component('TextEditor', TextEditor);
-app.component('PdfViewer', PdfViewer);
-app.component('OfficeViewer', OfficeViewer);
+// app.component('PdfViewer', PdfViewer);
+// app.component('OfficeViewer', OfficeViewer);
 app.component('GenericViewer', GenericViewer);
 
 app.mount('#app');
