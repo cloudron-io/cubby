@@ -20,10 +20,10 @@
     </div>
   </div>
 
-  <ImageViewer ref="imageViewer" :entries="entries" @close="onViewerClose" @download="onDownload" v-show="viewer === 'image'" />
+<!--   <ImageViewer ref="imageViewer" :entries="entries" @close="onViewerClose" @download="onDownload" v-show="viewer === 'image'" />
   <TextEditor ref="textEditor" :entries="entries" @close="onViewerClose" @saved="onFileSaved" v-show="viewer === 'text'" />
   <PdfViewer ref="pdfViewer" :entries="entries" @close="onViewerClose" v-show="viewer === 'pdf'" />
-  <OfficeViewer ref="officeViewer" :entries="entries" @close="onViewerClose" v-show="viewer === 'office'" />
+  <OfficeViewer ref="officeViewer" :entries="entries" @close="onViewerClose" v-show="viewer === 'office'" /> -->
 </template>
 
 <script>

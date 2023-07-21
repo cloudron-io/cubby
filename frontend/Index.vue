@@ -167,8 +167,14 @@ import superagent from 'superagent';
 import async from 'async';
 import { parseResourcePath, decode, getExtension, getShareLink, copyToClipboard, sanitize, download, getDirectLink, prettyFileSize } from './utils.js';
 
+import { TextEditor, ImageViewer } from 'pankow';
+
 export default {
     name: 'Index',
+    components: {
+      ImageViewer,
+      TextEditor
+    },
     data() {
         return {
             ready: false,
@@ -840,11 +846,21 @@ export default {
                     that.clearSelection();
                 } else {
                     if (that.$refs.imageViewer.canHandle(entry)) {
-                        that.$refs.imageViewer.open(entry);
-                        that.viewer = 'image';
+                      const otherSupportedEntries = that.entries.filter((e) => that.$refs.imageViewer.canHandle(e)).map((e) => {
+                        e.resourceUrl = `/viewer/${that.resourceType}/${that.resourceId}${e.folderPath}/${e.fileName}`;
+                        e.fullFileUrl = getDirectLink(e);
+                        return e;
+                      });
+
+                      that.$refs.imageViewer.open(entry, otherSupportedEntries);
+                      that.viewer = 'image';
                     } else if (that.$refs.textEditor.canHandle(entry)) {
-                        that.$refs.textEditor.open(entry);
+                      superagent.get(getDirectLink(entry)).end(function (error, result) {
+                        if (error) return console.error(error);
+
+                        that.$refs.textEditor.open(entry, result.text);
                         that.viewer = 'text';
+                      });
                     } else if (that.$refs.pdfViewer.canHandle(entry)) {
                         that.$refs.pdfViewer.open(entry);
                         that.viewer = 'pdf';

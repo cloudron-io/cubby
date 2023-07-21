@@ -29,6 +29,7 @@
     "morgan": "^1.10.0",
     "multiparty": "^4.2.3",
     "once": "^1.4.0",
+    "pankow": "^0.5.0",
     "pdfjs-dist": "^3.8.162",
     "primeicons": "^6.0.1",
     "primevue": "^3.30.2",

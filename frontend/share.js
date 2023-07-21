@@ -39,10 +39,10 @@ import EntryListItem from './components/EntryListItem.vue';
 import SideBar from './components/SideBar.vue';
 import Login from './components/Login.vue';
 import MainToolbar from './components/MainToolbar.vue';
-import ImageViewer from './components/ImageViewer.vue';
-import TextEditor from './components/TextEditor.vue';
-import PdfViewer from './components/PdfViewer.vue';
-import OfficeViewer from './components/OfficeViewer.vue';
+// import ImageViewer from './components/ImageViewer.vue';
+// import TextEditor from './components/TextEditor.vue';
+// import PdfViewer from './components/PdfViewer.vue';
+// import OfficeViewer from './components/OfficeViewer.vue';
 
 const app = createApp(Share);
 
@@ -86,9 +86,9 @@ app.component('MainToolbar', MainToolbar);
 app.component('EntryList', EntryList);
 app.component('EntryListItem', EntryListItem);
 app.component('SideBar', SideBar);
-app.component('ImageViewer', ImageViewer);
-app.component('TextEditor', TextEditor);
-app.component('PdfViewer', PdfViewer);
-app.component('OfficeViewer', OfficeViewer);
+// app.component('ImageViewer', ImageViewer);
+// app.component('TextEditor', TextEditor);
+// app.component('PdfViewer', PdfViewer);
+// app.component('OfficeViewer', OfficeViewer);
 
 app.mount('#app');
