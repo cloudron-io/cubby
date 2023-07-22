@@ -8,6 +8,7 @@ var express = require('express'),
     Dom = require('xmldom').DOMParser,
     xpath = require('xpath'),
     config = require('./config.js'),
+    cors = require('./cors.js'),
     users = require('./routes/users.js'),
     files = require('./routes/files.js'),
     shares = require('./routes/shares.js'),
@@ -48,8 +49,6 @@ function init(callback) {
         sessionOptions.cookie.secure = true;
     }
 
-    app.use(session(sessionOptions));
-
     app.use(morgan(function (tokens, req, res) {
         return [
             tokens.method(req, res),
@@ -65,6 +64,11 @@ function init(callback) {
         // only log failed requests by default
         // skip: function (req, res) { return res.statusCode < 400; }
     }));
+
+    // currently for local development. vite runs on 5173
+    if (!process.env.CLOUDRON) app.use(cors({ origins: [ '*' ], allowCredentials: true }))
+
+    app.use(session(sessionOptions));
 
     router.del = router.delete; // amend router.del for readability further on
 

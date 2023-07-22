@@ -22,6 +22,8 @@
 
 import superagent from 'superagent';
 
+const API_ORIGIN = import.meta.env.VITE_API_ORIGIN ? import.meta.env.VITE_API_ORIGIN : '';
+
 export default {
     name: 'Login',
     emits: [ 'success' ],
@@ -40,7 +42,7 @@ export default {
             that.error = false;
             that.busy = true;
 
-            superagent.post('/api/v1/login', { username: this.username, password: this.password }).end(function (error, result) {
+            superagent.post(API_ORIGIN + '/api/v1/login', { username: this.username, password: this.password }).end(function (error, result) {
                 that.busy = false;
 
                 if (error && error.status === 403) {

@@ -6,7 +6,7 @@ export function createMainModel(origin) {
     async getProfile() {
       let error, result;
       try {
-        result = await superagent.get(`${origin}/api/v1/profile`);
+        result = await superagent.get(`${origin}/api/v1/profile`).withCredentials();
       } catch (e) {
         error = e;
       }
@@ -27,7 +27,7 @@ export function createMainModel(origin) {
     async getConfig() {
       let error, result;
       try {
-        result = await superagent.get(`${origin}/api/v1/config`);
+        result = await superagent.get(`${origin}/api/v1/config`).withCredentials();
       } catch (e) {
         error = e;
       }
