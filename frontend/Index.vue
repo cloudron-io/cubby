@@ -171,12 +171,15 @@ import { TextEditor, ImageViewer } from 'pankow';
 import { createDirectoryModel } from './models/DirectoryModel.js';
 import { createMainModel } from './models/MainModel.js';
 
+import MainToolbar from './components/MainToolbar.vue';
+
 const API_ORIGIN = import.meta.env.VITE_API_ORIGIN ? import.meta.env.VITE_API_ORIGIN : '';
 
 export default {
     name: 'IndexView',
     components: {
       ImageViewer,
+      MainToolbar,
       TextEditor
     },
     data() {
@@ -240,10 +243,10 @@ export default {
       };
     },
     methods: {
-        prettyFileSize,
-        showAllFiles() {
-            window.location.hash = 'files/';
-        },
+      prettyFileSize,
+      showAllFiles() {
+        window.location.hash = 'files/';
+      },
         onLogout() {
             var that = this;
 
@@ -742,123 +745,121 @@ export default {
                 });
             });
         },
-        refresh() {
-            this.loadPath(null, true);
+        async refresh() {
+          await this.loadPath(null, true);
         },
-        loadPath(path, alwaysRefresh) {
-            var that = this;
+        async loadPath(path, alwaysRefresh) {
+          const resource = parseResourcePath(path || this.currentResourcePath || 'files/');
 
-            // FIXME rework this to not make the listview flicker that much
-            var resource = parseResourcePath(path || that.currentResourcePath || 'files/');
+          // check if we actually have a new path to fetch
+          var currentResource = null;
+          if (!alwaysRefresh && this.currentResourcePath) {
+            currentResource = parseResourcePath(this.currentResourcePath);
 
-            // check if we actually have a new path to fetch
-            var currentResource = null;
-            if (!alwaysRefresh && that.currentResourcePath) {
-                currentResource = parseResourcePath(that.currentResourcePath);
+            if (currentResource.resourcePath === resource.resourcePath) return;
+          }
 
-                if (currentResource.resourcePath === resource.resourcePath) return;
+          // only show busy state if it takes more than 2 seconds to avoid flickering
+          var busyTimer = setTimeout(() => { this.busy = true; }, 2000);
+
+          let entry;
+          try {
+            entry = await this.directoryModel.get(resource.apiPath, resource.path);
+          } catch (error) {
+            this.entries = [];
+            entry = {};
+
+            if (error.status === 401) return this.onLogout();
+            else if (error.status === 404) this.error = 'Does not exist';
+            else console.error(error);
+          }
+
+          clearTimeout(busyTimer);
+          this.busy = false;
+
+          // update the browser hash
+          window.location.hash = resource.resourcePath;
+
+          console.log(resource)
+          console.log(entry)
+
+          if (entry.isDirectory) {
+            this.currentPath = resource.path;
+            this.currentResourcePath = resource.resourcePath;
+            this.currentShare = entry.share || null;
+
+            if (resource.type === 'files') {
+              this.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
+                return {
+                  label: decode(e),
+                  url: '#files' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
+                };
+              });
+              this.breadCrumbHome = {
+                icon: 'pi pi-home',
+                url: '#files/'
+              };
+            } else if (resource.type === 'shares') {
+              this.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
+                return {
+                  label: decode(e),
+                  url: '#shares/' + resource.shareId  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
+                };
+              });
+              this.breadCrumbHome = {
+                icon: 'pi pi-share-alt',
+                url: '#shares/'
+              };
+
+              // if we are not toplevel, add the share information
+              if (entry.share) {
+                this.breadCrumbs.unshift({
+                  label: entry.share.filePath.slice(1), // remove slash at the beginning
+                  url: '#shares/' + resource.shareId + '/'
+                });
+              }
+            } else {
+              console.error('FIXME breadcrumbs for resource type', resource.type);
             }
 
-            // only show busy state if it takes more than 2 seconds to avoid flickering
-            var busyTimer = setTimeout(function () { that.busy = true; }, 2000);
-
-            superagent.get(resource.apiPath).query({ path: resource.path }).end(function (error, result) {
-                clearTimeout(busyTimer);
-                that.busy = false;
-
-                if (error) {
-                    that.entries = [];
-
-                    if (error.status === 401) that.onLogout();
-                    else if (error.status === 404) that.error = 'Does not exist';
-                    else console.error(error);
-
-                    return;
-                }
-
-                const entry = result.body;
-
-                // update the browser hash
-                window.location.hash = resource.resourcePath;
-
-                if (entry.isDirectory) {
-                    that.currentPath = resource.path;
-                    that.currentResourcePath = resource.resourcePath;
-                    that.currentShare = entry.share || null;
-
-                    if (resource.type === 'files') {
-                        that.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
-                            return {
-                                label: decode(e),
-                                url: '#files' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
-                            };
-                        });
-                        that.breadCrumbHome = {
-                            icon: 'pi pi-home',
-                            url: '#files/'
-                        };
-                    } else if (resource.type === 'shares') {
-                        that.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
-                            return {
-                                label: decode(e),
-                                url: '#shares/' + resource.shareId  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
-                            };
-                        });
-                        that.breadCrumbHome = {
-                            icon: 'pi pi-share-alt',
-                            url: '#shares/'
-                        };
-
-                        // if we are not toplevel, add the share information
-                        if (result.body.share) {
-                            that.breadCrumbs.unshift({
-                                label: entry.share.filePath.slice(1), // remove slash at the beginning
-                                url: '#shares/' + resource.shareId + '/'
-                            });
-                        }
-                    } else {
-                        console.error('FIXME breadcrumbs for resource type', resource.type);
-                    }
-
-                    entry.files.forEach(function (e) {
-                        e.extension = getExtension(e);
-                        e.rename = false;
-                        e.filePathNew = e.fileName;
-                    });
-
-                    that.entries = entry.files;
-                    that.viewer = '';
-
-                    that.clearSelection();
-                } else {
-                    if (that.$refs.imageViewer.canHandle(entry)) {
-                      const otherSupportedEntries = that.entries.filter((e) => that.$refs.imageViewer.canHandle(e)).map((e) => {
-                        e.resourceUrl = `/viewer/${that.resourceType}/${that.resourceId}${e.folderPath}/${e.fileName}`;
-                        e.fullFileUrl = getDirectLink(e);
-                        return e;
-                      });
-
-                      that.$refs.imageViewer.open(entry, otherSupportedEntries);
-                      that.viewer = 'image';
-                    } else if (that.$refs.textEditor.canHandle(entry)) {
-                      superagent.get(getDirectLink(entry)).end(function (error, result) {
-                        if (error) return console.error(error);
-
-                        that.$refs.textEditor.open(entry, result.text);
-                        that.viewer = 'text';
-                      });
-                    } else if (that.$refs.pdfViewer.canHandle(entry)) {
-                        that.$refs.pdfViewer.open(entry);
-                        that.viewer = 'pdf';
-                    } else if (that.$refs.officeViewer.canHandle(entry)) {
-                        that.$refs.officeViewer.open(entry);
-                        that.viewer = 'office';
-                    } else {
-                        that.viewer = 'generic';
-                        that.$refs.genericViewer.open(entry);
-                    }
-                }
+            entry.files.forEach(function (e) {
+              e.extension = getExtension(e);
+              e.rename = false;
+              e.filePathNew = e.fileName;
             });
+
+            this.entries = entry.files;
+            this.viewer = '';
+
+            this.clearSelection();
+          } else {
+            if (this.$refs.imageViewer.canHandle(entry)) {
+              const otherSupportedEntries = this.entries.filter((e) => this.$refs.imageViewer.canHandle(e)).map((e) => {
+                e.resourceUrl = `/viewer/${this.resourceType}/${this.resourceId}${e.folderPath}/${e.fileName}`;
+                e.fullFileUrl = getDirectLink(e);
+                return e;
+              });
+
+              this.$refs.imageViewer.open(entry, otherSupportedEntries);
+              this.viewer = 'image';
+            } else if (this.$refs.textEditor.canHandle(entry)) {
+              superagent.get(getDirectLink(entry)).end(function (error, result) {
+                if (error) return console.error(error);
+
+                this.$refs.textEditor.open(entry, result.text);
+                this.viewer = 'text';
+              });
+            } else if (this.$refs.pdfViewer.canHandle(entry)) {
+              this.$refs.pdfViewer.open(entry);
+              this.viewer = 'pdf';
+            } else if (this.$refs.officeViewer.canHandle(entry)) {
+              this.$refs.officeViewer.open(entry);
+              this.viewer = 'office';
+            } else {
+              this.viewer = 'generic';
+              this.$refs.genericViewer.open(entry);
+            }
+          }
         },
         onOpen(entry) {
             if (entry.share && entry.share.id) window.location.hash = 'shares/' + entry.share.id + '/' + entry.filePath;
@@ -930,7 +931,7 @@ export default {
         return;
       }
 
-      // this.directoryModel = createDirectoryModel(this.apiOrigin, this.accessToken, type === 'volume' ? `volumes/${resourceId}` : `apps/${resourceId}`);
+      this.directoryModel = createDirectoryModel(API_ORIGIN);
 
       // initial load with hash if present
       const hash = window.location.hash.slice(1);

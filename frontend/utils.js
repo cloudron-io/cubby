@@ -142,13 +142,13 @@ function parseResourcePath(resourcePath) {
     if (resourcePath.indexOf('files/') === 0) {
         result.type = 'files';
         result.path = resourcePath.slice('files'.length) || '/';
-        result.apiPath = '/api/v1/files';
+        result.apiPath = 'files';
         result.resourcePath = result.type + result.path;
     } else if (resourcePath.indexOf('shares/') === 0) {
         result.type = 'shares';
         result.shareId = resourcePath.split('/')[1];
         result.path = resourcePath.slice((result.type + '/' + result.shareId).length) || '/';
-        result.apiPath = '/api/v1/shares/' + result.shareId;
+        result.apiPath = 'shares/' + result.shareId;
         // without shareId we show the root (share listing)
         result.resourcePath = result.type + '/' + (result.shareId ? (result.shareId + result.path) : '');
     } else {
