@@ -18,11 +18,11 @@
 
       <div style="flex-grow: 1">&nbsp;</div>
 
-      <div class="p-fluid" v-tooltip.top="prettyFileSize(profile.diskusage.used) + ' of ' + prettyFileSize(profile.diskusage.available)">
+      <div class="p-fluid" v-tooltip.top="profile.diskusage ? (prettyFileSize(profile.diskusage.used) + ' of ' + prettyFileSize(profile.diskusage.available)) : ''">
         <span>
-          <b>{{ parseInt(profile.diskusage.used / profile.diskusage.available * 100) }}%</b> of storage used
+          <b>{{ profile.diskusage ? parseInt(profile.diskusage.used / profile.diskusage.available * 100) : 0 }}%</b> of storage used
         </span>
-        <ProgressBar class="diskusage" :value="(profile.diskusage.used / profile.diskusage.size) * 100" :showValue="false"/>
+        <ProgressBar class="diskusage" :value="profile.diskusage ? ((profile.diskusage.used / profile.diskusage.size) * 100) : 0" :showValue="false"/>
       </div>
     </div>
     <div class="content">
@@ -168,83 +168,76 @@ import async from 'async';
 import { parseResourcePath, decode, getExtension, getShareLink, copyToClipboard, sanitize, download, getDirectLink, prettyFileSize } from './utils.js';
 
 import { TextEditor, ImageViewer } from 'pankow';
+import { createDirectoryModel } from './models/DirectoryModel.js';
+import { createMainModel } from './models/MainModel.js';
+
+const API_ORIGIN = import.meta.env.VITE_API_ORIGIN ? import.meta.env.VITE_API_ORIGIN : '';
 
 export default {
-    name: 'Index',
+    name: 'IndexView',
     components: {
       ImageViewer,
       TextEditor
     },
     data() {
-        return {
-            ready: false,
-            busy: true,
-            search: '',
-            viewer: '',
-            profile: {
-                username: '',
-                displayName: '',
-                email: '',
-                diskusage: {
-                    used: 0,
-                    size: 0,
-                    available: 0
-                }
-            },
-            config: {
-                viewers: {
-                    collabora: {}
-                }
-            },
-            viewers: [],
-            uploadStatus: {
-                busy: false,
-                queue: [],
-                done: 0,
-                size: 0,
-                percentDone: 0
-            },
-            error: '',
-            entries: [],
-            selectedEntries: [],
-            currentPath: '/',
-            currentResourcePath: 'files/',
-            currentShare: null,
-            sideBarVisible: true,
-            breadCrumbs: [],
-            breadCrumbHome: {
-                icon: 'pi pi-home',
-                url: '#files'
-            },
-            newFileDialog: {
-                visible: false,
-                error: '',
-                fileName: ''
-            },
-            newFolderDialog: {
-                visible: false,
-                error: '',
-                folderName: ''
-            },
-            conflictingFileDialog: {
-                visible: false,
-                path: '',
-                file: null
-            },
-            shareDialog: {
-                visible: false,
-                error: '',
-                receiverUsername: '',
-                readonly: false,
-                users: [],
-                sharedWith: [],
-                entry: {},
-                shareLink: {
-                    expire: false,
-                    expiresAt: 0
-                }
-            }
-        };
+      return {
+        ready: false,
+        busy: true,
+        mainModel: null,
+        directoryModel: null,
+        search: '',
+        viewer: '',
+        profile: {},
+        config: {},
+        viewers: [],
+        uploadStatus: {
+          busy: false,
+          queue: [],
+          done: 0,
+          size: 0,
+          percentDone: 0
+        },
+        error: '',
+        entries: [],
+        selectedEntries: [],
+        currentPath: '/',
+        currentResourcePath: 'files/',
+        currentShare: null,
+        sideBarVisible: true,
+        breadCrumbs: [],
+        breadCrumbHome: {
+          icon: 'pi pi-home',
+          url: '#files'
+        },
+        newFileDialog: {
+          visible: false,
+          error: '',
+          fileName: ''
+        },
+        newFolderDialog: {
+          visible: false,
+          error: '',
+          folderName: ''
+        },
+        conflictingFileDialog: {
+          visible: false,
+          path: '',
+          file: null
+        },
+        shareDialog: {
+          visible: false,
+          error: '',
+          receiverUsername: '',
+          readonly: false,
+          users: [],
+          sharedWith: [],
+          entry: {},
+          shareLink: {
+            expire: false,
+            expiresAt: 0
+          }
+        }
+      };
     },
     methods: {
         prettyFileSize,
@@ -267,18 +260,11 @@ export default {
                 };
             });
         },
-        onLoggedIn(profile) {
-            var that = this;
+        async onLoggedIn() {
+            this.profile = await this.mainModel.getProfile();
+            this.config = await this.mainModel.getConfig();
 
-            this.profile.username = profile.username;
-            this.profile.displayName = profile.displayName;
-            this.profile.email = profile.email;
-            this.profile.diskusage = profile.diskusage;
-
-            this.refreshConfig(function (error) {
-                if (error) return console.error('Failed to load config.', error);
-                that.loadPath(window.location.hash.slice(1), true);
-            });
+            this.loadPath(window.location.hash.slice(1), true);
         },
         onUploadFile() {
             // reset the form first to make the change handler retrigger even on the same file selected
@@ -897,75 +883,63 @@ export default {
                 window.location.hash = hash.split('/')[0] + sanitize(hash.split('/').slice(1, -1).filter(function (p) { return !!p; }).join('/'));
             }
         },
-        refreshConfig(callback) {
-            var that = this;
-
-            superagent.get('/api/v1/config').end(function (error, result) {
-                if (error) return callback(error);
-
-                // ensure we know what we get so we can properly reference
-                that.config.viewers.collabora = result.body.viewers.collabora || {};
-
-                callback();
-            });
-        }
     },
-    mounted() {
-        var that = this;
+    async mounted() {
+      // upload input event handler
+      this.$refs.uploadFile.addEventListener('change', () => {
+        this.uploadFiles(this.$refs.uploadFile.files || []);
+      });
 
-        // upload input event handler
-        this.$refs.uploadFile.addEventListener('change', function () {
-            that.uploadFiles(that.$refs.uploadFile.files || []);
-        });
+      this.$refs.uploadFolder.addEventListener('change', function () {
+        this.uploadFiles(this.$refs.uploadFolder.files || []);
+      });
 
-        this.$refs.uploadFolder.addEventListener('change', function () {
-            that.uploadFiles(that.$refs.uploadFolder.files || []);
-        });
+      window.addEventListener('hashchange', () => {
+        const hash = window.location.hash.slice(1);
 
-        function hashChange() {
-            const hash = window.location.hash.slice(1);
+        if (hash.indexOf('files/') === 0) this.loadPath(hash);
+        else if (hash.indexOf('recent/') === 0) this.onRecent();
+        else if (hash.indexOf('shares/') === 0) this.loadPath(hash);
+        else window.location.hash = 'files/';
+      }, false);
 
-            if (hash.indexOf('files/') === 0) that.loadPath(hash);
-            else if (hash.indexOf('recent/') === 0) that.onRecent();
-            else if (hash.indexOf('shares/') === 0) that.loadPath(hash);
-            else window.location.hash = 'files/';
-        }
+      // warn the user if uploads are still in progress
+      window.addEventListener('beforeunload', (event) => {
+        if (!this.uploadStatus.busy) return;
 
-        window.addEventListener('hashchange', hashChange, false);
+        event.preventDefault();
+        window.confirm('Uploads are still in progress. Please wait for them to finish.');
+      }, { capture: true });
 
-        // warn the user if uploads are still in progress
-        window.addEventListener('beforeunload', function (event) {
-            if (!that.uploadStatus.busy) return;
+      this.mainModel = createMainModel(API_ORIGIN);
 
-            event.preventDefault();
-            window.confirm('Uploads are still in progress. Please wait for them to finish.');
-        }, { capture: true });
+      try {
+        this.profile = await this.mainModel.getProfile();
+      } catch (e) {
+        console.error('Failed to get profile.', e);
+        this.ready = true;
+        return;
+      }
 
-        superagent.get('/api/v1/profile').end(function (error, result) {
-            if (error) {
-                if (error.status !== 401) console.error(error);
-                that.ready = true;
-                return;
-            }
 
-            that.profile.username = result.body.username;
-            that.profile.email = result.body.email;
-            that.profile.displayName = result.body.displayName;
-            that.profile.diskusage = result.body.diskusage;
+      try {
+        this.config = await this.mainModel.getConfig();
+      } catch (e) {
+        console.error('Failed to get config.', e);
+        this.ready = true;
+        return;
+      }
 
-            that.refreshConfig(function (error) {
-                if (error) return console.error('Cant load config', error);
+      // this.directoryModel = createDirectoryModel(this.apiOrigin, this.accessToken, type === 'volume' ? `volumes/${resourceId}` : `apps/${resourceId}`);
 
-                that.ready = true;
+      // initial load with hash if present
+      const hash = window.location.hash.slice(1);
+      if (hash.indexOf('files/') === 0) this.loadPath(hash, true);
+      else if (hash.indexOf('recent/') === 0) this.onRecent();
+      else if (hash.indexOf('shares/') === 0) this.loadPath(hash, true);
+      else this.loadPath(null, true);
 
-                // initial load with has if present
-                const hash = window.location.hash.slice(1);
-                if (hash.indexOf('files/') === 0) that.loadPath(hash, true);
-                else if (hash.indexOf('recent/') === 0) that.onRecent();
-                else if (hash.indexOf('shares/') === 0) that.loadPath(hash, true);
-                else that.loadPath(null, true);
-            });
-        });
+      this.ready = true;
     }
 };
 
