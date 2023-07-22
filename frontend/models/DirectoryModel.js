@@ -15,6 +15,10 @@ export function createDirectoryModel(origin) {
 
       const entry = result.body;
 
+      entry.files.forEach(e => {
+        e.previewUrl = origin + e.previewUrl;
+      });
+
       // this prepares the entries to be compatible with all components
       // result.body.entries.forEach(item => {
       //   item.id = item.fileName;
