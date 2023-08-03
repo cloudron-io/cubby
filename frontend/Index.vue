@@ -294,8 +294,10 @@ export default {
               if (error.reason === DirectoryModelError.NO_AUTH) this.onLogout();
               else if (error.reason === DirectoryModelError.NOT_ALLOWED) this.newFileDialog.error = 'File name not allowed';
               else if (error.reason === DirectoryModelError.CONFLICT) this.newFileDialog.error = 'File already exists';
-              else if (error.reason === DirectoryModelError.GENERIC) this.newFileDialog.error = 'File name not allowed';
-              else console.error('Failed to add file, unknown error:', error)
+              else {
+                this.newFolderDialog.error = 'Unkown error, check logs';
+                console.error('Failed to add file, unknown error:', error)
+              }
 
               return;
             }
@@ -303,22 +305,26 @@ export default {
             this.refresh();
             this.newFileDialog.visible = false;
         },
-        onSaveNewFolderDialog() {
-            var that = this;
+        async onSaveNewFolderDialog() {
+          const path = sanitize(this.currentPath + '/' + this.newFolderDialog.folderName);
+          const resource = parseResourcePath(this.currentResourcePath || 'files/');
 
-            var path = sanitize(this.currentPath + '/' + this.newFolderDialog.folderName);
+          try {
+            await this.directoryModel.newFolder(resource.apiPath, path);
+          } catch (error) {
+            if (error.reason === DirectoryModelError.NO_AUTH) this.onLogout();
+            else if (error.reason === DirectoryModelError.NOT_ALLOWED) this.newFolderDialog.error = 'Folder name not allowed';
+            else if (error.reason === DirectoryModelError.CONFLICT) this.newFolderDialog.error = 'Folder already exists';
+            else {
+              this.newFolderDialog.error = 'Unkown error, check logs';
+              console.error('Failed to add folder, unknown error:', error)
+            }
 
-            superagent.post('/api/v1/files').query({ path: path, directory: true }).end(function (error, result) {
-                if (result && result.statusCode === 401) return that.onLogout();
-                if (result && result.statusCode === 403) return that.newFolderDialog.error = 'Folder name not allowed';
-                if (result && result.statusCode === 409) return that.newFolderDialog.error = 'Folder already exists';
-                if (result && result.statusCode !== 200) return that.newFolderDialog.error = 'Error creating folder: ' + result.statusCode;
-                if (error) return console.error(error.message);
+            return;
+          }
 
-                that.refresh();
-
-                that.newFolderDialog.visible = false;
-            });
+          this.refresh();
+          this.newFolderDialog.visible = false;
         },
         onUploadFolder() {
             // reset the form first to make the change handler retrigger even on the same file selected

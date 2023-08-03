@@ -81,6 +81,16 @@ export function createDirectoryModel(origin) {
         else if (error.status === 409) throw new DirectoryModelError(DirectoryModelError.CONFLICT, error);
         throw new DirectoryModelError(DirectoryModelError.GENERIC, error);
       }
+    },
+    async newFolder(resource, newFolderPath) {
+      try {
+        await superagent.post(`${origin}/api/v1/${resource}`).withCredentials().query({ path: newFolderPath, directory: true });
+      } catch (error) {
+        if (error.status === 401) throw new DirectoryModelError(DirectoryModelError.NO_AUTH, error);
+        else if (error.status === 403) throw new DirectoryModelError(DirectoryModelError.NOT_ALLOWED, error);
+        else if (error.status === 409) throw new DirectoryModelError(DirectoryModelError.CONFLICT, error);
+        throw new DirectoryModelError(DirectoryModelError.GENERIC, error);
+      }
     }
   };
 }
