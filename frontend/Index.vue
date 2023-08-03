@@ -168,7 +168,7 @@ import async from 'async';
 import { parseResourcePath, decode, getExtension, getShareLink, copyToClipboard, sanitize, download, getDirectLink, prettyFileSize } from './utils.js';
 
 import { TextEditor, ImageViewer } from 'pankow';
-import { createDirectoryModel } from './models/DirectoryModel.js';
+import { createDirectoryModel, DirectoryModelError } from './models/DirectoryModel.js';
 import { createMainModel } from './models/MainModel.js';
 
 import MainToolbar from './components/MainToolbar.vue';
@@ -284,25 +284,24 @@ export default {
             this.newFolderDialog.folderName = '';
             this.newFolderDialog.visible = true;
         },
-        onSaveNewFileDialog() {
-            var that = this;
+        async onSaveNewFileDialog() {
+            const path = sanitize(this.currentPath + '/' + this.newFileDialog.fileName);
+            const resource = parseResourcePath(this.currentResourcePath || 'files/');
 
-            var path = sanitize(this.currentPath + '/' + this.newFileDialog.fileName);
+            try {
+              await this.directoryModel.newFile(resource.apiPath, path);
+            } catch (error) {
+              if (error.reason === DirectoryModelError.NO_AUTH) this.onLogout();
+              else if (error.reason === DirectoryModelError.NOT_ALLOWED) this.newFileDialog.error = 'File name not allowed';
+              else if (error.reason === DirectoryModelError.CONFLICT) this.newFileDialog.error = 'File already exists';
+              else if (error.reason === DirectoryModelError.GENERIC) this.newFileDialog.error = 'File name not allowed';
+              else console.error('Failed to add file, unknown error:', error)
 
-            var formData = new FormData();
-            formData.append('file', new Blob());
+              return;
+            }
 
-            superagent.post('/api/v1/files').query({ path: path }).send(formData).end(function (error, result) {
-                if (result && result.statusCode === 401) return that.onLogout();
-                if (result && result.statusCode === 403) return that.newFileDialog.error = 'File name not allowed';
-                if (result && result.statusCode === 409) return that.newFileDialog.error = 'File already exists';
-                if (result && result.statusCode !== 200) return that.newFileDialog.error = 'Error creating file: ' + result.statusCode;
-                if (error) return console.error(error.message);
-
-                that.refresh();
-
-                that.newFileDialog.visible = false;
-            });
+            this.refresh();
+            this.newFileDialog.visible = false;
         },
         onSaveNewFolderDialog() {
             var that = this;
@@ -779,9 +778,6 @@ export default {
 
           // update the browser hash
           window.location.hash = resource.resourcePath;
-
-          console.log(resource)
-          console.log(entry)
 
           if (entry.isDirectory) {
             this.currentPath = resource.path;
