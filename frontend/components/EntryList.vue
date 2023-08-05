@@ -34,7 +34,6 @@
 <script>
 
 import { getPreviewUrl, prettyDate, prettyLongDate, prettyFileSize, getDirectLink, clearSelection, getEntryIdentifier, entryListSort } from '../utils.js';
-import * as Combokeys from 'combokeys';
 
 export default {
     name: 'EntryList',
@@ -240,12 +239,6 @@ export default {
                 // prevents scrolling the viewport
                 event.preventDefault();
             }
-        });
-
-        var keys = new Combokeys(document.documentElement);
-        keys.bind([ 'command+a', 'ctrl+a' ], function () {
-            that.onSelectAll();
-            return false;
         });
     }
 

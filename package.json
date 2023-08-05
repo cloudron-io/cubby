@@ -12,7 +12,6 @@
     "archiver": "^5.3.1",
     "async": "^3.2.4",
     "body-parser": "^1.20.2",
-    "combokeys": "^3.0.1",
     "commander": "^11.0.0",
     "connect-lastmile": "^2.1.1",
     "connect-timeout": "^1.9.0",
