@@ -20,7 +20,10 @@
   "addons": {
     "localstorage": {},
     "postgresql": {},
-    "ldap": {}
+    "ldap": {},
+    "oidc": {
+      "loginRedirectUri": "/api/v1/oidc/callback"
+    }
   },
   "mediaLinks": [
     "https://screenshots.cloudron.io/io.cloudron.cubby/cubby_01.png"

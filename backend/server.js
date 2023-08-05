@@ -17,6 +17,7 @@ var express = require('express'),
     misc = require('./routes/misc.js'),
     multipart = require('./routes/multipart.js'),
     morgan = require('morgan'),
+    oidc = require('express-openid-connect'),
     session = require('express-session'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
@@ -72,11 +73,20 @@ function init(callback) {
 
     router.del = router.delete; // amend router.del for readability further on
 
-    router.post('/api/v1/login', users.login);
+    function oidcLogin(req, res) {
+        res.oidc.login({
+            returnTo: '/',
+            authorizationParams: {
+                redirect_uri: process.env.CLOUDRON_APP_ORIGIN + '/api/v1/oidc/callback',
+            },
+        });
+    }
+
+    // router.post('/api/v1/login', users.login);
     router.get ('/api/v1/logout', users.logout);
 
-    router.get ('/api/v1/profile', users.sessionAuth, users.profile);
-    router.get ('/api/v1/config', users.sessionAuth, async function (req, res, next) {
+    router.get ('/api/v1/profile', users.isAuthenticated, users.profile);
+    router.get ('/api/v1/config', users.isAuthenticated, async function (req, res, next) {
         // currently we only send configs for collabora
 
         const tmp = {
@@ -105,19 +115,21 @@ function init(callback) {
         next(new HttpSuccess(200, tmp));
     });
 
-    router.get ('/api/v1/users', users.sessionAuth, users.list);
+    router.get ('/api/v1/oidc/login', oidcLogin);
 
-    router.get ('/api/v1/recent', users.sessionAuth, files.recent);
+    router.get ('/api/v1/users', users.isAuthenticated, users.list);
 
-    router.head('/api/v1/files', users.sessionAuth, files.head);
-    router.get ('/api/v1/files', users.sessionAuth, files.get);
-    router.post('/api/v1/files', users.sessionAuth, multipart({ maxFieldsSize: 2 * 1024, limit: '512mb', timeout: 3 * 60 * 1000 }), files.add);
-    router.put ('/api/v1/files', users.sessionAuth, files.update);
-    router.del ('/api/v1/files', users.sessionAuth, files.remove);
+    router.get ('/api/v1/recent', users.isAuthenticated, files.recent);
 
-    router.get ('/api/v1/shares', users.sessionAuth, shares.listShares);
-    router.post('/api/v1/shares', users.sessionAuth, shares.createShare);
-    router.del ('/api/v1/shares', users.sessionAuth, shares.removeShare);
+    router.head('/api/v1/files', users.isAuthenticated, files.head);
+    router.get ('/api/v1/files', users.isAuthenticated, files.get);
+    router.post('/api/v1/files', users.isAuthenticated, multipart({ maxFieldsSize: 2 * 1024, limit: '512mb', timeout: 3 * 60 * 1000 }), files.add);
+    router.put ('/api/v1/files', users.isAuthenticated, files.update);
+    router.del ('/api/v1/files', users.isAuthenticated, files.remove);
+
+    router.get ('/api/v1/shares', users.isAuthenticated, shares.listShares);
+    router.post('/api/v1/shares', users.isAuthenticated, shares.createShare);
+    router.del ('/api/v1/shares', users.isAuthenticated, shares.removeShare);
 
     router.head('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.head);
     router.get ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.get);
@@ -127,7 +139,7 @@ function init(callback) {
 
     router.get ('/api/v1/preview/:type/:id/:hash', users.optionalSessionAuth, misc.getPreview);
 
-    router.get ('/api/v1/download', users.sessionAuth, misc.download);
+    router.get ('/api/v1/download', users.isAuthenticated, misc.download);
 
     router.get ('/api/v1/office/handle', users.sessionAuth, office.getHandle);
     router.get ('/api/v1/office/wopi/files/:shareId', users.tokenAuth, office.checkFileInfo);
@@ -138,6 +150,23 @@ function init(callback) {
     app.use('/api', bodyParser.json());
     app.use('/api', bodyParser.urlencoded({ extended: false, limit: '100mb' }));
     app.use(webdav.express());
+    app.use(oidc.auth({
+        issuerBaseURL: process.env.CLOUDRON_OIDC_ISSUER,
+        baseURL: process.env.CLOUDRON_APP_ORIGIN,
+        clientID: process.env.CLOUDRON_OIDC_CLIENT_ID,
+        clientSecret: process.env.CLOUDRON_OIDC_CLIENT_SECRET,
+        secret: 'FIXME this secret',
+        authorizationParams: {
+            response_type: 'code',
+            scope: 'openid profile email'
+        },
+        authRequired: false,
+        routes: {
+            callback: '/api/v1/oidc/callback',
+            login: false,
+            logout: '/api/v1/oidc/logout'
+        }
+    }));
     app.use(router);
     app.use('/', express.static(path.resolve(__dirname, '../dist')));
 

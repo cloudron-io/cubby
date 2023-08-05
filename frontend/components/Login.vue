@@ -1,67 +1,28 @@
 <template>
-    <div class="container">
-        <form @submit="onLogin" @submit.prevent>
-            <h1>Login to Cubby</h1>
-            <div class="p-fluid">
-                <div class="p-field">
-                    <label for="usernameInput">Username</label>
-                    <InputText id="usernameInput" type="text" v-model="username" :class="{ 'p-invalid': error }" autofocus/>
-                </div>
-                <div class="p-field">
-                    <label for="passwordInput">Password</label>
-                    <Password id="passwordInput" :feedback="false" v-model="password" :class="{ 'p-invalid': error }"/>
-                    <small v-show="error" :class="{ 'p-invalid': error }">Wrong username or password.</small>
-                </div>
-            </div>
-            <Button type="submit" label="Login" id="loginButton"/>
-        </form>
+  <div class="container">
+    <div class="left">
+      <img src="/public/logo-plain.svg" style="width: 50%"/>
+      <div class="footer">
+        by <a href="https://cloudron.io" target="_blank">Cloudron</a>
+      </div>
     </div>
+    <div class="right">
+      <h1>Login to Cubby</h1>
+      <a :href="apiOrigin + '/api/v1/oidc/login'"><Button label="Login" id="loginButton"/></a>
+    </div>
+  </div>
 </template>
 
 <script>
 
-import superagent from 'superagent';
-
 const API_ORIGIN = import.meta.env.VITE_API_ORIGIN ? import.meta.env.VITE_API_ORIGIN : '';
 
 export default {
-    name: 'Login',
-    emits: [ 'success' ],
+    name: 'LoginView',
     data() {
-        return {
-            username: '',
-            password: '',
-            error: false,
-            busy: false
-        };
-    },
-    methods: {
-        onLogin() {
-            var that = this;
-
-            that.error = false;
-            that.busy = true;
-
-            superagent.post(API_ORIGIN + '/api/v1/login', { username: this.username, password: this.password }).end(function (error, result) {
-                that.busy = false;
-
-                if (error && error.status === 403) {
-                    that.error = 'Invalid username or password';
-                    that.password = '';
-                    return;
-                }
-                if (error) return console.error(error);
-
-                that.$emit('success', result.body.user);
-
-                that.username = '';
-                that.password = '';
-            });
-        }
-    },
-    mounted() {
-        // TODO check if valid session then redirect to /
-        setTimeout(function () { document.getElementById('usernameInput').focus(); }, 0);
+      return {
+        apiOrigin: API_ORIGIN,
+      };
     }
 };
 
@@ -70,9 +31,54 @@ export default {
 <style scoped>
 
 .container {
-    max-width: 480px;
-    margin: auto;
-    padding: 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.left {
+  background: linear-gradient(90deg, rgb(168, 85, 247) 0%,rgb(33, 150, 243) 100%);
+  flex-grow: 1;
+  display: none;
+  max-width: 40%;
+  align-items: center;
+  align-content: center;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+@media (min-width:320px) {
+  .left {
+    display: flex;
+  }
+}
+
+.right {
+  background-color: white;
+  align-self: stretch;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 40px;
+  margin: auto;
+  white-space: nowrap;
+}
+
+.footer {
+  color: white;
+  width: 100%;
+  font-size: 12px;
+  padding: 5px;
+}
+
+.footer a {
+  color: white;
+}
+
+.footer a:hover,
+.footer a:active {
+  color: white;
+  text-decoration: underline;
 }
 
 </style>

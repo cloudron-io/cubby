@@ -1,6 +1,7 @@
 'use strict';
 
 exports = module.exports = {
+    isAuthenticated,
     login,
     logout,
     tokenAuth,
@@ -17,6 +18,21 @@ var assert = require('assert'),
     diskusage = require('../diskusage.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
+
+async function isAuthenticated(req, res, next) {
+    if (!req.oidc.isAuthenticated()) return next(new HttpError(401, 'Unauthorized'));
+
+    console.log('---', req.oidc)
+
+    try {
+        req.user = await users.get(req.oidc.user.sub);
+        if (!req.user) return next(new HttpError(401, 'Invalid login session'));
+    } catch (error) {
+        return next(new HttpError(500, error));
+    }
+
+    next();
+}
 
 async function login(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
