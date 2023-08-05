@@ -65,8 +65,8 @@ function init(callback) {
         // skip: function (req, res) { return res.statusCode < 400; }
     }));
 
-    // currently for local development. vite runs on 5173
-    if (!process.env.CLOUDRON) app.use(cors({ origins: [ '*' ], allowCredentials: true }))
+    // currently for local development. vite runs on http://localhost:5173
+    app.use(cors({ origins: [ '*' ], allowCredentials: true }))
 
     app.use(session(sessionOptions));
 
