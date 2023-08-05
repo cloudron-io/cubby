@@ -19,16 +19,13 @@ RUN mkdir -p /usr/local/node-$NODE_VERSION && \
     curl -L https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz | tar zxf - --strip-components 1 -C /usr/local/node-$NODE_VERSION
 ENV PATH /usr/local/node-$NODE_VERSION/bin:$PATH
 
-COPY frontend /app/code/frontend
-COPY public /app/code/public
-COPY migrations /app/code/migrations
-COPY backend /app/code/backend
-COPY package.json package-lock.json \
-     start.sh vue.config.js babel.config.js app.js cli.js \
-     /app/code/
+COPY . /app/code
 
-RUN npm install \
-    && npm run build
+RUN npm install
+RUN npm run build
+
+# for development
+# RUN ./node_modules/.bin/vite build --sourcemap=inline
 
 CMD [ "/app/code/start.sh" ]
 
