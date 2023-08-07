@@ -20,12 +20,22 @@ var assert = require('assert'),
     HttpSuccess = require('connect-lastmile').HttpSuccess;
 
 async function isAuthenticated(req, res, next) {
-    if (!req.oidc.isAuthenticated()) return next(new HttpError(401, 'Unauthorized'));
+    let username;
 
-    console.log('---', req.oidc)
+    // logic to allow access for local develop without login by setting DEV_USERNAME
+    if (req.headers.origin === 'http://localhost:5173') {
+        console.log('Local develop access');
+        if (process.env.DEV_USERNAME) username = process.env.DEV_USERNAME;
+        else console.log('Set DEV_USERNAME to the intended dev username to continue');
+    }
+
+    if (!username) {
+        if (!req.oidc.isAuthenticated()) return next(new HttpError(401, 'Unauthorized'));
+        username = req.oidc.user.sub;
+    }
 
     try {
-        req.user = await users.get(req.oidc.user.sub);
+        req.user = await users.get(username);
         if (!req.user) return next(new HttpError(401, 'Invalid login session'));
     } catch (error) {
         return next(new HttpError(500, error));
