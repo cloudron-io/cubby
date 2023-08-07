@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="left">
-      <img src="/public/logo-plain.svg" style="width: 50%"/>
+      <img src="/logo-plain.svg" style="width: 50%"/>
       <div class="footer">
         by <a href="https://cloudron.io" target="_blank">Cloudron</a>
       </div>

@@ -10,11 +10,11 @@
 
   <div class="container" v-show="ready && profile.username">
     <div class="sidebar">
-      <h1 style="margin-bottom: 50px; text-align: center;"><img src="/logo.png" height="60" width="60"/><br/>Cubby</h1>
+      <h1 style="margin-bottom: 50px; text-align: center;"><img src="/logo-plain.svg" height="60" width="60"/><br/>Cubby</h1>
 
-      <Button icon="pi pi-folder-open" class="p-button-text p-button-primary" label="All Files" @click="showAllFiles"/>
-      <Button icon="pi pi-clock" class="p-button-text p-button-primary" label="Recent Files" @click="showAllRecent"/>
-      <Button icon="pi pi-share-alt" class="p-button-text p-button-primary" label="Shared With You" @click="showAllShares"/>
+      <div class="sidebar-entry" @click="showAllFiles"><i class="pi pi-folder-open"></i> All Files</div>
+      <div class="sidebar-entry" @click="showAllRecent"><i class="pi pi-clock"></i> Recent Files</div>
+      <div class="sidebar-entry" @click="showAllShares"><i class="pi pi-share-alt"></i> Shared With You</div>
 
       <div style="flex-grow: 1">&nbsp;</div>
 
@@ -978,10 +978,25 @@ label {
     display: flex;
     height: 100%;
     width: 250px;
-    background-color: #E8E8E8;
-    color: #607D8B;
+    background: linear-gradient(90deg, rgb(168, 85, 247) 0%,rgb(33, 150, 243) 100%);
+    color: white;
     padding: 10px;
     flex-direction: column;
+}
+
+.sidebar-entry {
+  cursor: pointer;
+  padding: 10px;
+  padding-left: 20px;
+  border-radius: 3px;
+}
+
+.sidebar-entry:hover {
+  background-color: rgba(255,255,255,0.2);
+}
+
+.sidebar-entry > i {
+  padding-right: 10px;
 }
 
 .content {
