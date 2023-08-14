@@ -74,6 +74,8 @@ function init(callback) {
     router.del = router.delete; // amend router.del for readability further on
 
     function oidcLogin(req, res) {
+        if (process.env.LOCAL_DEVELOP) return res.redirect('http://localhost:5173');
+
         res.oidc.login({
             returnTo: '/',
             authorizationParams: {
@@ -150,23 +152,27 @@ function init(callback) {
     app.use('/api', bodyParser.json());
     app.use('/api', bodyParser.urlencoded({ extended: false, limit: '100mb' }));
     app.use(webdav.express());
-    app.use(oidc.auth({
-        issuerBaseURL: process.env.CLOUDRON_OIDC_ISSUER,
-        baseURL: process.env.CLOUDRON_APP_ORIGIN,
-        clientID: process.env.CLOUDRON_OIDC_CLIENT_ID,
-        clientSecret: process.env.CLOUDRON_OIDC_CLIENT_SECRET,
-        secret: 'FIXME this secret',
-        authorizationParams: {
-            response_type: 'code',
-            scope: 'openid profile email'
-        },
-        authRequired: false,
-        routes: {
-            callback: '/api/v1/oidc/callback',
-            login: false,
-            logout: '/api/v1/oidc/logout'
-        }
-    }));
+
+    if (!process.env.LOCAL_DEVELOP) {
+        app.use(oidc.auth({
+            issuerBaseURL: process.env.CLOUDRON_OIDC_ISSUER,
+            baseURL: process.env.CLOUDRON_APP_ORIGIN,
+            clientID: process.env.CLOUDRON_OIDC_CLIENT_ID,
+            clientSecret: process.env.CLOUDRON_OIDC_CLIENT_SECRET,
+            secret: 'FIXME this secret',
+            authorizationParams: {
+                response_type: 'code',
+                scope: 'openid profile email'
+            },
+            authRequired: false,
+            routes: {
+                callback: '/api/v1/oidc/callback',
+                login: false,
+                logout: '/api/v1/oidc/logout'
+            }
+        }));
+    }
+
     app.use(router);
     app.use('/', express.static(path.resolve(__dirname, '../dist')));
 

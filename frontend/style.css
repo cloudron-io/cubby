@@ -56,7 +56,6 @@ a:hover {
 .main-container-content {
     overflow: scroll;
     flex-grow: 1;
-    padding: 0 10px;
 }
 
 .main-container-footer {

@@ -24,6 +24,9 @@ while true; do
     esac
 done
 
+export DEV_USERNAME="admin"
+export LOCAL_DEVELOP="true"
+
 # create the same postgres server version to test with
 CONTAINER_NAME="postgres-server-cubby"
 
@@ -67,6 +70,10 @@ echo "=> Ensure admin account with admin:admin"
 
 echo "=> Ensure test account with test:test"
 ./cli.js user-add --username test --password test --email test@server.local --display-name Tester || true
+
+echo ""
+echo "Run 'VITE_API_ORIGIN="http://localhost:3000" npm run dev' in a second tab"
+echo ""
 
 echo "=> Start cubby"
 ./app.js

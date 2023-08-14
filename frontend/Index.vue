@@ -30,7 +30,7 @@
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
-          <EntryList :entries="entries" :sort-folders-first="true" :editable="!isReadonly()" :shareable="isShareable()" :active="viewer === ''"
+<!--           <EntryList :entries="entries" :sort-folders-first="true" :editable="!isReadonly()" :shareable="isShareable()" :active="viewer === ''"
             @entry-shared="onShare"
             @entry-renamed="onRename"
             @entry-activated="onOpen"
@@ -38,6 +38,32 @@
             @download="onDownload"
             @selection-changed="onSelectionChanged"
             @dropped="onDrop"
+          /> -->
+          <DirectoryView
+            :show-owner="true"
+            :show-size="true"
+            :show-modified="true"
+            @selection-changed="onSelectionChanged"
+            @item-activated="onItemActivated"
+            :delete-handler="deleteHandler"
+            :rename-handler="renameHandler"
+            :change-owner-handler="changeOwnerHandler"
+            :copy-handler="copyHandler"
+            :cut-handler="cutHandler"
+            :paste-handler="pasteHandler"
+            :download-handler="downloadHandler"
+            :extract-handler="extractHandler"
+            :new-file-handler="onNewFile"
+            :new-folder-handler="onNewFolder"
+            :upload-file-handler="onUploadFile"
+            :upload-folder-handler="onUploadFolder"
+            :drop-handler="onDrop"
+            :items="entries"
+            :clipboard="clipboard"
+            :owners-model="ownersModel"
+            :fallback-icon="`${BASE_URL}mime-types/none.svg`"
+            :tr="$t"
+            style="position: absolute;"
           />
         </div>
         <SideBar :selectedEntries="selectedEntries" :visible="sideBarVisible"/>
@@ -167,23 +193,26 @@ import superagent from 'superagent';
 import async from 'async';
 import { parseResourcePath, decode, getExtension, getShareLink, copyToClipboard, sanitize, download, getDirectLink, prettyFileSize } from './utils.js';
 
-import { TextEditor, ImageViewer } from 'pankow';
+import { TextEditor, ImageViewer, DirectoryView } from 'pankow';
 import { createDirectoryModel, DirectoryModelError } from './models/DirectoryModel.js';
 import { createMainModel } from './models/MainModel.js';
 
 import MainToolbar from './components/MainToolbar.vue';
 
 const API_ORIGIN = import.meta.env.VITE_API_ORIGIN ? import.meta.env.VITE_API_ORIGIN : '';
+const BASE_URL = import.meta.env.BASE_URL || '/';
 
 export default {
     name: 'IndexView',
     components: {
+      DirectoryView,
       ImageViewer,
       MainToolbar,
       TextEditor
     },
     data() {
       return {
+        BASE_URL,
         ready: false,
         busy: true,
         mainModel: null,
@@ -199,6 +228,10 @@ export default {
           done: 0,
           size: 0,
           percentDone: 0
+        },
+        clipboard: {
+          action: '', // copy or cut
+          files: []
         },
         error: '',
         entries: [],
