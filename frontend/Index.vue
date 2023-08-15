@@ -178,10 +178,10 @@
 
   <div class="viewer-container" v-show="viewer">
     <ImageViewer ref="imageViewer" @close="onViewerClose" @download="onDownload" v-show="viewer === 'image'" />
-    <TextEditor ref="textEditor" @close="onViewerClose" @saved="onFileSaved" v-show="viewer === 'text'" />
+    <!-- <TextEditor ref="textEditor" @close="onViewerClose" @saved="onFileSaved" v-show="viewer === 'text'" /> -->
     <!-- <PdfViewer ref="pdfViewer" @close="onViewerClose" v-show="viewer === 'pdf'" /> -->
     <!-- <OfficeViewer ref="officeViewer" :config="config.viewers.collabora" @close="onViewerClose" v-show="viewer === 'office'" /> -->
-    <GenericViewer ref="genericViewer" @close="onViewerClose" v-show="viewer === 'generic'" />
+    <!-- <GenericViewer ref="genericViewer" @close="onViewerClose" v-show="viewer === 'generic'" /> -->
   </div>
 </template>
 
@@ -870,8 +870,7 @@ export default {
           } else {
             if (this.$refs.imageViewer.canHandle(entry)) {
               const otherSupportedEntries = this.entries.filter((e) => this.$refs.imageViewer.canHandle(e)).map((e) => {
-                e.resourceUrl = `/viewer/${this.resourceType}/${this.resourceId}${e.folderPath}/${e.fileName}`;
-                e.fullFileUrl = getDirectLink(e);
+                e.resourceUrl = `/viewer/${resource.apiPath}/${e.folderPath}/${e.fileName}`;
                 return e;
               });
 

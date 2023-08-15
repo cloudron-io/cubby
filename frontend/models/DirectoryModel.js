@@ -42,10 +42,6 @@ export function createDirectoryModel(origin) {
 
       const entry = result.body;
 
-      entry.files.forEach(e => {
-        e.previewUrl = origin + e.previewUrl;
-      });
-
       // extension: ""
       // fileName: "Accounting"
       // filePath: "/Accounting"
@@ -64,13 +60,26 @@ export function createDirectoryModel(origin) {
       // sharedWith: Array []
       // size: 164720946
 
+      // translate for pankow
+      entry.name = entry.fileName;
+      entry.folderPath = path.slice(-entry.fileName.length);
+      entry.previewUrl = origin + entry.previewUrl;
+      entry.fullFileUrl = `${origin}/api/v1/${resource}?path=${entry.filePath}&type=raw`;
+      entry.modified = new Date(entry.mtime);
+      entry.type = entry.isDirectory ? 'directory' : 'file',
+      entry.icon = entry.previewUrl;
+      // entry.resourceUrl = `/viewer/${resource}/${this.resourceId}${e.folderPath}/${e.fileName}`;
+
       // this prepares the entries to be compatible with all components
-      entry.files.forEach(item => {
-        item.name = item.fileName;
-        item.folderPath = path;
-        item.modified = new Date(item.mtime);
-        item.type = item.isDirectory ? 'directory' : 'file',
-        item.icon = item.previewUrl;
+      entry.files.forEach(child => {
+        child.name = child.fileName;
+        child.folderPath = entry.folderPath.slice(-child.fileName.length);
+        child.previewUrl = origin + child.previewUrl;
+        child.fullFileUrl = `${origin}/api/v1/${resource}?path=${child.filePath}&type=raw`;
+        child.modified = new Date(child.mtime);
+        child.type = child.isDirectory ? 'directory' : 'file',
+        child.icon = child.previewUrl;
+        child.resourceUrl = '';
 
         // if we have an image, attach previewUrl
         // if (item.mimeType.indexOf('image/') === 0) {
