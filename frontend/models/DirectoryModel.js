@@ -128,6 +128,14 @@ export function createDirectoryModel(origin) {
         throw new DirectoryModelError(DirectoryModelError.GENERIC, error);
       }
     },
+    async remove(resource, filePath) {
+      try {
+        await superagent.del(`${origin}/api/v1/${resource.apiPath}`).query({ path: filePath }).withCredentials();
+      } catch (error) {
+        if (error.status === 401) throw new DirectoryModelError(DirectoryModelError.NO_AUTH, error);
+        throw new DirectoryModelError(DirectoryModelError.GENERIC, error);
+      }
+    },
     async copy(resource, fromFilePath, newFilePath) {
       try {
         await superagent.put(`${origin}/api/v1/${resource.apiPath}`).query({ path: fromFilePath, action: 'copy', new_path: newFilePath }).withCredentials();

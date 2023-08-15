@@ -232,6 +232,7 @@ export default {
         },
         error: '',
         pasteInProgress: false,
+        deleteInProgress: false,
         entries: [],
         selectedEntries: [],
         currentPath: '/',
@@ -352,48 +353,48 @@ export default {
         window.removeEventListener('beforeunload', beforeUnloadListener, { capture: true });
         this.pasteInProgress = false;
       },
-        async onSaveNewFileDialog() {
-            const path = sanitize(this.currentPath + '/' + this.newFileDialog.fileName);
-            const resource = parseResourcePath(this.currentResourcePath || 'files/');
-
-            try {
-              await this.directoryModel.newFile(resource, path);
-            } catch (error) {
-              if (error.reason === DirectoryModelError.NO_AUTH) this.onLogout();
-              else if (error.reason === DirectoryModelError.NOT_ALLOWED) this.newFileDialog.error = 'File name not allowed';
-              else if (error.reason === DirectoryModelError.CONFLICT) this.newFileDialog.error = 'File already exists';
-              else {
-                this.newFolderDialog.error = 'Unkown error, check logs';
-                console.error('Failed to add file, unknown error:', error)
-              }
-
-              return;
-            }
-
-            this.refresh();
-            this.newFileDialog.visible = false;
-        },
-        async onSaveNewFolderDialog() {
-          const path = sanitize(this.currentPath + '/' + this.newFolderDialog.folderName);
+      async onSaveNewFileDialog() {
+          const path = sanitize(this.currentPath + '/' + this.newFileDialog.fileName);
           const resource = parseResourcePath(this.currentResourcePath || 'files/');
 
           try {
-            await this.directoryModel.newFolder(resource, path);
+            await this.directoryModel.newFile(resource, path);
           } catch (error) {
             if (error.reason === DirectoryModelError.NO_AUTH) this.onLogout();
-            else if (error.reason === DirectoryModelError.NOT_ALLOWED) this.newFolderDialog.error = 'Folder name not allowed';
-            else if (error.reason === DirectoryModelError.CONFLICT) this.newFolderDialog.error = 'Folder already exists';
+            else if (error.reason === DirectoryModelError.NOT_ALLOWED) this.newFileDialog.error = 'File name not allowed';
+            else if (error.reason === DirectoryModelError.CONFLICT) this.newFileDialog.error = 'File already exists';
             else {
               this.newFolderDialog.error = 'Unkown error, check logs';
-              console.error('Failed to add folder, unknown error:', error)
+              console.error('Failed to add file, unknown error:', error)
             }
 
             return;
           }
 
           this.refresh();
-          this.newFolderDialog.visible = false;
-        },
+          this.newFileDialog.visible = false;
+      },
+      async onSaveNewFolderDialog() {
+        const path = sanitize(this.currentPath + '/' + this.newFolderDialog.folderName);
+        const resource = parseResourcePath(this.currentResourcePath || 'files/');
+
+        try {
+          await this.directoryModel.newFolder(resource, path);
+        } catch (error) {
+          if (error.reason === DirectoryModelError.NO_AUTH) this.onLogout();
+          else if (error.reason === DirectoryModelError.NOT_ALLOWED) this.newFolderDialog.error = 'Folder name not allowed';
+          else if (error.reason === DirectoryModelError.CONFLICT) this.newFolderDialog.error = 'Folder already exists';
+          else {
+            this.newFolderDialog.error = 'Unkown error, check logs';
+            console.error('Failed to add folder, unknown error:', error)
+          }
+
+          return;
+        }
+
+        this.refresh();
+        this.newFolderDialog.visible = false;
+      },
       onSelectionChanged(selectedEntries) {
         this.selectedEntries = selectedEntries;
       },
@@ -458,82 +459,71 @@ export default {
             download(entries, this.currentShare ? this.currentShare.filePath.slice(1) : '');
         },
         onDrop(items, targetEntry) {
-            var that = this;
+          var that = this;
 
-            if (items.length === 0) return;
+          if (items.length === 0) return;
 
-            const list = [];
-            for (let i = 0; i < items.length; i++) list.push(items[i]);
+          const list = [];
+          for (let i = 0; i < items.length; i++) list.push(items[i]);
 
-            // figure if a folder was dropped on a modern browser, in this case the first would have to be a directory
-            var folderItem;
-            var targetPath = targetEntry ? (that.currentResourcePath + targetEntry.filePath) : null;
-            try {
-                folderItem = list[0].webkitGetAsEntry();
-                if (folderItem.isFile) return that.uploadFiles(list.map(function (item) { return item.getAsFile(); }), targetPath);
-            } catch (e) {
-                return that.uploadFiles(list.map(function (item) { return item.getAsFile(); }), targetPath);
+          // figure if a folder was dropped on a modern browser, in this case the first would have to be a directory
+          var folderItem;
+          var targetPath = targetEntry ? (that.currentResourcePath + targetEntry.filePath) : null;
+          try {
+            folderItem = list[0].webkitGetAsEntry();
+            if (folderItem.isFile) return that.uploadFiles(list.map(function (item) { return item.getAsFile(); }), targetPath);
+          } catch (e) {
+            return that.uploadFiles(list.map(function (item) { return item.getAsFile(); }), targetPath);
+          }
+
+          // if we got here we have a folder drop and a modern browser
+          // now traverse the folder tree and create a file list
+          const files = [];
+          function traverseFileTree(item, path, callback) {
+            if (item.isFile) {
+              // Get file
+              item.file(function (file) {
+                files.push(file);
+                callback();
+              });
+            } else if (item.isDirectory) {
+              // Get folder contents
+              var dirReader = item.createReader();
+              dirReader.readEntries(function (entries) {
+                async.each(entries, function (entry, callback) {
+                  traverseFileTree(entry, path + item.name + '/', callback);
+                }, callback);
+              });
             }
+          }
 
-            // if we got here we have a folder drop and a modern browser
-            // now traverse the folder tree and create a file list
-            const files = [];
-            function traverseFileTree(item, path, callback) {
-                if (item.isFile) {
-                    // Get file
-                    item.file(function (file) {
-                        files.push(file);
-                        callback();
-                    });
-                } else if (item.isDirectory) {
-                    // Get folder contents
-                    var dirReader = item.createReader();
-                    dirReader.readEntries(function (entries) {
-                        async.each(entries, function (entry, callback) {
-                            traverseFileTree(entry, path + item.name + '/', callback);
-                        }, callback);
-                    });
-                }
-            }
+          const resource = parseResourcePath(this.currentResourcePath);
+          traverseFileTree(folderItem, '', (error) => {
+            if (error) return console.error(error);
 
-            const resource = parseResourcePath(this.currentResourcePath);
-            traverseFileTree(folderItem, '', (error) => {
-              if (error) return console.error(error);
-
-              this.$refs.fileUploader.addFiles(files, resource.resourcePath);
-            });
+            this.$refs.fileUploader.addFiles(files, resource.resourcePath);
+          });
         },
-        onDelete(entries) {
-            var that = this;
+        async deleteHandler(entries) {
+          if (!entries) return;
 
-            if (!entries) entries = this.selectedEntries;
+          window.addEventListener('beforeunload', beforeUnloadListener, { capture: true });
+          this.deleteInProgress = true;
 
-            this.$confirm.require({
-                target: event.target,
-                header: 'Delete Confirmation',
-                message: 'Really delete',
-                icon: 'pi pi-exclamation-triangle',
-                acceptClass: 'p-button-danger',
-                accept: () => {
-                    async.eachSeries(entries, function (entry, callback) {
-                        var resource = parseResourcePath(that.currentResourcePath + '/' + entry.fileName);
+          const resource = parseResourcePath(this.currentResourcePath);
 
-                        superagent.del(resource.apiPath).query({ path: resource.path }).end(function (error, result) {
-                            if (result && result.statusCode === 401) return that.logout();
-                            if (result && result.statusCode !== 200) console.error('Error deleting entry.', entry);
-                            if (error) console.error(error.message);
+          for (let i in entries) {
+            try {
+              await this.directoryModel.remove(resource, entries[i].filePath);
+            } catch (e) {
+              console.error(`Failed to remove file ${entries[i].name}:`, e);
+            }
+          }
 
-                            // we currently don't fail on first failure
-                            callback();
-                        });
-                    }, function (error) {
-                        if (error) console.error('Failed to delete entries.', entries, error);
+          await this.refresh();
 
-                        that.refresh();
-                    });
-                },
-                reject: () => {}
-            });
+          window.removeEventListener('beforeunload', beforeUnloadListener, { capture: true });
+          this.deleteInProgress = false;
         },
         onRename(entry, newFileName) {
             var that = this;
