@@ -111,7 +111,18 @@ export function createDirectoryModel(origin) {
         else if (error.status === 409) throw new DirectoryModelError(DirectoryModelError.CONFLICT, error);
         throw new DirectoryModelError(DirectoryModelError.GENERIC, error);
       }
-    }
+    },
+    async upload(resource, file, progressHandler) {
+      console.log('DirectoryModel: upload', resource, file)
+
+      // file may contain a file name or a file path + file name
+      const relativefilePath = (file.webkitRelativePath ? file.webkitRelativePath : file.name);
+
+      await superagent.post(`${origin}/api/v1/${resource.apiPath}`).withCredentials()
+        .query({ path: sanitize(resource.path + '/' + relativefilePath), overwrite: !!file.overwrite })
+        .attach('file', file)
+        .on('progress', progressHandler);
+    },
   };
 }
 

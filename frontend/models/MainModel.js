@@ -39,6 +39,13 @@ export function createMainModel(origin) {
           collabora: result.body.viewers.collabora || {}
         }
       };
+    },
+    async logout() {
+      try {
+        await superagent.get('/api/v1/logout').withCredentials();
+      } catch (e) {
+        console.error('Error logging out', e);
+      }
     }
   };
 }

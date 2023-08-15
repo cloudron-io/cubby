@@ -1,7 +1,4 @@
 <template>
-  <input type="file" ref="uploadFile" style="display: none" multiple/>
-  <input type="file" ref="uploadFolder" style="display: none" multiple webkitdirectory directory/>
-
   <!-- This is re-used and thus global -->
   <ConfirmDialog></ConfirmDialog>
   <Toast position="top-center" />
@@ -62,16 +59,16 @@
             :clipboard="clipboard"
             :owners-model="ownersModel"
             :fallback-icon="`${BASE_URL}mime-types/none.svg`"
-            :tr="$t"
             style="position: absolute;"
           />
         </div>
         <SideBar :selectedEntries="selectedEntries" :visible="sideBarVisible"/>
       </div>
-      <div class="upload" v-show="uploadStatus.busy">
-        <div style="margin-right: 10px;">Uploading {{ uploadStatus.queue.length+1 }} files ({{ Math.round(uploadStatus.done/1000/1000) }}MB / {{ Math.round(uploadStatus.size/1000/1000) }}MB)</div>
-        <ProgressBar :value="uploadStatus.percentDone">{{uploadStatus.percentDone}}%</ProgressBar>
-      </div>
+      <FileUploader
+        ref="fileUploader"
+        :upload-handler="uploadHandler"
+        @finished="onUploadFinished"
+      />
     </div>
   </div>
 
@@ -193,7 +190,7 @@ import superagent from 'superagent';
 import async from 'async';
 import { parseResourcePath, decode, getExtension, getShareLink, copyToClipboard, sanitize, download, getDirectLink, prettyFileSize } from './utils.js';
 
-import { TextEditor, ImageViewer, DirectoryView } from 'pankow';
+import { TextEditor, ImageViewer, DirectoryView, FileUploader } from 'pankow';
 import { createDirectoryModel, DirectoryModelError } from './models/DirectoryModel.js';
 import { createMainModel } from './models/MainModel.js';
 
@@ -208,7 +205,8 @@ export default {
       DirectoryView,
       ImageViewer,
       MainToolbar,
-      TextEditor
+      TextEditor,
+      FileUploader
     },
     data() {
       return {
@@ -222,13 +220,6 @@ export default {
         profile: {},
         config: {},
         viewers: [],
-        uploadStatus: {
-          busy: false,
-          queue: [],
-          done: 0,
-          size: 0,
-          percentDone: 0
-        },
         clipboard: {
           action: '', // copy or cut
           files: []
@@ -280,43 +271,50 @@ export default {
       showAllFiles() {
         window.location.hash = 'files/';
       },
-        onLogout() {
-            var that = this;
+      async uploadHandler(targetDir, file, progressHandler) {
+        const resource = parseResourcePath(targetDir);
+        await this.directoryModel.upload(resource, file, progressHandler);
+        this.refresh();
+      },
+      async onLogout() {
+        await this.mainModel.logout();
 
-            superagent.get('/api/v1/logout').end(function (error) {
-                if (error) return console.error(error.message);
+        this.profile.username = '';
+        this.profile.email = '';
+        this.profile.displayName = '';
+        this.profile.diskusage = {
+          used: 0,
+          size: 0,
+          available: 0
+        };
+      },
+      async onLoggedIn() {
+        this.profile = await this.mainModel.getProfile();
+        this.config = await this.mainModel.getConfig();
 
-                that.profile.username = '';
-                that.profile.email = '';
-                that.profile.displayName = '';
-                that.profile.diskusage = {
-                    used: 0,
-                    size: 0,
-                    available: 0
-                };
-            });
-        },
-        async onLoggedIn() {
-            this.profile = await this.mainModel.getProfile();
-            this.config = await this.mainModel.getConfig();
-
-            this.loadPath(window.location.hash.slice(1), true);
-        },
-        onUploadFile() {
-            // reset the form first to make the change handler retrigger even on the same file selected
-            this.$refs.uploadFile.value = '';
-            this.$refs.uploadFile.click();
-        },
-        onNewFile() {
-            this.newFileDialog.error = '';
-            this.newFileDialog.fileName = '';
-            this.newFileDialog.visible = true;
-        },
-        onNewFolder() {
-            this.newFolderDialog.error = '';
-            this.newFolderDialog.folderName = '';
-            this.newFolderDialog.visible = true;
-        },
+        this.loadPath(window.location.hash.slice(1), true);
+      },
+      onUploadFinished() {
+        this.refresh();
+      },
+      onUploadFile() {
+        const resource = parseResourcePath(this.currentResourcePath || 'files/');
+        this.$refs.fileUploader.onUploadFile(resource.resourcePath);
+      },
+      onUploadFolder() {
+        const resource = parseResourcePath(this.currentResourcePath || 'files/');
+        this.$refs.fileUploader.onUploadFolder(resource.resourcePath);
+      },
+      onNewFile() {
+          this.newFileDialog.error = '';
+          this.newFileDialog.fileName = '';
+          this.newFileDialog.visible = true;
+      },
+      onNewFolder() {
+          this.newFolderDialog.error = '';
+          this.newFolderDialog.folderName = '';
+          this.newFolderDialog.visible = true;
+      },
         async onSaveNewFileDialog() {
             const path = sanitize(this.currentPath + '/' + this.newFileDialog.fileName);
             const resource = parseResourcePath(this.currentResourcePath || 'files/');
@@ -359,17 +357,12 @@ export default {
           this.refresh();
           this.newFolderDialog.visible = false;
         },
-        onUploadFolder() {
-            // reset the form first to make the change handler retrigger even on the same file selected
-            this.$refs.uploadFolder.value = '';
-            this.$refs.uploadFolder.click();
-        },
-        onSelectionChanged(selectedEntries) {
-            this.selectedEntries = selectedEntries;
-        },
-        onToggleSideBar() {
-            this.sideBarVisible = !this.sideBarVisible;
-        },
+      onSelectionChanged(selectedEntries) {
+        this.selectedEntries = selectedEntries;
+      },
+      onToggleSideBar() {
+        this.sideBarVisible = !this.sideBarVisible;
+      },
         onFileSaved(entry, content, done) {
             var that = this;
 
@@ -384,106 +377,9 @@ export default {
                 if (typeof done === 'function') done();
             });
         },
-        clearSelection() {
-          this.selectedEntries = [];
-        },
-        uploadFile(file, fullTargetPath, callback) {
-            var that = this;
-
-            if (file.skip) {
-                // FIXME maybe refactor this calculation
-                that.uploadStatus.done += file.size;
-                var tmp = Math.round(that.uploadStatus.done / that.uploadStatus.size * 100);
-                that.uploadStatus.percentDone = tmp > 100 ? 100 : tmp;
-
-                return callback();
-            }
-
-            var formData = new FormData();
-            formData.append('file', file);
-
-            var finishedUploadSize = 0;
-
-            superagent.post(file.apiPath)
-              .query({ path: fullTargetPath, overwrite: !!file.overwrite })
-              .send(formData)
-              .on('progress', function (event) {
-                // only handle upload events
-                if (!(event.target instanceof XMLHttpRequestUpload)) return;
-
-                that.uploadStatus.done += event.loaded - finishedUploadSize;
-                // keep track of progress diff not absolute
-                finishedUploadSize = event.loaded;
-
-                var tmp = Math.round(that.uploadStatus.done / that.uploadStatus.size * 100);
-                that.uploadStatus.percentDone = tmp > 100 ? 100 : tmp;
-            }).end(function (error, result) {
-                if (result && result.statusCode === 401) return that.logout();
-                if (result && result.statusCode !== 200) console.error('Error uploading file:', result.statusCode);
-                if (error) console.error('Error uploading file:', error);
-
-                callback();
-            });
-        },
-        uploadNext() {
-            var that = this;
-
-            if (that.uploadStatus.queue.length === 0) {
-                that.uploadStatus.busy = false;
-                that.uploadStatus.size = 0;
-                that.uploadStatus.done = 0;
-                that.uploadStatus.percentDone = 0;
-
-                that.refresh();
-
-                return;
-            }
-
-            that.uploadStatus.busy = true;
-
-            var file = that.uploadStatus.queue.pop();
-            var resource = parseResourcePath(file.targetPath);
-            var fullTargetPath = sanitize(resource.path + '/' + (file.webkitRelativePath || file.name));
-
-            // amend info for uploadFile
-            file.apiType = resource.type;
-            file.apiPath = resource.apiPath;
-            file.shareId = resource.shareId;
-
-            // check first for conflict to avoid double upload
-            superagent.head(resource.apiPath).query({ path: fullTargetPath }).end(function (error, result) {
-                if (result && result.statusCode === 401) return that.logout();
-
-                // This stops the uploadNext flow waiting for user input
-                if (result && result.statusCode === 200) {
-                    if (file.skip) {
-                        // FIXME maybe refactor this calculation
-                        that.uploadStatus.done += file.size;
-                        var tmp = Math.round(that.uploadStatus.done / that.uploadStatus.size * 100);
-                        that.uploadStatus.percentDone = tmp > 100 ? 100 : tmp;
-
-                        that.uploadNext();
-                    } else if (file.overwrite) {
-                        that.uploadFile(file, fullTargetPath, function (error) {
-                            if (error) return console.error(error);
-                            that.uploadNext();
-                        });
-                    } else {
-                        // FIXME: check why we need the timeout to give UI a chance to update
-                        setTimeout(function () { that.showConflictingFileDialog(file, fullTargetPath); }, 1000);
-                    }
-                    return;
-                }
-
-                if (error && error.status !== 404) console.error(error.message);
-
-                that.uploadFile(file, fullTargetPath, function (error) {
-                    if (error) return console.error(error);
-
-                    that.uploadNext();
-                });
-            });
-        },
+      clearSelection() {
+        this.selectedEntries = [];
+      },
         showConflictingFileDialog(file, path) {
             this.conflictingFileDialog.file = file;
             this.conflictingFileDialog.path = path;
@@ -517,27 +413,6 @@ export default {
                 // continue
                 that.uploadNext();
             });
-        },
-        uploadFiles(files, targetPath) {
-            var that = this;
-
-            if (!files || !files.length) return;
-
-            targetPath = targetPath || that.currentResourcePath;
-
-            // convert from FileList to Array and amend useful properties
-            files = Array.from(files).map(function (file) {
-                file.targetPath = targetPath;
-                return file;
-            });
-
-            // now collect stats for progress
-            files.forEach(function (file) {
-                that.uploadStatus.queue.push(file);
-                that.uploadStatus.size += file.size;
-            });
-
-            that.uploadNext();
         },
         onDownload(entries) {
             if (!entries) entries = this.selectedEntries;
@@ -584,10 +459,11 @@ export default {
                 }
             }
 
-            traverseFileTree(folderItem, '', function (error) {
-                if (error) return console.error(error);
+            const resource = parseResourcePath(this.currentResourcePath);
+            traverseFileTree(folderItem, '', (error) => {
+              if (error) return console.error(error);
 
-                that.uploadFiles(files, targetPath);
+              this.$refs.fileUploader.addFiles(files, resource.resourcePath);
             });
         },
         onDelete(entries) {
@@ -920,15 +796,6 @@ export default {
         },
     },
     async mounted() {
-      // upload input event handler
-      this.$refs.uploadFile.addEventListener('change', () => {
-        this.uploadFiles(this.$refs.uploadFile.files || []);
-      });
-
-      this.$refs.uploadFolder.addEventListener('change', function () {
-        this.uploadFiles(this.$refs.uploadFolder.files || []);
-      });
-
       window.addEventListener('hashchange', () => {
         const hash = window.location.hash.slice(1);
 
@@ -937,14 +804,6 @@ export default {
         else if (hash.indexOf('shares/') === 0) this.loadPath(hash);
         else window.location.hash = 'files/';
       }, false);
-
-      // warn the user if uploads are still in progress
-      window.addEventListener('beforeunload', (event) => {
-        if (!this.uploadStatus.busy) return;
-
-        event.preventDefault();
-        window.confirm('Uploads are still in progress. Please wait for them to finish.');
-      }, { capture: true });
 
       this.mainModel = createMainModel(API_ORIGIN);
 
