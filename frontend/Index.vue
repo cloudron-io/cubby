@@ -44,7 +44,7 @@
             :show-size="true"
             :show-modified="true"
             @selection-changed="onSelectionChanged"
-            @item-activated="onItemActivated"
+            @item-activated="onOpen"
             :delete-handler="deleteHandler"
             :rename-handler="renameHandler"
             :change-owner-handler="changeOwnerHandler"
