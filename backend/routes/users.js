@@ -20,14 +20,7 @@ var assert = require('assert'),
     HttpSuccess = require('connect-lastmile').HttpSuccess;
 
 async function isAuthenticated(req, res, next) {
-    let username;
-
-    // logic to allow access for local develop without login by setting DEV_USERNAME
-    if (req.headers.origin === 'http://localhost:5173') {
-        console.log('Local develop access');
-        if (process.env.DEV_USERNAME) username = process.env.DEV_USERNAME;
-        else console.log('Set DEV_USERNAME to the intended dev username to continue');
-    }
+    let username = process.env.LOCAL_DEVELOP_USERNAME || '';
 
     if (!username) {
         if (!req.oidc.isAuthenticated()) return next(new HttpError(401, 'Unauthorized'));
@@ -83,13 +76,20 @@ async function sessionAuth(req, res, next) {
 }
 
 async function optionalSessionAuth(req, res, next) {
-    if (!req.session || !req.session.username) {
+    let username = process.env.LOCAL_DEVELOP_USERNAME || '';
+
+    if (!username) {
+        if (!req.oidc.isAuthenticated()) return next(new HttpError(401, 'Unauthorized'));
+        username = req.oidc.user.sub;
+    }
+
+    if (!username) {
         req.user = null;
         return next();
     }
 
     try {
-        req.user = await users.get(req.session.username);
+        req.user = await users.get(username);
         if (!req.user) return next(new HttpError(401, 'Invalid login session'));
     } catch (error) {
         return next(new HttpError(500, error));

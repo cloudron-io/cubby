@@ -74,7 +74,7 @@ function init(callback) {
     router.del = router.delete; // amend router.del for readability further on
 
     function oidcLogin(req, res) {
-        if (process.env.LOCAL_DEVELOP) return res.redirect('http://localhost:5173');
+        if (process.env.LOCAL_DEVELOP_USERNAME) return res.redirect('http://localhost:5173');
 
         res.oidc.login({
             returnTo: '/',
@@ -153,7 +153,7 @@ function init(callback) {
     app.use('/api', bodyParser.urlencoded({ extended: false, limit: '100mb' }));
     app.use(webdav.express());
 
-    if (!process.env.LOCAL_DEVELOP) {
+    if (!process.env.LOCAL_DEVELOP_USERNAME) {
         app.use(oidc.auth({
             issuerBaseURL: process.env.CLOUDRON_OIDC_ISSUER,
             baseURL: process.env.CLOUDRON_APP_ORIGIN,
@@ -171,6 +171,8 @@ function init(callback) {
                 logout: '/api/v1/oidc/logout'
             }
         }));
+    } else {
+        console.log(`Local develop access with ${process.env.LOCAL_DEVELOP_USERNAME}`);
     }
 
     app.use(router);

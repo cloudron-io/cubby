@@ -46,8 +46,6 @@ export function createDirectoryModel(origin) {
         e.previewUrl = origin + e.previewUrl;
       });
 
-      console.log(entry.files)
-
       // extension: ""
       // fileName: "Accounting"
       // filePath: "/Accounting"
