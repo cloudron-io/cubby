@@ -2,8 +2,6 @@
 import superagent from 'superagent';
 import { buildFilePath, sanitize } from 'pankow/utils';
 
-const BASE_URL = import.meta.env.BASE_URL || '/';
-
 export function DirectoryModelError(reason, errorOrMessage) {
     Error.call(this);
 
@@ -35,7 +33,7 @@ export function createDirectoryModel(origin) {
   return {
     name: 'DirectoryModel',
     async get(resource, path) {
-      const result = await superagent.get(`${origin}/api/v1/${resource}`).withCredentials().query({
+      const result = await superagent.get(`${origin}/api/v1/${resource.apiPath}`).withCredentials().query({
         type: 'json',
         path: path
       });
@@ -64,18 +62,18 @@ export function createDirectoryModel(origin) {
       entry.name = entry.fileName;
       entry.folderPath = path.slice(-entry.fileName.length);
       entry.previewUrl = origin + entry.previewUrl;
-      entry.fullFileUrl = `${origin}/api/v1/${resource}?path=${entry.filePath}&type=raw`;
+      entry.fullFileUrl = `${origin}/api/v1/${resource.apiPath}?path=${entry.filePath}&type=raw`;
       entry.modified = new Date(entry.mtime);
       entry.type = entry.isDirectory ? 'directory' : 'file',
       entry.icon = entry.previewUrl;
-      // entry.resourceUrl = `/viewer/${resource}/${this.resourceId}${e.folderPath}/${e.fileName}`;
+      // entry.resourceUrl = `/viewer/${resource.apiPath}/${this.resourceId}${e.folderPath}/${e.fileName}`;
 
       // this prepares the entries to be compatible with all components
       entry.files.forEach(child => {
         child.name = child.fileName;
         child.folderPath = entry.folderPath.slice(-child.fileName.length);
         child.previewUrl = origin + child.previewUrl;
-        child.fullFileUrl = `${origin}/api/v1/${resource}?path=${child.filePath}&type=raw`;
+        child.fullFileUrl = `${origin}/api/v1/${resource.apiPath}?path=${child.filePath}&type=raw`;
         child.modified = new Date(child.mtime);
         child.type = child.isDirectory ? 'directory' : 'file',
         child.icon = child.previewUrl;
@@ -83,7 +81,7 @@ export function createDirectoryModel(origin) {
 
         // if we have an image, attach previewUrl
         // if (item.mimeType.indexOf('image/') === 0) {
-        //   item.previewUrl = `${origin}/api/v1/${resource}/files/${encodeURIComponent(path + '/' + item.fileName)}`;
+        //   item.previewUrl = `${origin}/api/v1/${resource.apiPath}/files/${encodeURIComponent(path + '/' + item.fileName)}`;
         // }
       });
 
@@ -94,7 +92,7 @@ export function createDirectoryModel(origin) {
       formData.append('file', new Blob());
 
       try {
-        await superagent.post(`${origin}/api/v1/${resource}`).withCredentials().query({ path: newFilePath }).send(formData);
+        await superagent.post(`${origin}/api/v1/${resource.apiPath}`).withCredentials().query({ path: newFilePath }).send(formData);
       } catch (error) {
         if (error.status === 401) throw new DirectoryModelError(DirectoryModelError.NO_AUTH, error);
         else if (error.status === 403) throw new DirectoryModelError(DirectoryModelError.NOT_ALLOWED, error);
@@ -104,17 +102,15 @@ export function createDirectoryModel(origin) {
     },
     async newFolder(resource, newFolderPath) {
       try {
-        await superagent.post(`${origin}/api/v1/${resource}`).withCredentials().query({ path: newFolderPath, directory: true });
+        await superagent.post(`${origin}/api/v1/${resource.apiPath}`).withCredentials().query({ path: newFolderPath, directory: true });
       } catch (error) {
         if (error.status === 401) throw new DirectoryModelError(DirectoryModelError.NO_AUTH, error);
-        else if (error.status === 403) throw new DirectoryModelError(DirectoryModelError.NOT_ALLOWED, error);
-        else if (error.status === 409) throw new DirectoryModelError(DirectoryModelError.CONFLICT, error);
+        if (error.status === 403) throw new DirectoryModelError(DirectoryModelError.NOT_ALLOWED, error);
+        if (error.status === 409) throw new DirectoryModelError(DirectoryModelError.CONFLICT, error);
         throw new DirectoryModelError(DirectoryModelError.GENERIC, error);
       }
     },
     async upload(resource, file, progressHandler) {
-      console.log('DirectoryModel: upload', resource, file)
-
       // file may contain a file name or a file path + file name
       const relativefilePath = (file.webkitRelativePath ? file.webkitRelativePath : file.name);
 
@@ -123,6 +119,44 @@ export function createDirectoryModel(origin) {
         .attach('file', file)
         .on('progress', progressHandler);
     },
+    async rename(resource, fromFilePath, newFilePath) {
+      try {
+        await superagent.put(`${origin}/api/v1/${resource.apiPath}`).query({ path: fromFilePath, action: 'move', new_path: newFilePath }).withCredentials();
+      } catch (error) {
+        if (error.status === 401) throw new DirectoryModelError(DirectoryModelError.NO_AUTH, error);
+        if (error.status === 409) throw new DirectoryModelError(DirectoryModelError.CONFLICT, error);
+        throw new DirectoryModelError(DirectoryModelError.GENERIC, error);
+      }
+    },
+    async copy(resource, fromFilePath, newFilePath) {
+      try {
+        await superagent.put(`${origin}/api/v1/${resource.apiPath}`).query({ path: fromFilePath, action: 'copy', new_path: newFilePath }).withCredentials();
+      } catch (error) {
+        if (error.status === 401) throw new DirectoryModelError(DirectoryModelError.NO_AUTH, error);
+        if (error.status === 409) throw new DirectoryModelError(DirectoryModelError.CONFLICT, error);
+        throw new DirectoryModelError(DirectoryModelError.GENERIC, error);
+      }
+    },
+    async paste(resource, action, files) {
+      // this will not overwrite but tries to find a new unique name to past to
+      for (let f in files) {
+        let done = false;
+        let targetPath = sanitize(resource.path + '/' + files[f].name);
+        while (!done) {
+          try {
+            if (action === 'cut') await this.rename(resource, buildFilePath(files[f].folderPath, files[f].name), targetPath);
+            if (action === 'copy') await this.copy(resource, buildFilePath(files[f].folderPath, files[f].name), targetPath);
+            done = true;
+          } catch (error) {
+            if (error.reason === DirectoryModelError.CONFLICT) {
+              targetPath += '-copy';
+            } else {
+              throw error;
+            }
+          }
+        }
+      }
+    }
   };
 }
 

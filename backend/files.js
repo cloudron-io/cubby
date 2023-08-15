@@ -8,6 +8,7 @@ exports = module.exports = {
     get,
     head,
     move,
+    copy,
     remove,
     recent
 };
@@ -332,6 +333,29 @@ async function move(username, filePath, newFilePath) {
         // TODO add option for overwrite
         await fs.move(fullFilePath, fullNewFilePath, { overwrite: false });
     } catch (error) {
+        if (error.message === 'Source and destination must not be the same.') throw new MainError(MainError.CONFLICT);
+        throw new MainError(MainError.FS_ERROR, error);
+    }
+}
+
+async function copy(username, filePath, newFilePath) {
+    assert.strictEqual(typeof username, 'string');
+    assert.strictEqual(typeof filePath, 'string');
+    assert.strictEqual(typeof newFilePath, 'string');
+
+    const fullFilePath = getValidFullPath(username, filePath);
+    if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);
+
+    const fullNewFilePath = getValidFullPath(username, newFilePath);
+    if (!fullNewFilePath) throw new MainError(MainError.INVALID_PATH);
+
+    debug(`copy ${fullFilePath} -> ${fullNewFilePath}`);
+
+    try {
+        // TODO add option for overwrite
+        await fs.copy(fullFilePath, fullNewFilePath, { overwrite: false });
+    } catch (error) {
+        if (error.message === 'Source and destination must not be the same.') throw new MainError(MainError.CONFLICT);
         throw new MainError(MainError.FS_ERROR, error);
     }
 }

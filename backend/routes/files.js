@@ -119,21 +119,20 @@ async function update(req, res, next) {
 
     debug(`update: [${action}] ${filePath}`);
 
-    if (action === 'move') {
-        const newFilePath = decodeURIComponent(req.query.new_path);
-        if (!newFilePath) return next(new HttpError(400, 'move action requires new_path argument'));
+    const newFilePath = decodeURIComponent(req.query.new_path);
+    if (!newFilePath) return next(new HttpError(400, 'action requires new_path argument'));
 
-        try {
-            await files.move(req.user.username, filePath, newFilePath);
-        } catch (error) {
-            if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'not found'));
-            return next(new HttpError(500, error));
-        }
-
-        return next(new HttpSuccess(200, {}));
-    } else {
-        return next(new HttpError(400, 'unknown action'));
+    try {
+        if (action === 'move') await files.move(req.user.username, filePath, newFilePath);
+        else if (action === 'copy') await files.copy(req.user.username, filePath, newFilePath);
+        else return next(new HttpError(400, 'unknown action. Must be one of "move", "copy"'));
+    } catch (error) {
+        if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'not found'));
+        if (error.reason === MainError.CONFLICT) return next(new HttpError(409, 'already exists'));
+        return next(new HttpError(500, error));
     }
+
+    return next(new HttpSuccess(200, {}));
 }
 
 async function remove(req, res, next) {

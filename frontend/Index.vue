@@ -40,6 +40,7 @@
             :show-owner="true"
             :show-size="true"
             :show-modified="true"
+            :editable="!isReadonly()"
             @selection-changed="onSelectionChanged"
             @item-activated="onOpen"
             :delete-handler="deleteHandler"
@@ -199,6 +200,11 @@ import MainToolbar from './components/MainToolbar.vue';
 const API_ORIGIN = import.meta.env.VITE_API_ORIGIN ? import.meta.env.VITE_API_ORIGIN : '';
 const BASE_URL = import.meta.env.BASE_URL || '/';
 
+const beforeUnloadListener = (event) => {
+  event.preventDefault();
+  return window.confirm('File operation still in progress. Really close?');
+};
+
 export default {
     name: 'IndexView',
     components: {
@@ -225,6 +231,7 @@ export default {
           files: []
         },
         error: '',
+        pasteInProgress: false,
         entries: [],
         selectedEntries: [],
         currentPath: '/',
@@ -315,12 +322,42 @@ export default {
           this.newFolderDialog.folderName = '';
           this.newFolderDialog.visible = true;
       },
+      async copyHandler(files) {
+        if (!files) return;
+
+        this.clipboard = {
+          action: 'copy',
+          files
+        };
+      },
+      async cutHandler(files) {
+        if (!files) return;
+
+        this.clipboard = {
+          action: 'cut',
+          files
+        };
+      },
+      async pasteHandler(target) {
+        if (!this.clipboard.files || !this.clipboard.files.length) return;
+
+        window.addEventListener('beforeunload', beforeUnloadListener, { capture: true });
+        this.pasteInProgress = true;
+
+        const resource = parseResourcePath((target && target.isDirectory) ? sanitize(this.currentResourcePath + '/' + target.fileName) : this.currentResourcePath);
+        await this.directoryModel.paste(resource, this.clipboard.action, this.clipboard.files);
+        this.clipboard = {};
+        await this.refresh();
+
+        window.removeEventListener('beforeunload', beforeUnloadListener, { capture: true });
+        this.pasteInProgress = false;
+      },
         async onSaveNewFileDialog() {
             const path = sanitize(this.currentPath + '/' + this.newFileDialog.fileName);
             const resource = parseResourcePath(this.currentResourcePath || 'files/');
 
             try {
-              await this.directoryModel.newFile(resource.apiPath, path);
+              await this.directoryModel.newFile(resource, path);
             } catch (error) {
               if (error.reason === DirectoryModelError.NO_AUTH) this.onLogout();
               else if (error.reason === DirectoryModelError.NOT_ALLOWED) this.newFileDialog.error = 'File name not allowed';
@@ -341,7 +378,7 @@ export default {
           const resource = parseResourcePath(this.currentResourcePath || 'files/');
 
           try {
-            await this.directoryModel.newFolder(resource.apiPath, path);
+            await this.directoryModel.newFolder(resource, path);
           } catch (error) {
             if (error.reason === DirectoryModelError.NO_AUTH) this.onLogout();
             else if (error.reason === DirectoryModelError.NOT_ALLOWED) this.newFolderDialog.error = 'Folder name not allowed';
@@ -552,16 +589,16 @@ export default {
             });
         },
         showAllShares() {
-            window.location.hash = 'shares/';
+          window.location.hash = 'shares/';
         },
         isReadonly() {
-            if (window.location.hash === '/shares/') return true;
-            if (!this.currentShare) return false;
-            return this.currentShare.readonly;
+          if (window.location.hash === '/shares/') return true;
+          if (!this.currentShare) return false;
+          return this.currentShare.readonly;
         },
         isShareable() {
-            var resource = parseResourcePath(this.currentResourcePath || 'files/');
-            return resource.type !== 'shares';
+          var resource = parseResourcePath(this.currentResourcePath || 'files/');
+          return resource.type !== 'shares';
         },
         onShare(entry) {
             var that = this;
@@ -659,141 +696,141 @@ export default {
                 });
             });
         },
-        async refresh() {
-          await this.loadPath(null, true);
-        },
-        async loadPath(path, alwaysRefresh) {
-          const resource = parseResourcePath(path || this.currentResourcePath || 'files/');
+      async refresh() {
+        await this.loadPath(null, true);
+      },
+      async loadPath(path, alwaysRefresh) {
+        const resource = parseResourcePath(path || this.currentResourcePath || 'files/');
 
-          // check if we actually have a new path to fetch
-          var currentResource = null;
-          if (!alwaysRefresh && this.currentResourcePath) {
-            currentResource = parseResourcePath(this.currentResourcePath);
+        // check if we actually have a new path to fetch
+        var currentResource = null;
+        if (!alwaysRefresh && this.currentResourcePath) {
+          currentResource = parseResourcePath(this.currentResourcePath);
 
-            if (currentResource.resourcePath === resource.resourcePath) return;
-          }
+          if (currentResource.resourcePath === resource.resourcePath) return;
+        }
 
-          // only show busy state if it takes more than 2 seconds to avoid flickering
-          var busyTimer = setTimeout(() => { this.busy = true; }, 2000);
+        // only show busy state if it takes more than 2 seconds to avoid flickering
+        var busyTimer = setTimeout(() => { this.busy = true; }, 2000);
 
-          let entry;
-          try {
-            entry = await this.directoryModel.get(resource.apiPath, resource.path);
-          } catch (error) {
-            this.entries = [];
-            entry = {};
+        let entry;
+        try {
+          entry = await this.directoryModel.get(resource, resource.path);
+        } catch (error) {
+          this.entries = [];
+          entry = {};
 
-            if (error.status === 401) return this.onLogout();
-            else if (error.status === 404) this.error = 'Does not exist';
-            else console.error(error);
-          }
+          if (error.status === 401) return this.onLogout();
+          else if (error.status === 404) this.error = 'Does not exist';
+          else console.error(error);
+        }
 
-          clearTimeout(busyTimer);
-          this.busy = false;
+        clearTimeout(busyTimer);
+        this.busy = false;
 
-          // update the browser hash
-          window.location.hash = resource.resourcePath;
+        // update the browser hash
+        window.location.hash = resource.resourcePath;
 
-          if (entry.isDirectory) {
-            this.currentPath = resource.path;
-            this.currentResourcePath = resource.resourcePath;
-            this.currentShare = entry.share || null;
+        if (entry.isDirectory) {
+          this.currentPath = resource.path;
+          this.currentResourcePath = resource.resourcePath;
+          this.currentShare = entry.share || null;
 
-            if (resource.type === 'files') {
-              this.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
-                return {
-                  label: decode(e),
-                  url: '#files' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
-                };
-              });
-              this.breadCrumbHome = {
-                icon: 'pi pi-home',
-                url: '#files/'
+          if (resource.type === 'files') {
+            this.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
+              return {
+                label: decode(e),
+                url: '#files' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
               };
-            } else if (resource.type === 'shares') {
-              this.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
-                return {
-                  label: decode(e),
-                  url: '#shares/' + resource.shareId  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
-                };
-              });
-              this.breadCrumbHome = {
-                icon: 'pi pi-share-alt',
-                url: '#shares/'
+            });
+            this.breadCrumbHome = {
+              icon: 'pi pi-home',
+              url: '#files/'
+            };
+          } else if (resource.type === 'shares') {
+            this.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
+              return {
+                label: decode(e),
+                url: '#shares/' + resource.shareId  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
               };
+            });
+            this.breadCrumbHome = {
+              icon: 'pi pi-share-alt',
+              url: '#shares/'
+            };
 
-              // if we are not toplevel, add the share information
-              if (entry.share) {
-                this.breadCrumbs.unshift({
-                  label: entry.share.filePath.slice(1), // remove slash at the beginning
-                  url: '#shares/' + resource.shareId + '/'
-                });
-              }
-            } else {
-              console.error('FIXME breadcrumbs for resource type', resource.type);
+            // if we are not toplevel, add the share information
+            if (entry.share) {
+              this.breadCrumbs.unshift({
+                label: entry.share.filePath.slice(1), // remove slash at the beginning
+                url: '#shares/' + resource.shareId + '/'
+              });
             }
+          } else {
+            console.error('FIXME breadcrumbs for resource type', resource.type);
+          }
 
-            entry.files.forEach(function (e) {
-              e.extension = getExtension(e);
-              e.rename = false;
-              e.filePathNew = e.fileName;
+          entry.files.forEach(function (e) {
+            e.extension = getExtension(e);
+            e.rename = false;
+            e.filePathNew = e.fileName;
+          });
+
+          this.entries = entry.files;
+          this.viewer = '';
+
+          this.clearSelection();
+        } else {
+          if (this.$refs.imageViewer.canHandle(entry)) {
+            const otherSupportedEntries = this.entries.filter((e) => this.$refs.imageViewer.canHandle(e)).map((e) => {
+              e.resourceUrl = `/viewer/${resource.apiPath}/${e.folderPath}/${e.fileName}`;
+              return e;
             });
 
-            this.entries = entry.files;
-            this.viewer = '';
+            this.$refs.imageViewer.open(entry, otherSupportedEntries);
+            this.viewer = 'image';
+          } else if (this.$refs.textEditor.canHandle(entry)) {
+            superagent.get(getDirectLink(entry)).end(function (error, result) {
+              if (error) return console.error(error);
 
-            this.clearSelection();
+              this.$refs.textEditor.open(entry, result.text);
+              this.viewer = 'text';
+            });
+          } else if (this.$refs.pdfViewer.canHandle(entry)) {
+            this.$refs.pdfViewer.open(entry);
+            this.viewer = 'pdf';
+          } else if (this.$refs.officeViewer.canHandle(entry)) {
+            this.$refs.officeViewer.open(entry);
+            this.viewer = 'office';
           } else {
-            if (this.$refs.imageViewer.canHandle(entry)) {
-              const otherSupportedEntries = this.entries.filter((e) => this.$refs.imageViewer.canHandle(e)).map((e) => {
-                e.resourceUrl = `/viewer/${resource.apiPath}/${e.folderPath}/${e.fileName}`;
-                return e;
-              });
-
-              this.$refs.imageViewer.open(entry, otherSupportedEntries);
-              this.viewer = 'image';
-            } else if (this.$refs.textEditor.canHandle(entry)) {
-              superagent.get(getDirectLink(entry)).end(function (error, result) {
-                if (error) return console.error(error);
-
-                this.$refs.textEditor.open(entry, result.text);
-                this.viewer = 'text';
-              });
-            } else if (this.$refs.pdfViewer.canHandle(entry)) {
-              this.$refs.pdfViewer.open(entry);
-              this.viewer = 'pdf';
-            } else if (this.$refs.officeViewer.canHandle(entry)) {
-              this.$refs.officeViewer.open(entry);
-              this.viewer = 'office';
-            } else {
-              this.viewer = 'generic';
-              this.$refs.genericViewer.open(entry);
-            }
+            this.viewer = 'generic';
+            this.$refs.genericViewer.open(entry);
           }
-        },
-        onOpen(entry) {
-            if (entry.share && entry.share.id) window.location.hash = 'shares/' + entry.share.id + '/' + entry.filePath;
-            else window.location.hash = 'files' + entry.filePath;
-        },
-        onViewerClose() {
-            this.viewer = '';
+        }
+      },
+      onOpen(entry) {
+        if (entry.share && entry.share.id) window.location.hash = 'shares/' + entry.share.id + '/' + entry.filePath;
+        else window.location.hash = 'files' + entry.filePath;
+      },
+      onViewerClose() {
+        this.viewer = '';
 
-            // update the browser hash
-            const resource = parseResourcePath(this.currentResourcePath || 'files/');
-            window.location.hash = resource.resourcePath;
-        },
-        onUp() {
-            if (window.location.hash.indexOf('#shares/') === 0) {
-                const hash = window.location.hash.slice('#shares/'.length);
+        // update the browser hash
+        const resource = parseResourcePath(this.currentResourcePath || 'files/');
+        window.location.hash = resource.resourcePath;
+      },
+      onUp() {
+        if (window.location.hash.indexOf('#shares/') === 0) {
+          const hash = window.location.hash.slice('#shares/'.length);
 
-                // if we are first level of that share, go back to all shares
-                if (!hash.split('/')[1]) window.location.hash = 'shares/';
-                else window.location.hash = hash.split('/')[0] + sanitize(hash.split('/').slice(1, -1).filter(function (p) { return !!p; }).join('/'));
-            } else {
-                const hash = window.location.hash.slice(1);
-                window.location.hash = hash.split('/')[0] + sanitize(hash.split('/').slice(1, -1).filter(function (p) { return !!p; }).join('/'));
-            }
-        },
+          // if we are first level of that share, go back to all shares
+          if (!hash.split('/')[1]) window.location.hash = 'shares/';
+          else window.location.hash = hash.split('/')[0] + sanitize(hash.split('/').slice(1, -1).filter(function (p) { return !!p; }).join('/'));
+        } else {
+          const hash = window.location.hash.slice(1);
+          window.location.hash = hash.split('/')[0] + sanitize(hash.split('/').slice(1, -1).filter(function (p) { return !!p; }).join('/'));
+        }
+      },
     },
     async mounted() {
       window.addEventListener('hashchange', () => {
