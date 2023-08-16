@@ -119,6 +119,29 @@ export function createDirectoryModel(origin) {
         .attach('file', file)
         .on('progress', progressHandler);
     },
+    async download(resource, files) {
+      console.log('download', resource, files)
+      if (files.length === 1 && !files[0].isDirectory) {
+        window.location.href = `${origin}/api/v1/${resource.apiPath}?type=download&path=${files[0].filePath}`;
+      } else {
+        const params = new URLSearchParams();
+
+        // be a bit smart about the archive name and folder tree
+        const folderPath = files[0].filePath.slice(0, -files[0].fileName.length);
+        const archiveName = name || folderPath.slice(folderPath.slice(0, -1).lastIndexOf('/')+1).slice(0, -1);
+        params.append('name', archiveName);
+        params.append('skipPath', folderPath);
+
+        params.append('entries', JSON.stringify(files.map(function (entry) {
+            return {
+                filePath: entry.filePath,
+                shareId: entry.share ? entry.share.id : undefined
+            };
+        })));
+
+        window.location.href = `${origin}/api/v1/download?${params.toString()}`;
+      }
+    },
     async rename(resource, fromFilePath, newFilePath) {
       try {
         await superagent.put(`${origin}/api/v1/${resource.apiPath}`).query({ path: fromFilePath, action: 'move', new_path: newFilePath }).withCredentials();

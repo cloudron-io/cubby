@@ -23,7 +23,7 @@
       </div>
     </div>
     <div class="content">
-      <MainToolbar :breadCrumbs="breadCrumbs" :breadCrumbHome="breadCrumbHome" :selectedEntries="selectedEntries" :displayName="profile.displayName" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @directory-up="onUp" @new-folder="onNewFolder" @delete="onDelete" @download="onDownload"/>
+      <MainToolbar :breadCrumbs="breadCrumbs" :breadCrumbHome="breadCrumbHome" :selectedEntries="selectedEntries" :displayName="profile.displayName" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @directory-up="onUp" @new-folder="onNewFolder" @delete="onDelete" @download="downloadHandler"/>
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
@@ -41,6 +41,7 @@
             :show-size="true"
             :show-modified="true"
             :editable="!isReadonly()"
+            :multi-download="true"
             @selection-changed="onSelectionChanged"
             @item-activated="onOpen"
             :delete-handler="deleteHandler"
@@ -175,7 +176,7 @@
   </Dialog>
 
   <div class="viewer-container" v-show="viewer">
-    <ImageViewer ref="imageViewer" @close="onViewerClose" @download="onDownload" v-show="viewer === 'image'" />
+    <ImageViewer ref="imageViewer" @close="onViewerClose" :download-handler="downloadHandler" v-show="viewer === 'image'" />
     <!-- <TextEditor ref="textEditor" @close="onViewerClose" @saved="onFileSaved" v-show="viewer === 'text'" /> -->
     <!-- <PdfViewer ref="pdfViewer" @close="onViewerClose" v-show="viewer === 'pdf'" /> -->
     <!-- <OfficeViewer ref="officeViewer" :config="config.viewers.collabora" @close="onViewerClose" v-show="viewer === 'office'" /> -->
@@ -189,7 +190,7 @@
 
 import superagent from 'superagent';
 import async from 'async';
-import { parseResourcePath, decode, getExtension, getShareLink, copyToClipboard, sanitize, download, getDirectLink, prettyFileSize } from './utils.js';
+import { parseResourcePath, decode, getExtension, getShareLink, copyToClipboard, sanitize, getDirectLink, prettyFileSize } from './utils.js';
 
 import { TextEditor, ImageViewer, DirectoryView, FileUploader } from 'pankow';
 import { createDirectoryModel, DirectoryModelError } from './models/DirectoryModel.js';
@@ -453,11 +454,12 @@ export default {
                 that.uploadNext();
             });
         },
-        onDownload(entries) {
-            if (!entries) entries = this.selectedEntries;
+        async downloadHandler(entries) {
+          if (!entries) entries = this.selectedEntries;
+          if (!Array.isArray(entries)) entries = [ entries ];
 
-            // use the
-            download(entries, this.currentShare ? this.currentShare.filePath.slice(1) : '');
+          const resource = parseResourcePath(this.currentResourcePath);
+          await this.directoryModel.download(resource, entries);
         },
         onDrop(items, targetEntry) {
           var that = this;

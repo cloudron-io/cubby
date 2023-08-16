@@ -8,8 +8,8 @@
         <template #end>
             <!-- file action buttons -->
             <div class="file-actions">
-                <Button v-show="selectedEntries.length > 1" icon="pi pi-download" class="p-button-outlined p-button-sm" v-tooltip="'Download'" @click="onDownload"/>
-                <Button v-show="displayName && selectedEntries.length > 1" icon="pi pi-trash" class="p-button-outlined p-button-sm p-button-danger" v-tooltip="'Delete'" @click="onDelete"/>
+                <Button v-show="selectedEntries.length" icon="pi pi-download" class="p-button-outlined p-button-sm" v-tooltip="'Download'" @click="onDownload"/>
+                <Button v-show="displayName && selectedEntries.length" icon="pi pi-trash" class="p-button-outlined p-button-sm p-button-danger" v-tooltip="'Delete'" @click="onDelete"/>
             </div>
 
             <!-- Always visible if we have a login session-->

@@ -69,34 +69,6 @@ function getShareLink(shareId) {
     return window.location.origin + '/api/v1/shares/' + shareId + '?type=raw';
 }
 
-function download(entries, name) {
-    if (!entries.length) return;
-
-    if (entries.length === 1) {
-        if (entries[0].share) window.location.href = '/api/v1/shares/' + entries[0].share.id + '?type=download&path=' + encodeURIComponent(entries[0].filePath);
-        else window.location.href = '/api/v1/files?type=download&path=' + encodeURIComponent(entries[0].filePath);
-
-        return;
-    }
-
-    const params = new URLSearchParams();
-
-    // be a bit smart about the archive name and folder tree
-    const folderPath = entries[0].filePath.slice(0, -entries[0].fileName.length);
-    const archiveName = name || folderPath.slice(folderPath.slice(0, -1).lastIndexOf('/')+1).slice(0, -1);
-    params.append('name', archiveName);
-    params.append('skipPath', folderPath);
-
-    params.append('entries', JSON.stringify(entries.map(function (entry) {
-        return {
-            filePath: entry.filePath,
-            shareId: entry.share ? entry.share.id : undefined
-        };
-    })));
-
-    window.location.href = '/api/v1/download?' + params.toString();
-}
-
 function getFileTypeGroup(entry) {
     return entry.mimeType.split('/')[0];
 }
@@ -186,7 +158,6 @@ export {
     sanitize,
     encode,
     decode,
-    download,
     getExtension,
     copyToClipboard,
     clearSelection,

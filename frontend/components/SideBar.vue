@@ -28,7 +28,7 @@
 
 <script>
 
-import { getPreviewUrl, download, encode, copyToClipboard, prettyLongDate, prettyFileSize } from '../utils.js';
+import { getPreviewUrl, prettyLongDate, prettyFileSize } from '../utils.js';
 
 export default {
     name: 'SideBar',
@@ -55,14 +55,6 @@ export default {
         prettyLongDate,
         prettyFileSize,
         getPreviewUrl,
-        onDownload: function (entry) {
-            download(entry);
-        },
-        onCopyLink: function (entry) {
-            copyToClipboard(location.origin + encode(entry.filePath));
-
-            this.$toast.add({ severity:'success', summary: 'Link copied to Clipboard', life: 1500 });
-        }
     },
     mounted() {
     }
