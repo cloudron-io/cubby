@@ -37,7 +37,7 @@
             @dropped="onDrop"
           /> -->
           <DirectoryView
-            :show-owner="true"
+            :show-owner="false"
             :show-size="true"
             :show-modified="true"
             :editable="!isReadonly()"
