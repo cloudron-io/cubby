@@ -231,6 +231,7 @@ export default {
           files: []
         },
         error: '',
+        // TODO show busy state for those
         pasteInProgress: false,
         deleteInProgress: false,
         entries: [],
@@ -525,19 +526,10 @@ export default {
           window.removeEventListener('beforeunload', beforeUnloadListener, { capture: true });
           this.deleteInProgress = false;
         },
-        onRename(entry, newFileName) {
-            var that = this;
-
-            var resource = parseResourcePath(that.currentResourcePath + '/' + entry.fileName);
-            var newResource = parseResourcePath(that.currentResourcePath + '/' + newFileName);
-
-            superagent.put(resource.apiPath).query({ path: resource.path, action: 'move', new_path: newResource.path }).end(function (error, result) {
-                if (result && result.statusCode === 401) return that.logout();
-                if (result && result.statusCode !== 200) return console.error('Error moving file or folder');
-                if (error) return console.error(error.message);
-
-                that.refresh();
-            });
+        async renameHandler(file, newName) {
+          const resource = parseResourcePath(this.currentResourcePath);
+          await this.directoryModel.rename(resource, file.filePath, sanitize(resource.path + '/' + newName));
+          await this.refresh();
         },
         showAllRecent() {
             window.location.hash = 'recent/';
@@ -571,7 +563,6 @@ export default {
 
                 result.body.files.forEach(function (entry) {
                     entry.extension = getExtension(entry);
-                    entry.rename = false;
                     entry.filePathNew = entry.fileName;
                 });
 
@@ -762,7 +753,6 @@ export default {
 
           entry.files.forEach(function (e) {
             e.extension = getExtension(e);
-            e.rename = false;
             e.filePathNew = e.fileName;
           });
 
