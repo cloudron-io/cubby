@@ -37,7 +37,7 @@ import Index from './Index.vue';
 import EntryList from './components/EntryList.vue';
 import EntryListItem from './components/EntryListItem.vue';
 import SideBar from './components/SideBar.vue';
-import Login from './components/Login.vue';
+import LoginView from './components/LoginView.vue';
 // import PdfViewer from './components/PdfViewer.vue';
 // import OfficeViewer from './components/OfficeViewer.vue';
 import GenericViewer from './components/GenericViewer.vue';
@@ -79,7 +79,7 @@ app.directive('tooltip', Tooltip);
 app.directive('badge', BadgeDirective);
 
 // custom components
-app.component('Login', Login);
+app.component('LoginView', LoginView);
 app.component('EntryList', EntryList);
 app.component('EntryListItem', EntryListItem);
 app.component('SideBar', SideBar);

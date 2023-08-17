@@ -29,7 +29,7 @@
 <script>
 
 import superagent from 'superagent';
-import { decode, sanitize, urlSearchQuery, getExtension, download, getDirectLink, prettyFileSize } from './utils.js';
+import { decode, sanitize, urlSearchQuery, getExtension, getDirectLink, prettyFileSize } from './utils.js';
 
 export default {
     name: 'Index',
@@ -62,7 +62,7 @@ export default {
         },
         onDownload(entries) {
             if (!entries) entries = this.selectedEntries;
-            download(entries);
+            // download(entries);
         },
         loadPath(path) {
             var that = this;

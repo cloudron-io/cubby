@@ -37,7 +37,7 @@ import Share from './Share.vue';
 import EntryList from './components/EntryList.vue';
 import EntryListItem from './components/EntryListItem.vue';
 import SideBar from './components/SideBar.vue';
-import Login from './components/Login.vue';
+import LoginView from './components/LoginView.vue';
 import MainToolbar from './components/MainToolbar.vue';
 // import ImageViewer from './components/ImageViewer.vue';
 // import TextEditor from './components/TextEditor.vue';
@@ -81,7 +81,7 @@ app.directive('tooltip', Tooltip);
 app.directive('badge', BadgeDirective);
 
 // custom components
-app.component('Login', Login);
+app.component('LoginView', LoginView);
 app.component('MainToolbar', MainToolbar);
 app.component('EntryList', EntryList);
 app.component('EntryListItem', EntryListItem);
