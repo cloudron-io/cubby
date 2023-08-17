@@ -177,7 +177,7 @@
 
   <div class="viewer-container" v-show="viewer">
     <ImageViewer ref="imageViewer" @close="onViewerClose" :download-handler="downloadHandler" v-show="viewer === 'image'" />
-    <!-- <TextEditor ref="textEditor" @close="onViewerClose" @saved="onFileSaved" v-show="viewer === 'text'" /> -->
+    <TextEditor ref="textEditor" @close="onViewerClose" @saved="onFileSaved" v-show="viewer === 'text'" />
     <!-- <PdfViewer ref="pdfViewer" @close="onViewerClose" v-show="viewer === 'pdf'" /> -->
     <!-- <OfficeViewer ref="officeViewer" :config="config.viewers.collabora" @close="onViewerClose" v-show="viewer === 'office'" /> -->
     <!-- <GenericViewer ref="genericViewer" @close="onViewerClose" v-show="viewer === 'generic'" /> -->
@@ -772,12 +772,8 @@ export default {
             this.$refs.imageViewer.open(entry, otherSupportedEntries);
             this.viewer = 'image';
           } else if (this.$refs.textEditor.canHandle(entry)) {
-            superagent.get(getDirectLink(entry)).end(function (error, result) {
-              if (error) return console.error(error);
-
-              this.$refs.textEditor.open(entry, result.text);
-              this.viewer = 'text';
-            });
+            this.$refs.textEditor.open(entry, await this.directoryModel.getRawContent(resource, entry.filePath));
+            this.viewer = 'text';
           } else if (this.$refs.pdfViewer.canHandle(entry)) {
             this.$refs.pdfViewer.open(entry);
             this.viewer = 'pdf';

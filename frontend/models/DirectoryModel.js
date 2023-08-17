@@ -87,6 +87,16 @@ export function createDirectoryModel(origin) {
 
       return entry;
     },
+    async getRawContent(resource, path) {
+      const result = await superagent.get(`${origin}/api/v1/${resource.apiPath}`).withCredentials().query({
+        type: 'raw',
+        path: path
+      });
+
+      console.log(result)
+
+      return result.text;
+    },
     async newFile(resource, newFilePath) {
       const formData = new FormData();
       formData.append('file', new Blob());
