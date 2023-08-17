@@ -24,7 +24,7 @@
     "express-session": "^1.17.3",
     "filesize": "^10.0.12",
     "fs-extra": "^11.1.1",
-    "ldapjs": "^3.0.5",
+    "ldapjs": "^2.3.3",
     "morgan": "^1.10.0",
     "multiparty": "^4.2.3",
     "once": "^1.4.0",
