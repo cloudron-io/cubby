@@ -3,7 +3,7 @@
   <ConfirmDialog></ConfirmDialog>
   <Toast position="top-center" />
 
-  <Login v-show="ready && !profile.username" @success="onLoggedIn"/>
+  <LoginView v-show="ready && !profile.username" @success="onLoggedIn"/>
 
   <div class="container" v-show="ready && profile.username">
     <div class="sidebar">
