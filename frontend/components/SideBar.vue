@@ -2,7 +2,7 @@
     <div class="sidebar-container" :class="{ 'visible': visible }">
       <div class="p-d-flex p-jc-between header" style="padding-bottom: 10px;">Details</div>
       <div class="preview-container">
-        <div class="preview" v-for="entry in selectedEntries" :key="entry.id" :style="{ backgroundImage: entry && getPreviewUrl(entry) ? 'url(' + getPreviewUrl(entry) + ')' : 'none' }"></div>
+        <div class="preview" v-for="entry in selectedEntries.slice(0, 15)" :key="entry.id" :style="{ backgroundImage: entry && getPreviewUrl(entry) ? 'url(' + getPreviewUrl(entry) + ')' : 'none' }"></div>
       </div>
       <div class="detail" v-show="selectedEntries.length === 1">
         <p>Owner</p>
