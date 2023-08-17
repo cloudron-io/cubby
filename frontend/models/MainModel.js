@@ -42,7 +42,7 @@ export function createMainModel(origin) {
     },
     async logout() {
       try {
-        await superagent.get('/api/v1/logout').withCredentials();
+        await superagent.get('/api/v1/oidc/logout').withCredentials();
       } catch (e) {
         console.error('Error logging out', e);
       }
