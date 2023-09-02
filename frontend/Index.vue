@@ -684,6 +684,71 @@ export default {
       async refresh() {
         await this.loadPath(null, true);
       },
+      async loadMainDirectory(path, entry) {
+        const resource = parseResourcePath(path);
+
+        if (!entry) {
+          try {
+            entry = await this.directoryModel.get(resource, resource.path);
+          } catch (error) {
+            this.entries = [];
+            entry = {};
+
+            if (error.status === 401) return this.onLogout();
+            else if (error.status === 404) this.error = 'Does not exist';
+            else console.error(error);
+          }
+        }
+
+        this.currentPath = resource.path;
+        this.currentResourcePath = resource.resourcePath;
+        this.currentShare = entry.share || null;
+
+        if (resource.type === 'files') {
+          this.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
+            return {
+              label: decode(e),
+              url: '#files' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
+            };
+          });
+          this.breadCrumbHome = {
+            icon: 'pi pi-home',
+            url: '#files/'
+          };
+        } else if (resource.type === 'shares') {
+          this.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
+            return {
+              label: decode(e),
+              url: '#shares/' + resource.shareId  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
+            };
+          });
+          this.breadCrumbHome = {
+            icon: 'pi pi-share-alt',
+            url: '#shares/'
+          };
+
+          // if we are not toplevel, add the share information
+          if (entry.share) {
+            this.breadCrumbs.unshift({
+              label: entry.share.filePath.slice(1), // remove slash at the beginning
+              url: '#shares/' + resource.shareId + '/'
+            });
+          }
+        } else {
+          console.error('FIXME breadcrumbs for resource type', resource.type);
+        }
+
+        entry.files.forEach(function (e) {
+          e.extension = getExtension(e);
+          e.filePathNew = e.fileName;
+        });
+
+        this.entries = entry.files;
+        this.viewer = '';
+
+        this.clearSelection();
+
+      },
       async loadPath(path, alwaysRefresh) {
         const resource = parseResourcePath(path || this.currentResourcePath || 'files/');
 
@@ -716,55 +781,11 @@ export default {
         // update the browser hash
         window.location.hash = resource.resourcePath;
 
-        if (entry.isDirectory) {
-          this.currentPath = resource.path;
-          this.currentResourcePath = resource.resourcePath;
-          this.currentShare = entry.share || null;
+        if (entry.isDirectory) await this.loadMainDirectory(resource.resourcePath, entry);
+        else await this.loadMainDirectory(resource.parentResourcePath, null);
 
-          if (resource.type === 'files') {
-            this.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
-              return {
-                label: decode(e),
-                url: '#files' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
-              };
-            });
-            this.breadCrumbHome = {
-              icon: 'pi pi-home',
-              url: '#files/'
-            };
-          } else if (resource.type === 'shares') {
-            this.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
-              return {
-                label: decode(e),
-                url: '#shares/' + resource.shareId  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
-              };
-            });
-            this.breadCrumbHome = {
-              icon: 'pi pi-share-alt',
-              url: '#shares/'
-            };
-
-            // if we are not toplevel, add the share information
-            if (entry.share) {
-              this.breadCrumbs.unshift({
-                label: entry.share.filePath.slice(1), // remove slash at the beginning
-                url: '#shares/' + resource.shareId + '/'
-              });
-            }
-          } else {
-            console.error('FIXME breadcrumbs for resource type', resource.type);
-          }
-
-          entry.files.forEach(function (e) {
-            e.extension = getExtension(e);
-            e.filePathNew = e.fileName;
-          });
-
-          this.entries = entry.files;
-          this.viewer = '';
-
-          this.clearSelection();
-        } else {
+        // if we don't have a folder load the viewer
+        if (!entry.isDirectory) {
           if (this.$refs.imageViewer.canHandle(entry)) {
             const otherSupportedEntries = this.entries.filter((e) => this.$refs.imageViewer.canHandle(e)).map((e) => {
               e.resourceUrl = `/viewer/${resource.apiPath}/${e.folderPath}/${e.fileName}`;
