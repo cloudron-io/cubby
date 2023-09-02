@@ -115,3 +115,23 @@ a:hover {
     display: inline-block;
     margin-bottom: 0.5rem;
 }
+
+.pop-enter-active,
+.pop-leave-active {
+  transition: opacity 0.2s ease-in;
+  animation: pop-in 0.2s;
+}
+
+.pop-enter-from,
+.pop-leave-to {
+  opacity: 0;
+  animation: pop-in 0.2s reverse;
+}
+@keyframes pop-in {
+  0% {
+    transform: scale(0.8);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
