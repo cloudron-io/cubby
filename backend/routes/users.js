@@ -15,24 +15,33 @@ exports = module.exports = {
 var assert = require('assert'),
     users = require('../users.js'),
     tokens = require('../tokens.js'),
+    constants = require('../constants.js'),
     diskusage = require('../diskusage.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
 
 async function isAuthenticated(req, res, next) {
-    let username = process.env.LOCAL_DEVELOP_USERNAME || '';
+    if (!req.oidc.isAuthenticated()) return next(new HttpError(401, 'Unauthorized'));
 
-    if (!username) {
-        if (!req.oidc.isAuthenticated()) return next(new HttpError(401, 'Unauthorized'));
-        username = req.oidc.user.sub;
-    }
-
+    let user;
     try {
-        req.user = await users.get(username);
-        if (!req.user) return next(new HttpError(401, 'Invalid login session'));
-    } catch (error) {
-        return next(new HttpError(500, error));
+        user = await users.get(req.oidc.user.sub);
+    } catch (e) {
+        try {
+            user = {
+                username: req.oidc.user.sub,
+                password: '',
+                email: req.oidc.user.email,
+                displayName: req.oidc.user.name
+            };
+            await users.add(user, constants.USER_SOURCE_OIDC);
+        } catch (e) {
+            console.error('Failed to add user', req.user.oidc.user, e);
+            return next(new HttpError(500, 'internal error'));
+        }
     }
+
+    req.user = user;
 
     next();
 }
@@ -76,20 +85,15 @@ async function sessionAuth(req, res, next) {
 }
 
 async function optionalSessionAuth(req, res, next) {
-    let username = process.env.LOCAL_DEVELOP_USERNAME || '';
+    if (!req.oidc.isAuthenticated()) return next(new HttpError(401, 'Unauthorized'));
 
-    if (!username) {
-        if (!req.oidc.isAuthenticated()) return next(new HttpError(401, 'Unauthorized'));
-        username = req.oidc.user.sub;
-    }
-
-    if (!username) {
+    if (!req.oidc.user.sub) {
         req.user = null;
         return next();
     }
 
     try {
-        req.user = await users.get(username);
+        req.user = await users.get(req.oidc.user.sub);
         if (!req.user) return next(new HttpError(401, 'Invalid login session'));
     } catch (error) {
         return next(new HttpError(500, error));

@@ -15,7 +15,6 @@ var assert = require('assert'),
     crypto = require('crypto'),
     debug = require('debug')('cubby:users'),
     database = require('./database.js'),
-    ldap = require('./ldap.js'),
     tokens = require('./tokens.js'),
     MainError = require('./mainerror.js');
 
@@ -57,9 +56,6 @@ async function login(username, password) {
     if (user.source === constants.USER_SOURCE_LOCAL) {
         if (await localLogin(username, password)) return user;
         else return null;
-    } else if (user.source === constants.USER_SOURCE_LDAP) {
-        if (await ldap.login(username, password)) return user;
-        else return null;
     } else {
         debug(`login: ${username} has invalid source type ${user.source}.`);
         return null;
@@ -70,13 +66,13 @@ async function add(user, source) {
     assert.strictEqual(typeof user, 'object');
     assert.strictEqual(typeof source, 'string');
 
-    if (source !== constants.USER_SOURCE_LDAP && source !== constants.USER_SOURCE_LOCAL) throw new MainError(MainError.BAD_FIELD, `source must be "${constants.USER_SOURCE_LOCAL}" or "${constants.USER_SOURCE_LDAP}"`);
+    if (source !== constants.USER_SOURCE_OIDC && source !== constants.USER_SOURCE_LOCAL) throw new MainError(MainError.BAD_FIELD, `source must be "${constants.USER_SOURCE_LOCAL}" or "${constants.USER_SOURCE_OIDC}"`);
 
-    var username = user.username;
-    var email = user.email;
-    var displayName = user.displayName;
-    var password = '';
-    var salt = '';
+    const username = user.username;
+    const email = user.email;
+    const displayName = user.displayName;
+    let password = '';
+    let salt = '';
 
     if (source === constants.USER_SOURCE_LOCAL) {
         try {

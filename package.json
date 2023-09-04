@@ -3,7 +3,7 @@
   "version": "1.1.4",
   "private": true,
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 5555",
     "build": "vite build",
     "serve": "vite preview"
   },
@@ -24,7 +24,6 @@
     "express-session": "^1.17.3",
     "filesize": "^10.0.12",
     "fs-extra": "^11.1.1",
-    "ldapjs": "^2.3.3",
     "morgan": "^1.10.0",
     "multiparty": "^4.2.3",
     "once": "^1.4.0",

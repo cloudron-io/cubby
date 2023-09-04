@@ -24,8 +24,6 @@ while true; do
     esac
 done
 
-export LOCAL_DEVELOP_USERNAME="admin"
-
 # create the same postgres server version to test with
 CONTAINER_NAME="postgres-server-cubby"
 
@@ -64,15 +62,12 @@ export DEBUG="cubby*"
 echo "=> Run database migrations"
 DATABASE_URL="postgres://${CLOUDRON_POSTGRESQL_USERNAME}:${CLOUDRON_POSTGRESQL_PASSWORD}@${CLOUDRON_POSTGRESQL_HOST}/${CLOUDRON_POSTGRESQL_DATABASE}" ./node_modules/.bin/db-migrate up
 
-echo "=> Ensure admin account with admin:admin"
-./cli.js user-add --username admin --password admin --email admin@server.local --display-name Admin || true
+echo "========================================================"
+echo "If running the vite dev server as below in a second terminal on the side for live-reload"
+echo "VITE_API_ORIGIN=http://localhost:3000 npm run dev"
+echo "========================================================"
 
-echo "=> Ensure test account with test:test"
-./cli.js user-add --username test --password test --email test@server.local --display-name Tester || true
-
-echo ""
-echo "Run 'VITE_API_ORIGIN="http://localhost:3000" npm run dev' in a second terminal"
-echo ""
+export VITE_DEV_PORT=5555
 
 echo "=> Start cubby"
 ./app.js

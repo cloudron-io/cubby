@@ -5,7 +5,6 @@
 var constants = require('./backend/constants.js'),
     database = require('./backend/database.js'),
     fs = require('fs'),
-    ldap = require('./backend/ldap.js'),
     config = require('./backend/config.js'),
     diskusage = require('./backend/diskusage.js'),
     server = require('./backend/server.js');
@@ -24,12 +23,8 @@ fs.mkdirSync(constants.DATA_ROOT, { recursive: true });
 // we shall crash if this fails
 diskusage.calculate();
 
-// sync user listing
-ldap.sync();
-
 // currently just update this every hour to put less strain on the disk
 setInterval(diskusage.calculate, 1000 * 60 * 60);
-setInterval(ldap.sync, 1000 * 60 * 60);
 
 server.init(function (error) {
     if (error) exit(error);

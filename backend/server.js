@@ -26,6 +26,9 @@ exports = module.exports = {
     init
 };
 
+const PORT = process.env.PORT || 3000;
+const APP_ORIGIN = process.env.CLOUDRON_APP_ORIGIN || `http://localhost:${PORT}`;
+
 function init(callback) {
     var app = express();
 
@@ -74,13 +77,11 @@ function init(callback) {
     router.del = router.delete; // amend router.del for readability further on
 
     function oidcLogin(req, res) {
-        if (process.env.LOCAL_DEVELOP_USERNAME) return res.redirect('http://localhost:5173');
-
         res.oidc.login({
             returnTo: '/',
             authorizationParams: {
-                redirect_uri: process.env.CLOUDRON_APP_ORIGIN + '/api/v1/oidc/callback',
-            },
+                redirect_uri: `${APP_ORIGIN}/api/v1/callback`,
+            }
         });
     }
 
@@ -153,7 +154,7 @@ function init(callback) {
     app.use('/api', bodyParser.urlencoded({ extended: false, limit: '100mb' }));
     app.use(webdav.express());
 
-    if (!process.env.LOCAL_DEVELOP_USERNAME) {
+    if (process.env.CLOUDRON_OIDC_ISSUER) {
         app.use(oidc.auth({
             issuerBaseURL: process.env.CLOUDRON_OIDC_ISSUER,
             baseURL: process.env.CLOUDRON_APP_ORIGIN,
@@ -172,7 +173,44 @@ function init(callback) {
             }
         }));
     } else {
-        console.log(`Local develop access with ${process.env.LOCAL_DEVELOP_USERNAME}`);
+        // mock oidc
+        let loginSession = false;
+
+        app.use((req, res, next) => {
+            res.oidc = {
+                login(options) {
+                    console.log('---', options, req.session, req.query, req.body)
+                    loginSession = true;
+                    res.redirect(options.authorizationParams.redirect_uri);
+                }
+            };
+            req.oidc = {
+                user: {
+                    sub: 'admin',
+                    family_name: 'Cloudron',
+                    given_name: 'Admin',
+                    locale: 'en-US',
+                    name: 'Cloudron Admin',
+                    preferred_username: 'admin',
+                    email: 'admin@cloudron.local',
+                    email_verified: true
+                },
+                isAuthenticated() {
+                    return loginSession;
+                }
+            };
+
+            next();
+        });
+
+        app.use('/api/v1/callback', (req, res) => {
+            res.redirect(`http://localhost:${process.env.VITE_DEV_PORT || process.env.PORT}/`);
+        });
+
+        app.use('/api/v1/logout', (req, res) => {
+            loginSession = false;
+            res.status(200).send({});
+        });
     }
 
     app.use(router);
