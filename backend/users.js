@@ -101,7 +101,7 @@ async function get(username) {
     assert.strictEqual(typeof username, 'string');
 
     const result = await database.query('SELECT * FROM users WHERE username = $1', [ username ]);
-    if (result.rows.length === 0) return null;
+    if (result.rows.length === 0) throw new MainError(MainError.NOT_FOUND, 'user not found');
 
     return postProcess(result.rows[0]);
 }

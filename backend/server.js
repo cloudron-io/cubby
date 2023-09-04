@@ -174,41 +174,44 @@ function init(callback) {
         }));
     } else {
         // mock oidc
-        let loginSession = false;
-
         app.use((req, res, next) => {
             res.oidc = {
                 login(options) {
-                    console.log('---', options, req.session, req.query, req.body)
-                    loginSession = true;
-                    res.redirect(options.authorizationParams.redirect_uri);
+                    res.writeHead(200, { 'Content-Type': 'text/html' })
+                    res.write(require('fs').readFileSync(__dirname + '/oidc_develop_user_select.html', 'utf8').replaceAll('REDIRECT_URI', options.authorizationParams.redirect_uri));
+                    res.end()
                 }
             };
+
             req.oidc = {
-                user: {
-                    sub: 'admin',
-                    family_name: 'Cloudron',
-                    given_name: 'Admin',
-                    locale: 'en-US',
-                    name: 'Cloudron Admin',
-                    preferred_username: 'admin',
-                    email: 'admin@cloudron.local',
-                    email_verified: true
-                },
+                user: {},
                 isAuthenticated() {
-                    return loginSession;
+                    return !!req.session.username;
                 }
             };
+
+            if (req.session.username) {
+                req.oidc.user = {
+                    sub: req.session.username,
+                    family_name: 'Cloudron',
+                    given_name: req.session.username.toUpperCase(),
+                    locale: 'en-US',
+                    name: 'Cloudron ' + req.session.username.toUpperCase(),
+                    preferred_username: req.session.username,
+                    email: req.session.username + '@cloudron.local',
+                    email_verified: true
+                };
+            }
 
             next();
         });
 
         app.use('/api/v1/callback', (req, res) => {
+            req.session.username = req.query.username;
             res.redirect(`http://localhost:${process.env.VITE_DEV_PORT || process.env.PORT}/`);
         });
 
         app.use('/api/v1/logout', (req, res) => {
-            loginSession = false;
             res.status(200).send({});
         });
     }
