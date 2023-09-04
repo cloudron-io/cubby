@@ -244,7 +244,7 @@ export default {
         entries: [],
         selectedEntries: [],
         currentPath: '/',
-        currentResourcePath: 'files/',
+        currentResourcePath: '',
         currentShare: null,
         sideBarVisible: true,
         breadCrumbs: [],
@@ -308,7 +308,7 @@ export default {
         this.profile = await this.mainModel.getProfile();
         this.config = await this.mainModel.getConfig();
 
-        this.loadPath(window.location.hash.slice(1), true);
+        this.loadPath(window.location.hash.slice(1));
       },
       onUploadFinished() {
         this.refresh();
@@ -686,10 +686,13 @@ export default {
             });
         },
       async refresh() {
-        await this.loadPath(null, true);
+        await this.loadPath(null);
       },
       async loadMainDirectory(path, entry) {
         const resource = parseResourcePath(path);
+
+        // nothing new
+        if (this.currentResourcePath === resource.resourcePath) return;
 
         if (!entry) {
           try {
@@ -753,19 +756,8 @@ export default {
         this.clearSelection();
 
       },
-      async loadPath(path, alwaysRefresh) {
+      async loadPath(path) {
         const resource = parseResourcePath(path || this.currentResourcePath || 'files/');
-
-        // check if we actually have a new path to fetch
-        var currentResource = null;
-        if (!alwaysRefresh && this.currentResourcePath) {
-          currentResource = parseResourcePath(this.currentResourcePath);
-
-          if (currentResource.resourcePath === resource.resourcePath) return;
-        }
-
-        // only show busy state if it takes more than 2 seconds to avoid flickering
-        var busyTimer = setTimeout(() => { this.busy = true; }, 2000);
 
         let entry;
         try {
@@ -778,9 +770,6 @@ export default {
           else if (error.status === 404) this.error = 'Does not exist';
           else console.error(error);
         }
-
-        clearTimeout(busyTimer);
-        this.busy = false;
 
         // update the browser hash
         window.location.hash = resource.resourcePath;
@@ -870,10 +859,10 @@ export default {
 
       // initial load with hash if present
       const hash = window.location.hash.slice(1);
-      if (hash.indexOf('files/') === 0) this.loadPath(hash, true);
+      if (hash.indexOf('files/') === 0) this.loadPath(hash);
       else if (hash.indexOf('recent/') === 0) this.onRecent();
-      else if (hash.indexOf('shares/') === 0) this.loadPath(hash, true);
-      else this.loadPath(null, true);
+      else if (hash.indexOf('shares/') === 0) this.loadPath(hash);
+      else this.loadPath(null);
 
       this.ready = true;
     }
