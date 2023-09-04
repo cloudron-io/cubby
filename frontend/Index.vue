@@ -536,7 +536,12 @@ export default {
         },
         async renameHandler(file, newName) {
           const resource = parseResourcePath(this.currentResourcePath);
-          await this.directoryModel.rename(resource, file.filePath, sanitize(resource.path + '/' + newName));
+          const fromFilePath = file.filePath;
+          const toFilePath = sanitize(resource.path + '/' + newName);
+
+          if (fromFilePath === toFilePath) return;
+
+          await this.directoryModel.rename(resource, fromFilePath, toFilePath);
           await this.refresh();
         },
         showAllRecent() {
@@ -686,13 +691,13 @@ export default {
             });
         },
       async refresh() {
-        await this.loadPath(null);
+        await this.loadPath(null, true);
       },
-      async loadMainDirectory(path, entry) {
+      async loadMainDirectory(path, entry, forceLoad = false) {
         const resource = parseResourcePath(path);
 
         // nothing new
-        if (this.currentResourcePath === resource.resourcePath) return;
+        if (!forceLoad && this.currentResourcePath === resource.resourcePath) return;
 
         if (!entry) {
           try {
@@ -756,7 +761,7 @@ export default {
         this.clearSelection();
 
       },
-      async loadPath(path) {
+      async loadPath(path, forceLoad = false) {
         const resource = parseResourcePath(path || this.currentResourcePath || 'files/');
 
         let entry;
@@ -774,8 +779,8 @@ export default {
         // update the browser hash
         window.location.hash = resource.resourcePath;
 
-        if (entry.isDirectory) await this.loadMainDirectory(resource.resourcePath, entry);
-        else await this.loadMainDirectory(resource.parentResourcePath, null);
+        if (entry.isDirectory) await this.loadMainDirectory(resource.resourcePath, entry, forceLoad);
+        else await this.loadMainDirectory(resource.parentResourcePath, null, forceLoad);
 
         // if we don't have a folder load the viewer
         if (!entry.isDirectory) {
