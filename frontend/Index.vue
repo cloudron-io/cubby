@@ -10,7 +10,7 @@
       <h1 style="margin-bottom: 50px; text-align: center;"><img src="/logo-plain.svg" height="60" width="60"/><br/>Cubby</h1>
 
       <div class="sidebar-entry" @click="showAllFiles"><i class="pi pi-folder-open"></i> All Files</div>
-      <div class="sidebar-entry" @click="showAllRecent"><i class="pi pi-clock"></i> Recent Files</div>
+      <!-- <div class="sidebar-entry" @click="showAllRecent"><i class="pi pi-clock"></i> Recent Files</div> -->
       <div class="sidebar-entry" @click="showAllShares"><i class="pi pi-share-alt"></i> Shared With You</div>
 
       <div style="flex-grow: 1">&nbsp;</div>
@@ -468,6 +468,7 @@ export default {
           await this.directoryModel.download(resource, entries);
         },
         onDrop(items, targetEntry) {
+          console.log(items, targetEntry)
           var that = this;
 
           if (items.length === 0) return;
@@ -547,40 +548,9 @@ export default {
         showAllRecent() {
             window.location.hash = 'recent/';
         },
-        onRecent() {
-            var that = this;
-
-            this.clearSelection();
-
-            that.busy = true;
-            superagent.get('/api/v1/recent').end(function (error, result) {
-                that.busy = false;
-
-                if (error) {
-                    that.entries = [];
-
-                    if (error.status === 401) that.onLogout();
-                    else if (error.status === 404) that.error = 'Does not exist';
-                    else console.error(error);
-
-                    return;
-                }
-
-                that.currentPath = '/';
-                that.currentResourcePath = 'recent/';
-                that.breadCrumbs = [];
-                that.breadCrumbHome = {
-                    icon: 'pi pi-clock',
-                    url: '#recent/'
-                };
-
-                result.body.files.forEach(function (entry) {
-                    entry.extension = getExtension(entry);
-                    entry.filePathNew = entry.fileName;
-                });
-
-                that.entries = result.body.files;
-            });
+        async onRecent() {
+          this.clearSelection();
+          await this.loadPath('recent/');
         },
         showAllShares() {
           window.location.hash = 'shares/';
