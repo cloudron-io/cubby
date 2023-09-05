@@ -108,30 +108,24 @@ function parseResourcePath(resourcePath) {
         path: '',
         parentResourcePath: '',
         shareId: '',
-        apiPath: '',
+        id: '',
         resourcePath: ''
     };
 
-    if (resourcePath.indexOf('files/') === 0) {
-        result.type = 'files';
-        result.path = resourcePath.slice('files'.length) || '/';
-        result.parentResourcePath = 'files' + result.path.slice(0, result.path.lastIndexOf('/')) + '/';
-        result.apiPath = 'files';
-        result.resourcePath = result.type + result.path;
+    if (resourcePath.indexOf('/home/') === 0) {
+        result.type = 'home';
+        result.path = resourcePath.slice('/home'.length) || '/';
+        result.parentResourcePath = result.path === '/' ? null : '/home' + result.path.slice(0, result.path.lastIndexOf('/')) + '/';
+        result.id = 'home';
+        result.resourcePath = `/${result.type}${result.path}`;
     } else if (resourcePath.indexOf('shares/') === 0) {
         result.type = 'shares';
         result.shareId = resourcePath.split('/')[1];
         result.path = resourcePath.slice((result.type + '/' + result.shareId).length) || '/';
         result.parentResourcePath = 'shares/' + result.shareId + result.path.slice(0, result.path.lastIndexOf('/')) + '/';
-        result.apiPath = 'shares/' + result.shareId;
+        result.id = result.shareId;
         // without shareId we show the root (share listing)
         result.resourcePath = result.type + '/' + (result.shareId ? (result.shareId + result.path) : '');
-    } else if (resourcePath.indexOf('recent/') === 0) {
-        result.type = 'recent';
-        result.path = resourcePath.slice('recent'.length) || '/';
-        result.parentResourcePath = 'recent' + result.path.slice(0, result.path.lastIndexOf('/')) + '/';
-        result.apiPath = 'recent';
-        result.resourcePath = result.type + result.path;
     } else {
         console.error('Unknown resource path', resourcePath);
     }

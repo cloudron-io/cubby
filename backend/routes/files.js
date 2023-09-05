@@ -87,49 +87,84 @@ async function get(req, res, next) {
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
     if (type && (type !== 'raw' && type !== 'download' && type !== 'json')) return next(new HttpError(400, 'type must be either empty, "download" or "raw"'));
 
-    debug(`get: ${filePath} type:${type || 'json'}`);
+    const resource = filePath.split('/')[1];
+    filePath = filePath.slice(resource.length+1);
+
+    debug(`get: ${resource} ${filePath} type:${type || 'json'}`);
 
     let result;
 
-    try {
-        result = await files.get(req.user.username, filePath);
-    } catch (error) {
-        if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'not found'));
-        return next(new HttpError(500, error));
-    }
+    if (resource === 'home') {
+        try {
+            result = await files.get(req.user.username, filePath);
+        } catch (error) {
+            if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'not found'));
+            return next(new HttpError(500, error));
+        }
 
-    if (type === 'raw') {
-        if (result.isDirectory) return next(new HttpError(417, 'type "raw" is not supported for directories'));
-        return res.sendFile(result._fullFilePath);
-    } else if (type === 'download') {
-        if (result.isDirectory) return next(new HttpError(417, 'type "download" is not supported for directories'));
-        return res.download(result._fullFilePath);
-    }
+        if (type === 'raw') {
+            if (result.isDirectory) return next(new HttpError(417, 'type "raw" is not supported for directories'));
+            return res.sendFile(result._fullFilePath);
+        } else if (type === 'download') {
+            if (result.isDirectory) return next(new HttpError(417, 'type "download" is not supported for directories'));
+            return res.download(result._fullFilePath);
+        }
 
-    next(new HttpSuccess(200, result.withoutPrivate()));
+        next(new HttpSuccess(200, result.withoutPrivate()));
+    } else {
+        next(new HttpError(500, `Unknown resource type ${resource}`));
+    }
 }
 
 async function update(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
-    const filePath = req.query.path ? decodeURIComponent(req.query.path) : '';
     const action = req.query.action;
+    let filePath = decodeURIComponent(req.query.path);
 
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
 
-    debug(`update: [${action}] ${filePath}`);
+    let resource = filePath.split('/')[1];
+    filePath = filePath.slice(resource.length+1);
 
-    const newFilePath = decodeURIComponent(req.query.new_path);
-    if (!newFilePath) return next(new HttpError(400, 'action requires new_path argument'));
+    debug(`update: [${action}] ${resource} ${filePath}`);
 
-    try {
-        if (action === 'move') await files.move(req.user.username, filePath, newFilePath);
-        else if (action === 'copy') await files.copy(req.user.username, filePath, newFilePath);
-        else return next(new HttpError(400, 'unknown action. Must be one of "move", "copy"'));
-    } catch (error) {
-        if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'not found'));
-        if (error.reason === MainError.CONFLICT) return next(new HttpError(409, 'already exists'));
-        return next(new HttpError(500, error));
+    // TODO support shares
+    if (action === 'move') {
+        if (!req.query.new_path) return next(new HttpError(400, 'action requires new_path argument'));
+
+        let newFilePath = decodeURIComponent(req.query.new_path);
+        const newResource = newFilePath.split('/')[1];
+        newFilePath = newFilePath.slice(newResource.length+1);
+
+        // currently we still operate on username only
+        resource = req.user.username;
+        try {
+            await files.move(resource, filePath, newFilePath);
+        } catch (error) {
+            if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'not found'));
+            if (error.reason === MainError.CONFLICT) return next(new HttpError(409, 'already exists'));
+            return next(new HttpError(500, error));
+        }
+    } else if (action === 'copy') {
+        if (!req.query.new_path) return next(new HttpError(400, 'action requires new_path argument'));
+
+        let newFilePath = decodeURIComponent(req.query.new_path);
+        const newResource = newFilePath.split('/')[1];
+        // currently we still operate on username only
+        newFilePath = newFilePath.slice(newResource.length+1);
+
+        // currently we still operate on username only
+        resource = req.user.username;
+        try {
+            await files.copy(resource, filePath, newFilePath);
+        } catch (error) {
+            if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'not found'));
+            if (error.reason === MainError.CONFLICT) return next(new HttpError(409, 'already exists'));
+            return next(new HttpError(500, error));
+        }
+    } else {
+        return next(new HttpError(400, 'unknown action. Must be one of "move", "copy"'));
     }
 
     return next(new HttpSuccess(200, {}));

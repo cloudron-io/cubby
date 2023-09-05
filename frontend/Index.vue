@@ -285,7 +285,7 @@ export default {
     methods: {
       prettyFileSize,
       showAllFiles() {
-        window.location.hash = 'files/';
+        window.location.hash = 'files/home/';
       },
       async uploadHandler(targetDir, file, progressHandler) {
         const resource = parseResourcePath(targetDir);
@@ -364,11 +364,10 @@ export default {
         this.pasteInProgress = false;
       },
       async onSaveNewFileDialog() {
-          const path = sanitize(this.currentPath + '/' + this.newFileDialog.fileName);
           const resource = parseResourcePath(this.currentResourcePath || 'files/');
 
           try {
-            await this.directoryModel.newFile(resource, path);
+            await this.directoryModel.newFile(resource, this.newFileDialog.fileName);
           } catch (error) {
             if (error.reason === DirectoryModelError.NO_AUTH) this.onLogout();
             else if (error.reason === DirectoryModelError.NOT_ALLOWED) this.newFileDialog.error = 'File name not allowed';
@@ -385,11 +384,10 @@ export default {
           this.newFileDialog.visible = false;
       },
       async onSaveNewFolderDialog() {
-        const path = sanitize(this.currentPath + '/' + this.newFolderDialog.folderName);
         const resource = parseResourcePath(this.currentResourcePath || 'files/');
 
         try {
-          await this.directoryModel.newFolder(resource, path);
+          await this.directoryModel.newFolder(resource, this.newFolderDialog.folderName);
         } catch (error) {
           if (error.reason === DirectoryModelError.NO_AUTH) this.onLogout();
           else if (error.reason === DirectoryModelError.NOT_ALLOWED) this.newFolderDialog.error = 'Folder name not allowed';
@@ -470,7 +468,6 @@ export default {
           await this.directoryModel.download(resource, entries);
         },
         onDrop(items, targetEntry) {
-          console.log(items, targetEntry)
           var that = this;
 
           if (items.length === 0) return;
@@ -538,13 +535,12 @@ export default {
           this.deleteInProgress = false;
         },
         async renameHandler(file, newName) {
-          const resource = parseResourcePath(this.currentResourcePath);
-          const fromFilePath = file.filePath;
-          const toFilePath = sanitize(resource.path + '/' + newName);
+          const fromResource = file.resource;
+          const toResource = parseResourcePath(sanitize(this.currentResourcePath + '/' + newName));
 
-          if (fromFilePath === toFilePath) return;
+          if (fromResource.resourcePath === toResource.resourcePath) return;
 
-          await this.directoryModel.rename(resource, fromFilePath, toFilePath);
+          await this.directoryModel.rename(fromResource, toResource);
           await this.refresh();
         },
         showAllRecent() {
@@ -666,6 +662,7 @@ export default {
         await this.loadPath(null, true);
       },
       async loadMainDirectory(path, entry, forceLoad = false) {
+        // path is files/filepath or shares/shareid/filepath
         const resource = parseResourcePath(path);
 
         // nothing new
@@ -688,16 +685,16 @@ export default {
         this.currentResourcePath = resource.resourcePath;
         this.currentShare = entry.share || null;
 
-        if (resource.type === 'files') {
+        if (resource.type === 'home') {
           this.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
             return {
               label: decode(e),
-              url: '#files' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
+              url: '#files/home' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
             };
           });
           this.breadCrumbHome = {
             icon: 'pi pi-home',
-            url: '#files/'
+            url: '#files/home'
           };
         } else if (resource.type === 'shares') {
           this.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
@@ -734,11 +731,11 @@ export default {
 
       },
       async loadPath(path, forceLoad = false) {
-        const resource = parseResourcePath(path || this.currentResourcePath || 'files/');
+        const resource = parseResourcePath(path || this.currentResourcePath || '/home/');
 
         let entry;
         try {
-          entry = await this.directoryModel.get(resource, resource.path);
+          entry = await this.directoryModel.get(resource);
         } catch (error) {
           this.entries = [];
           entry = {};
@@ -749,7 +746,7 @@ export default {
         }
 
         // update the browser hash
-        window.location.hash = resource.resourcePath;
+        window.location.hash = `files${resource.resourcePath}`;
 
         if (entry.isDirectory) await this.loadMainDirectory(resource.resourcePath, entry, forceLoad);
         else await this.loadMainDirectory(resource.parentResourcePath, null, forceLoad);
@@ -765,7 +762,7 @@ export default {
             this.$refs.imageViewer.open(entry, otherSupportedEntries);
             this.viewer = 'image';
           } else if (this.$refs.textEditor.canHandle(entry)) {
-            this.$refs.textEditor.open(entry, await this.directoryModel.getRawContent(resource, entry.filePath));
+            this.$refs.textEditor.open(entry, await this.directoryModel.getRawContent(resource));
             this.viewer = 'text';
           } else if (this.$refs.pdfViewer.canHandle(entry)) {
             this.$refs.pdfViewer.open(entry);
@@ -781,14 +778,14 @@ export default {
       },
       onOpen(entry) {
         if (entry.share && entry.share.id) window.location.hash = 'shares/' + entry.share.id + '/' + entry.filePath;
-        else window.location.hash = 'files' + entry.filePath;
+        else window.location.hash = 'files/home' + entry.filePath;
       },
       onViewerClose() {
         this.viewer = '';
 
         // update the browser hash
-        const resource = parseResourcePath(this.currentResourcePath || 'files/');
-        window.location.hash = resource.resourcePath;
+        const resource = parseResourcePath(this.currentResourcePath || '/home/');
+        window.location.hash = `files${resource.resourcePath}`;
       },
       onUp() {
         if (window.location.hash.indexOf('#shares/') === 0) {
@@ -807,10 +804,10 @@ export default {
       window.addEventListener('hashchange', () => {
         const hash = window.location.hash.slice(1);
 
-        if (hash.indexOf('files/') === 0) this.loadPath(hash);
+        if (hash.indexOf('files/home/') === 0) this.loadPath(hash.slice('files'.length));
         else if (hash.indexOf('recent/') === 0) this.onRecent();
-        else if (hash.indexOf('shares/') === 0) this.loadPath(hash);
-        else window.location.hash = 'files/';
+        else if (hash.indexOf('settings/') === 0) return;
+        else window.location.hash = 'files/home/';
       }, false);
 
       this.mainModel = createMainModel(API_ORIGIN);
@@ -836,10 +833,10 @@ export default {
 
       // initial load with hash if present
       const hash = window.location.hash.slice(1);
-      if (hash.indexOf('files/') === 0) this.loadPath(hash);
+      if (hash.indexOf('files/home/') === 0) this.loadPath(hash.slice('files'.length));
       else if (hash.indexOf('recent/') === 0) this.onRecent();
       else if (hash.indexOf('shares/') === 0) this.loadPath(hash);
-      else this.loadPath(null);
+      else this.loadPath('/home/');
 
       this.ready = true;
     }

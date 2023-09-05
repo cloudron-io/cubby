@@ -1,6 +1,8 @@
 'use strict';
 
 exports = module.exports = {
+    HOME: 'home',
+
     getValidFullPath,
     addDirectory,
     addOrOverwriteFile,
