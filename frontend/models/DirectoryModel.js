@@ -158,7 +158,7 @@ export function createDirectoryModel(origin) {
     },
     async download(resource, files) {
       if (files.length === 1 && !files[0].isDirectory) {
-        window.location.href = `${origin}/api/v1/files?type=download&path=${resource.id}${files[0].filePath}`;
+        window.location.href = `${origin}/api/v1/files?type=download&path=${files[0].resourcePath}`;
       } else {
         const params = new URLSearchParams();
 
@@ -170,8 +170,7 @@ export function createDirectoryModel(origin) {
 
         params.append('entries', JSON.stringify(files.map(function (entry) {
             return {
-                filePath: entry.filePath,
-                shareId: entry.share ? entry.share.id : undefined
+                resourcePath: entry.resourcePath
             };
         })));
 

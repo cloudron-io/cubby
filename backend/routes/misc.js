@@ -57,7 +57,7 @@ async function download(req, res, next) {
     const skipPath = req.query.skipPath || '';
     const name = req.query.name || 'cubby';
 
-    debug(`download: type=zip skipPath={skipPath}`, entries);
+    debug(`download: type=zip skipPath=${skipPath}`, entries);
 
     const archive = archiver('zip', {
         zlib: { level: 9 }
@@ -79,18 +79,10 @@ async function download(req, res, next) {
     // collect and attach all requested files
     for (const entry of entries) {
         try {
-            let file;
-            if (entry.shareId) {
-                const share = await shares.get(entry.shareId);
-                if (!share) {
-                    console.error(`Failed to get share ${entry.shareId}.`);
-                    continue;
-                }
+            const resource = entry.resourcePath.split('/')[1];
+            let filePath = entry.resourcePath.slice(resource.length+1);
 
-                file = await files.get(share.owner, path.join(share.filePath, entry.filePath));
-            } else {
-                file = await files.get(req.user.username, entry.filePath);
-            }
+            const file = await files.get(req.user.username /* FIXME should be resource */, filePath);
 
             debug(`download: add ${entry.isDirectory ? 'directory' : 'file'} to archive: ${file._fullFilePath} as ${file.filePath.slice(skipPath.length)}`);
 
