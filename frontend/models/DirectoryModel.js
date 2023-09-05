@@ -93,8 +93,6 @@ export function createDirectoryModel(origin) {
         path: path
       });
 
-      console.log(result)
-
       return result.text;
     },
     async newFile(resource, newFilePath) {
@@ -120,12 +118,32 @@ export function createDirectoryModel(origin) {
         throw new DirectoryModelError(DirectoryModelError.GENERIC, error);
       }
     },
+    async exists(resource, path) {
+      try {
+        await superagent.head(`${origin}/api/v1/${resource.apiPath}`).query({ path }).withCredentials();
+      } catch (error) {
+        if (error.status === 401) throw new DirectoryModelError(DirectoryModelError.NO_AUTH, error);
+        if (error.status === 404) return false;
+        else throw new DirectoryModelError(DirectoryModelError.GENERIC, error);
+      }
+
+      return true;
+    },
     async upload(resource, file, progressHandler) {
       // file may contain a file name or a file path + file name
       const relativefilePath = (file.webkitRelativePath ? file.webkitRelativePath : file.name);
 
+      // find unique path
+      let uniqueRelativeFilePath = sanitize(relativefilePath);
+      while (true) {
+        const exists = await this.exists(resource, uniqueRelativeFilePath);
+        if (!exists) break;
+
+        uniqueRelativeFilePath = uniqueRelativeFilePath + '-new';
+      }
+
       await superagent.post(`${origin}/api/v1/${resource.apiPath}`).withCredentials()
-        .query({ path: sanitize(resource.path + '/' + relativefilePath), overwrite: !!file.overwrite })
+        .query({ path: sanitize(resource.path + '/' + uniqueRelativeFilePath), overwrite: !!file.overwrite })
         .attach('file', file)
         .on('progress', progressHandler);
     },

@@ -289,7 +289,9 @@ export default {
       },
       async uploadHandler(targetDir, file, progressHandler) {
         const resource = parseResourcePath(targetDir);
+
         await this.directoryModel.upload(resource, file, progressHandler);
+
         this.refresh();
       },
       async onLogout() {
