@@ -182,7 +182,7 @@
   </Transition>
   <Transition name="pop">
     <div class="viewer-container" v-show="viewer === 'text'">
-      <TextEditor ref="textEditor" @close="onViewerClose" @saved="onFileSaved" />
+      <TextEditor ref="textEditor" @close="onViewerClose" :save-handler="onFileSaved" />
     </div>
   </Transition>
   <Transition name="pop">
@@ -414,20 +414,15 @@ export default {
       onToggleSideBar() {
         this.sideBarVisible = !this.sideBarVisible;
       },
-        onFileSaved(entry, content, done) {
-            var that = this;
+      async onFileSaved(entry, content, done) {
+        try {
+          await this.directoryModel.saveFile(entry.resource, content);
+        } catch (error) {
+          console.error(`Failed to save file ${entry.resourcePath}`, error);
+        }
 
-            var formData = new FormData();
-            formData.append('file', new File([ content ], 'file'));
-
-            superagent.post('/api/v1/files').query({ path: entry.filePath, overwrite: true }).send(formData).end(function (error, result) {
-                if (result && result.statusCode === 401) return that.logout();
-                if (result && result.statusCode !== 200) return console.error('Error saving file: ', result.statusCode);
-                if (error) return console.error(error);
-
-                if (typeof done === 'function') done();
-            });
-        },
+        if (typeof done === 'function') done();
+      },
       clearSelection() {
         this.selectedEntries = [];
       },

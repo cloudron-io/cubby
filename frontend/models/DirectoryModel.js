@@ -102,6 +102,18 @@ export function createDirectoryModel(origin) {
 
       return result.text;
     },
+    async saveFile(resource, content) {
+      const formData = new FormData();
+      formData.append('file', new File([ content ], 'file'));
+
+      try {
+        await superagent.post(`${origin}/api/v1/files`).withCredentials().query({ path: resource.resourcePath, overwrite: true }).send(formData);
+      } catch (error) {
+        if (error.status === 401) throw new DirectoryModelError(DirectoryModelError.NO_AUTH, error);
+        else if (error.status === 403) throw new DirectoryModelError(DirectoryModelError.NOT_ALLOWED, error);
+        throw new DirectoryModelError(DirectoryModelError.GENERIC, error);
+      }
+    },
     async newFile(resource, newFileName) {
       const formData = new FormData();
       formData.append('file', new Blob());
@@ -118,7 +130,6 @@ export function createDirectoryModel(origin) {
       }
     },
     async newFolder(resource, newFolderName) {
-
       const newFolderPath = `${resource.resourcePath}/${newFolderName}`;
       try {
         await superagent.post(`${origin}/api/v1/files`).withCredentials().query({ path: newFolderPath, directory: true });
