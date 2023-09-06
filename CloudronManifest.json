@@ -21,7 +21,7 @@
     "localstorage": {},
     "postgresql": {},
     "oidc": {
-      "loginRedirectUri": "/api/v1/oidc/callback"
+      "loginRedirectUri": "/api/v1/callback"
     }
   },
   "mediaLinks": [

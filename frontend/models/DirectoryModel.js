@@ -63,7 +63,8 @@ export function createDirectoryModel(origin) {
       entry.name = entry.fileName;
       entry.folderPath = resource.path.slice(-entry.fileName.length);
       entry.previewUrl = origin + entry.previewUrl;
-      entry.fullFileUrl = `${origin}/api/v1/files?path=${resource.id}${entry.filePath}&type=raw`;
+      entry.fullFileUrl = `${origin}/api/v1/files?path=/${resource.id}${entry.filePath}&type=raw`;
+      entry.downloadFileUrl = `${origin}/api/v1/files?path=/${resource.id}${entry.filePath}&type=download`;
       entry.modified = new Date(entry.mtime);
       entry.type = entry.isDirectory ? 'directory' : 'file',
       entry.icon = entry.previewUrl;
@@ -76,7 +77,8 @@ export function createDirectoryModel(origin) {
         child.name = child.fileName;
         child.folderPath = entry.folderPath.slice(-child.fileName.length);
         child.previewUrl = origin + child.previewUrl;
-        child.fullFileUrl = `${origin}/api/v1/files?path=${resource.id}${child.filePath}&type=raw`;
+        child.fullFileUrl = `${origin}/api/v1/files?path=/${resource.id}${child.filePath}&type=raw`;
+        child.downloadFileUrl = `${origin}/api/v1/files?path=/${resource.id}${child.filePath}&type=download`;
         child.modified = new Date(child.mtime);
         child.type = child.isDirectory ? 'directory' : 'file',
         child.icon = child.previewUrl;

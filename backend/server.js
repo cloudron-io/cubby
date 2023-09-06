@@ -167,9 +167,9 @@ function init(callback) {
             },
             authRequired: false,
             routes: {
-                callback: '/api/v1/oidc/callback',
+                callback: '/api/v1/callback',
                 login: false,
-                logout: '/api/v1/oidc/logout'
+                logout: '/api/v1/logout'
             }
         }));
     } else {

@@ -185,7 +185,11 @@
       <TextEditor ref="textEditor" @close="onViewerClose" @saved="onFileSaved" />
     </div>
   </Transition>
-      <!-- <PdfViewer ref="pdfViewer" @close="onViewerClose" v-show="viewer === 'pdf'" /> -->
+  <Transition name="pop">
+    <div class="viewer-container" v-show="viewer === 'pdf'">
+      <PdfViewer ref="pdfViewer" @close="onViewerClose" />
+    </div>
+  </Transition>
       <!-- <OfficeViewer ref="officeViewer" :config="config.viewers.collabora" @close="onViewerClose" v-show="viewer === 'office'" /> -->
       <!-- <GenericViewer ref="genericViewer" @close="onViewerClose" v-show="viewer === 'generic'" /> -->
 </template>
@@ -196,9 +200,9 @@
 
 import superagent from 'superagent';
 import async from 'async';
-import { parseResourcePath, decode, getExtension, getShareLink, copyToClipboard, sanitize, getDirectLink, prettyFileSize } from './utils.js';
+import { parseResourcePath, decode, getExtension, getShareLink, copyToClipboard, sanitize, prettyFileSize } from './utils.js';
 
-import { TextEditor, ImageViewer, DirectoryView, FileUploader } from 'pankow';
+import { TextEditor, ImageViewer, DirectoryView, FileUploader, PdfViewer } from 'pankow';
 import { createDirectoryModel, DirectoryModelError } from './models/DirectoryModel.js';
 import { createMainModel } from './models/MainModel.js';
 
@@ -219,6 +223,7 @@ export default {
       ImageViewer,
       MainToolbar,
       TextEditor,
+      PdfViewer,
       FileUploader
     },
     data() {
@@ -761,15 +766,15 @@ export default {
 
             this.$refs.imageViewer.open(entry, otherSupportedEntries);
             this.viewer = 'image';
-          } else if (this.$refs.textEditor.canHandle(entry)) {
-            this.$refs.textEditor.open(entry, await this.directoryModel.getRawContent(resource));
-            this.viewer = 'text';
           } else if (this.$refs.pdfViewer.canHandle(entry)) {
             this.$refs.pdfViewer.open(entry);
             this.viewer = 'pdf';
-          } else if (this.$refs.officeViewer.canHandle(entry)) {
-            this.$refs.officeViewer.open(entry);
-            this.viewer = 'office';
+          // } else if (this.$refs.officeViewer.canHandle(entry)) {
+          //   this.$refs.officeViewer.open(entry);
+          //   this.viewer = 'office';
+          } else if (this.$refs.textEditor.canHandle(entry)) {
+            this.$refs.textEditor.open(entry, await this.directoryModel.getRawContent(resource));
+            this.viewer = 'text';
           } else {
             this.viewer = 'generic';
             this.$refs.genericViewer.open(entry);
