@@ -154,7 +154,7 @@ async function update(req, res, next) {
         // currently we still operate on username only
         newFilePath = newFilePath.slice(newResource.length+1);
 
-        // currently we still operate on username only
+        // FIXME currently we still operate on username only
         resource = req.user.username;
         try {
             await files.copy(resource, filePath, newFilePath);
@@ -173,14 +173,20 @@ async function update(req, res, next) {
 async function remove(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
-    const filePath = req.query.path ? decodeURIComponent(req.query.path) : '';
+    let filePath = req.query.path ? decodeURIComponent(req.query.path) : '';
 
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
 
-    debug('remove:', filePath);
+    let resource = filePath.split('/')[1];
+    filePath = filePath.slice(resource.length+1);
+
+    debug(`remove: ${resource} ${filePath}`);
+
+    // FIXME currently we still operate on username only
+    resource = req.user.username;
 
     try {
-        await files.remove(req.user.username, filePath);
+        await files.remove(resource, filePath);
     } catch (error) {
         return next(new HttpError(500, error));
     }

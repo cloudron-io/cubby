@@ -186,9 +186,9 @@ export function createDirectoryModel(origin) {
         throw new DirectoryModelError(DirectoryModelError.GENERIC, error);
       }
     },
-    async remove(resource, filePath) {
+    async remove(resource) {
       try {
-        await superagent.del(`${origin}/api/v1/files`).query({ path: filePath }).withCredentials();
+        await superagent.del(`${origin}/api/v1/files`).query({ path: resource.resourcePath }).withCredentials();
       } catch (error) {
         if (error.status === 401) throw new DirectoryModelError(DirectoryModelError.NO_AUTH, error);
         throw new DirectoryModelError(DirectoryModelError.GENERIC, error);
