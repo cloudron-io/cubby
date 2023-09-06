@@ -369,24 +369,24 @@ export default {
         this.pasteInProgress = false;
       },
       async onSaveNewFileDialog() {
-          const resource = parseResourcePath(this.currentResourcePath || 'files/');
+        const resource = parseResourcePath(this.currentResourcePath || 'files/');
 
-          try {
-            await this.directoryModel.newFile(resource, this.newFileDialog.fileName);
-          } catch (error) {
-            if (error.reason === DirectoryModelError.NO_AUTH) this.onLogout();
-            else if (error.reason === DirectoryModelError.NOT_ALLOWED) this.newFileDialog.error = 'File name not allowed';
-            else if (error.reason === DirectoryModelError.CONFLICT) this.newFileDialog.error = 'File already exists';
-            else {
-              this.newFolderDialog.error = 'Unkown error, check logs';
-              console.error('Failed to add file, unknown error:', error)
-            }
-
-            return;
+        try {
+          await this.directoryModel.newFile(resource, this.newFileDialog.fileName);
+        } catch (error) {
+          if (error.reason === DirectoryModelError.NO_AUTH) this.onLogout();
+          else if (error.reason === DirectoryModelError.NOT_ALLOWED) this.newFileDialog.error = 'File name not allowed';
+          else if (error.reason === DirectoryModelError.CONFLICT) this.newFileDialog.error = 'File already exists';
+          else {
+            this.newFolderDialog.error = 'Unkown error, check logs';
+            console.error('Failed to add file, unknown error:', error)
           }
 
-          this.refresh();
-          this.newFileDialog.visible = false;
+          return;
+        }
+
+        this.refresh();
+        this.newFileDialog.visible = false;
       },
       async onSaveNewFolderDialog() {
         const resource = parseResourcePath(this.currentResourcePath || 'files/');

@@ -31,7 +31,7 @@ async function add(req, res, next) {
 
     const directory = boolLike(req.query.directory);
     const overwrite = boolLike(req.query.overwrite);
-    const filePath = req.query.path ? decodeURIComponent(req.query.path) : '';
+    let filePath = req.query.path ? decodeURIComponent(req.query.path) : '';
 
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
     if (!(req.files && req.files.file) && !directory) return next(new HttpError(400, 'missing file or directory'));
@@ -39,11 +39,17 @@ async function add(req, res, next) {
 
     var mtime = req.fields && req.fields.mtime ? new Date(req.fields.mtime) : null;
 
-    debug('add:', filePath, mtime);
+    let resource = filePath.split('/')[1];
+    filePath = filePath.slice(resource.length+1);
+
+    debug(`add: ${resource} ${filePath} ${mtime}`);
+
+    // FIXME currently we still operate on username only
+    resource = req.user.username;
 
     try {
-        if (directory) await files.addDirectory(req.user.username, filePath);
-        else await files.addOrOverwriteFile(req.user.username, filePath, req.files.file.path, mtime, overwrite);
+        if (directory) await files.addDirectory(resource, filePath);
+        else await files.addOrOverwriteFile(resource, filePath, req.files.file.path, mtime, overwrite);
     } catch (error) {
         if (error.reason === MainError.ALREADY_EXISTS) return next(new HttpError(409, 'already exists'));
         return next(new HttpError(500, error));
