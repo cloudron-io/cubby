@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     fs: {
       // Allow serving files from one level up to the project root for monaco editor assets
-      allow: ['..']
+      allow: ['..','../..','../../..']
     },
   },
   // https://vitejs.dev/guide/build.html#multi-page-app
