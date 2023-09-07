@@ -329,14 +329,14 @@ export default {
         this.$refs.fileUploader.onUploadFolder(resource.resourcePath);
       },
       onNewFile() {
-          this.newFileDialog.error = '';
-          this.newFileDialog.fileName = '';
-          this.newFileDialog.visible = true;
+        this.newFileDialog.error = '';
+        this.newFileDialog.fileName = '';
+        this.newFileDialog.visible = true;
       },
       onNewFolder() {
-          this.newFolderDialog.error = '';
-          this.newFolderDialog.folderName = '';
-          this.newFolderDialog.visible = true;
+        this.newFolderDialog.error = '';
+        this.newFolderDialog.folderName = '';
+        this.newFolderDialog.visible = true;
       },
       async copyHandler(files) {
         if (!files) return;
@@ -460,13 +460,13 @@ export default {
                 that.uploadNext();
             });
         },
-        async downloadHandler(entries) {
-          if (!entries) entries = this.selectedEntries;
-          if (!Array.isArray(entries)) entries = [ entries ];
+      async downloadHandler(entries) {
+        if (!entries) entries = this.selectedEntries;
+        if (!Array.isArray(entries)) entries = [ entries ];
 
-          const resource = parseResourcePath(this.currentResourcePath);
-          await this.directoryModel.download(resource, entries);
-        },
+        const resource = parseResourcePath(this.currentResourcePath);
+        await this.directoryModel.download(resource, entries);
+      },
         onDrop(items, targetEntry) {
           var that = this;
 
@@ -513,46 +513,46 @@ export default {
             this.$refs.fileUploader.addFiles(files, resource.resourcePath);
           });
         },
-        async deleteHandler(entries) {
-          if (!entries) return;
+      async deleteHandler(entries) {
+        if (!entries) return;
 
-          window.addEventListener('beforeunload', beforeUnloadListener, { capture: true });
-          this.deleteInProgress = true;
+        window.addEventListener('beforeunload', beforeUnloadListener, { capture: true });
+        this.deleteInProgress = true;
 
 
-          for (let i in entries) {
-            try {
-              const resource = parseResourcePath(sanitize(this.currentResourcePath + '/' + entries[i].filePath));
-              await this.directoryModel.remove(resource);
-            } catch (e) {
-              console.error(`Failed to remove file ${entries[i].name}:`, e);
-            }
+        for (let i in entries) {
+          try {
+            const resource = parseResourcePath(sanitize(this.currentResourcePath + '/' + entries[i].filePath));
+            await this.directoryModel.remove(resource);
+          } catch (e) {
+            console.error(`Failed to remove file ${entries[i].name}:`, e);
           }
+        }
 
-          await this.refresh();
+        await this.refresh();
 
-          window.removeEventListener('beforeunload', beforeUnloadListener, { capture: true });
-          this.deleteInProgress = false;
-        },
-        async renameHandler(file, newName) {
-          const fromResource = file.resource;
-          const toResource = parseResourcePath(sanitize(this.currentResourcePath + '/' + newName));
+        window.removeEventListener('beforeunload', beforeUnloadListener, { capture: true });
+        this.deleteInProgress = false;
+      },
+      async renameHandler(file, newName) {
+        const fromResource = file.resource;
+        const toResource = parseResourcePath(sanitize(this.currentResourcePath + '/' + newName));
 
-          if (fromResource.resourcePath === toResource.resourcePath) return;
+        if (fromResource.resourcePath === toResource.resourcePath) return;
 
-          await this.directoryModel.rename(fromResource, toResource);
-          await this.refresh();
-        },
-        showAllRecent() {
-            window.location.hash = 'recent/';
-        },
-        async onRecent() {
-          this.clearSelection();
-          await this.loadPath('recent/');
-        },
-        showAllShares() {
-          window.location.hash = 'shares/';
-        },
+        await this.directoryModel.rename(fromResource, toResource);
+        await this.refresh();
+      },
+      showAllRecent() {
+        window.location.hash = 'recent/';
+      },
+      async onRecent() {
+        this.clearSelection();
+        await this.loadPath('recent/');
+      },
+      showAllShares() {
+        window.location.hash = 'shares/';
+      },
         isReadonly() {
           if (window.location.hash === '/shares/') return true;
           if (!this.currentShare) return false;

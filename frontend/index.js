@@ -83,7 +83,6 @@ app.component('LoginView', LoginView);
 app.component('EntryList', EntryList);
 app.component('EntryListItem', EntryListItem);
 app.component('SideBar', SideBar);
-// app.component('PdfViewer', PdfViewer);
 // app.component('OfficeViewer', OfficeViewer);
 app.component('GenericViewer', GenericViewer);
 
