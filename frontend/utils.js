@@ -118,6 +118,12 @@ function parseResourcePath(resourcePath) {
         result.parentResourcePath = result.path === '/' ? null : '/home' + result.path.slice(0, result.path.lastIndexOf('/')) + '/';
         result.id = 'home';
         result.resourcePath = `/${result.type}${result.path}`;
+    } else if (resourcePath.indexOf('/recent/') === 0) {
+        result.type = 'recent';
+        result.path = resourcePath.slice('/recent'.length) || '/';
+        result.parentResourcePath = result.path === '/' ? null : '/recent' + result.path.slice(0, result.path.lastIndexOf('/')) + '/';
+        result.id = 'recent';
+        result.resourcePath = `/${result.type}${result.path}`;
     } else if (resourcePath.indexOf('shares/') === 0) {
         result.type = 'shares';
         result.shareId = resourcePath.split('/')[1];

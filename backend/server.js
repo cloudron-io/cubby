@@ -122,8 +122,6 @@ function init(callback) {
 
     router.get ('/api/v1/users', users.isAuthenticated, users.list);
 
-    router.get ('/api/v1/recent', users.isAuthenticated, files.recent);
-
     router.head('/api/v1/files', users.isAuthenticated, files.head);
     router.get ('/api/v1/files', users.isAuthenticated, files.get);
     router.post('/api/v1/files', users.isAuthenticated, multipart({ maxFieldsSize: 2 * 1024, limit: '512mb', timeout: 3 * 60 * 1000 }), files.add);

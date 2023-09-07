@@ -6,7 +6,6 @@ exports = module.exports = {
     get,
     update,
     remove,
-    recent
 };
 
 var assert = require('assert'),
@@ -98,9 +97,8 @@ async function get(req, res, next) {
 
     debug(`get: ${resource} ${filePath} type:${type || 'json'}`);
 
-    let result;
-
     if (resource === 'home') {
+        let result;
         try {
             result = await files.get(req.user.username, filePath);
         } catch (error) {
@@ -117,6 +115,32 @@ async function get(req, res, next) {
         }
 
         next(new HttpSuccess(200, result.withoutPrivate()));
+    } else if (resource === 'recent') {
+        const daysAgo = isNaN(parseInt(req.query.days_ago, 10)) ? 3 : parseInt(req.query.days_ago, 10);
+        const maxFiles = 100;
+
+        debug(`get: recent daysAgo:${daysAgo} maxFiles:${maxFiles}`);
+
+        let result = [];
+        try {
+            result = await files.recent(req.user.username, daysAgo, maxFiles);
+        } catch (error) {
+            return next(new HttpError(500, error));
+        }
+
+        const entry = new Entry({
+            id: 'recent',
+            fullFilePath: '/recent',
+            fileName: 'Recent',
+            filePath: '/',
+            owner: req.user.username,
+            isDirectory: true,
+            isFile: false,
+            mimeType: 'inode/recent',
+            files: result
+        });
+
+        next(new HttpSuccess(200, entry.withoutPrivate()));
     } else {
         next(new HttpError(500, `Unknown resource type ${resource}`));
     }
@@ -198,35 +222,4 @@ async function remove(req, res, next) {
     }
 
     next(new HttpSuccess(200, {}));
-}
-
-async function recent(req, res, next) {
-    assert.strictEqual(typeof req.user, 'object');
-
-    const daysAgo = isNaN(parseInt(req.query.days_ago, 10)) ? 3 : parseInt(req.query.days_ago, 10);
-    const maxFiles = 100;
-
-    debug(`recent: daysAgo:${daysAgo} maxFiles:${maxFiles}`);
-
-    let result = [];
-
-    try {
-        result = await files.recent(req.user.username, daysAgo, maxFiles);
-    } catch (error) {
-        return next(new HttpError(500, error));
-    }
-
-    const entry = new Entry({
-        id: 'recent',
-        fullFilePath: '/recent',
-        fileName: 'Recent',
-        filePath: '/',
-        owner: req.user.username,
-        isDirectory: true,
-        isFile: false,
-        mimeType: 'inode/recent',
-        files: result
-    });
-
-    next(new HttpSuccess(200, entry.withoutPrivate()));
 }

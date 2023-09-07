@@ -9,9 +9,9 @@
     <div class="sidebar">
       <h1 style="margin-bottom: 50px; text-align: center;"><img src="/logo-plain.svg" height="60" width="60"/><br/>Cubby</h1>
 
-      <div class="sidebar-entry" @click="showAllFiles"><i class="pi pi-folder-open"></i> All Files</div>
-      <!-- <div class="sidebar-entry" @click="showAllRecent"><i class="pi pi-clock"></i> Recent Files</div> -->
-      <div class="sidebar-entry" @click="showAllShares"><i class="pi pi-share-alt"></i> Shared With You</div>
+      <a class="sidebar-entry" href="#files/home/"><i class="pi pi-folder-open"></i> All Files</a>
+      <a class="sidebar-entry" href="#files/recent/"><i class="pi pi-clock"></i> Recent Files</a>
+      <a class="sidebar-entry" href="#files/shares/"><i class="pi pi-share-alt"></i> Shared With You</a>
 
       <div style="flex-grow: 1">&nbsp;</div>
 
@@ -539,10 +539,6 @@ export default {
       showAllRecent() {
         window.location.hash = 'recent/';
       },
-      async onRecent() {
-        this.clearSelection();
-        await this.loadPath('recent/');
-      },
       showAllShares() {
         window.location.hash = 'shares/';
       },
@@ -689,6 +685,12 @@ export default {
             icon: 'pi pi-home',
             url: '#files/home'
           };
+        } else if (resource.type === 'recent') {
+          this.breadCrumbs = [];
+          this.breadCrumbHome = {
+            icon: 'pi pi-clock',
+            url: '#files/recent/'
+          };
         } else if (resource.type === 'shares') {
           this.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
             return {
@@ -798,7 +800,7 @@ export default {
         const hash = window.location.hash.slice(1);
 
         if (hash.indexOf('files/home/') === 0) this.loadPath(hash.slice('files'.length));
-        else if (hash.indexOf('recent/') === 0) this.onRecent();
+        else if (hash.indexOf('files/recent/') === 0) this.loadPath(hash.slice('files'.length));
         else if (hash.indexOf('settings/') === 0) return;
         else window.location.hash = 'files/home/';
       }, false);
@@ -826,9 +828,10 @@ export default {
 
       // initial load with hash if present
       const hash = window.location.hash.slice(1);
+
       if (hash.indexOf('files/home/') === 0) this.loadPath(hash.slice('files'.length));
-      else if (hash.indexOf('recent/') === 0) this.onRecent();
-      else if (hash.indexOf('shares/') === 0) this.loadPath(hash);
+      else if (hash.indexOf('files/recent/') === 0) this.loadPath(hash.slice('files'.length));
+      else if (hash.indexOf('files/shares/') === 0) this.loadPath(hash);
       else this.loadPath('/home/');
 
       this.ready = true;
@@ -875,6 +878,7 @@ label {
 
 .sidebar-entry {
   cursor: pointer;
+  color: white;
   padding: 10px;
   padding-left: 20px;
   border-radius: 3px;
