@@ -467,52 +467,54 @@ export default {
         const resource = parseResourcePath(this.currentResourcePath);
         await this.directoryModel.download(resource, entries);
       },
-        onDrop(items, targetEntry) {
-          var that = this;
+      // either dataTransfer (external drop) or files (internal drag)
+      async onDrop(targetFolder, dataTransfer, files) {
+        const fullTargetFolder = sanitize(`${this.currentResourcePath}/${targetFolder}`);
 
-          if (items.length === 0) return;
+        const that = this;
+        function traverseFileTree(item, path) {
+          if (item.isFile) {
+            item.file(function (file) {
+              that.$refs.fileUploader.addFiles([file], sanitize(`${that.currentResourcePath}/${targetFolder}`), false);
+            });
+          } else if (item.isDirectory) {
+            // Get folder contents
+            var dirReader = item.createReader();
+            dirReader.readEntries(function (entries) {
+              for (let i in entries) {
+                traverseFileTree(entries[i], item.name);
+              }
+            });
+          }
+        }
 
-          const list = [];
-          for (let i = 0; i < items.length; i++) list.push(items[i]);
-
+        if (dataTransfer) {
           // figure if a folder was dropped on a modern browser, in this case the first would have to be a directory
-          var folderItem;
-          var targetPath = targetEntry ? (that.currentResourcePath + targetEntry.filePath) : null;
+          let folderItem;
           try {
-            folderItem = list[0].webkitGetAsEntry();
-            if (folderItem.isFile) return that.uploadFiles(list.map(function (item) { return item.getAsFile(); }), targetPath);
+              folderItem = dataTransfer.items[0].webkitGetAsEntry();
+              if (folderItem.isFile) return this.$refs.fileUploader.addFiles(dataTransfer.files, fullTargetFolder, false);
           } catch (e) {
-            return that.uploadFiles(list.map(function (item) { return item.getAsFile(); }), targetPath);
+              return this.$refs.fileUploader.addFiles(dataTransfer.files, fullTargetFolder, false);
           }
 
           // if we got here we have a folder drop and a modern browser
           // now traverse the folder tree and create a file list
-          const files = [];
-          function traverseFileTree(item, path, callback) {
-            if (item.isFile) {
-              // Get file
-              item.file(function (file) {
-                files.push(file);
-                callback();
-              });
-            } else if (item.isDirectory) {
-              // Get folder contents
-              var dirReader = item.createReader();
-              dirReader.readEntries(function (entries) {
-                async.each(entries, function (entry, callback) {
-                  traverseFileTree(entry, path + item.name + '/', callback);
-                }, callback);
-              });
-            }
-          }
+          traverseFileTree(folderItem, '');
+        } else {
+          if (!files.length) return;
 
-          const resource = parseResourcePath(this.currentResourcePath);
-          traverseFileTree(folderItem, '', (error) => {
-            if (error) return console.error(error);
+          window.addEventListener('beforeunload', beforeUnloadListener, { capture: true });
+          this.pasteInProgress = true;
 
-            this.$refs.fileUploader.addFiles(files, resource.resourcePath);
-          });
-        },
+          // check ctrl for cut/copy
+          await this.directoryModel.paste(parseResourcePath(fullTargetFolder), 'cut', files);
+          await this.refresh();
+
+          window.removeEventListener('beforeunload', beforeUnloadListener, { capture: true });
+          this.pasteInProgress = false;
+        }
+      },
       async deleteHandler(entries) {
         if (!entries) return;
 
