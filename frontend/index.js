@@ -36,7 +36,7 @@ import './style.css';
 import Index from './Index.vue';
 import EntryList from './components/EntryList.vue';
 import EntryListItem from './components/EntryListItem.vue';
-import SideBar from './components/SideBar.vue';
+
 import LoginView from './components/LoginView.vue';
 // import PdfViewer from './components/PdfViewer.vue';
 // import OfficeViewer from './components/OfficeViewer.vue';
@@ -82,7 +82,6 @@ app.directive('badge', BadgeDirective);
 app.component('LoginView', LoginView);
 app.component('EntryList', EntryList);
 app.component('EntryListItem', EntryListItem);
-app.component('SideBar', SideBar);
 // app.component('OfficeViewer', OfficeViewer);
 app.component('GenericViewer', GenericViewer);
 

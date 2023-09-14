@@ -6,12 +6,12 @@
   <LoginView v-show="ready && !profile.username" @success="onLoggedIn"/>
 
   <div class="container" v-show="ready && profile.username">
-    <div class="sidebar">
+    <div class="navigation-panel">
       <h1 style="margin-bottom: 50px; text-align: center;"><img src="/logo-plain.svg" height="60" width="60"/><br/>Cubby</h1>
 
-      <a class="sidebar-entry" href="#files/home/"><i class="pi pi-folder-open"></i> All Files</a>
-      <a class="sidebar-entry" href="#files/recent/"><i class="pi pi-clock"></i> Recent Files</a>
-      <a class="sidebar-entry" href="#files/shares/"><i class="pi pi-share-alt"></i> Shared With You</a>
+      <a class="navigation-panel-entry" href="#files/home/"><i class="pi pi-folder-open"></i> All Files</a>
+      <a class="navigation-panel-entry" href="#files/recent/"><i class="pi pi-clock"></i> Recent Files</a>
+      <a class="navigation-panel-entry" href="#files/shares/"><i class="pi pi-share-alt"></i> Shared With You</a>
 
       <div style="flex-grow: 1">&nbsp;</div>
 
@@ -26,7 +26,7 @@
       <MainToolbar :breadCrumbs="breadCrumbs" :breadCrumbHome="breadCrumbHome" :selectedEntries="selectedEntries" :displayName="profile.displayName" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @directory-up="onUp" @new-folder="onNewFolder" @delete="onDelete" @download="downloadHandler"/>
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
-          <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
+          <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (previewPanelVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onTogglePreviewPanel" v-tooltip="previewPanelVisible ? 'Hide Preview' : 'Show Preview'"/>
           <DirectoryView
             :show-owner="false"
             :show-size="true"
@@ -55,7 +55,7 @@
             style="position: absolute;"
           />
         </div>
-        <SideBar :selectedEntries="selectedEntries" :visible="sideBarVisible"/>
+        <PreviewPanel :selectedEntries="selectedEntries" :visible="previewPanelVisible"/>
       </div>
       <FileUploader
         ref="fileUploader"
@@ -197,6 +197,7 @@ import { createDirectoryModel, DirectoryModelError } from './models/DirectoryMod
 import { createMainModel } from './models/MainModel.js';
 
 import MainToolbar from './components/MainToolbar.vue';
+import PreviewPanel from './components/PreviewPanel.vue';
 
 const API_ORIGIN = import.meta.env.VITE_API_ORIGIN ? import.meta.env.VITE_API_ORIGIN : '';
 const BASE_URL = import.meta.env.BASE_URL || '/';
@@ -214,6 +215,7 @@ export default {
       MainToolbar,
       TextEditor,
       PdfViewer,
+      PreviewPanel,
       FileUploader
     },
     data() {
@@ -241,7 +243,7 @@ export default {
         currentPath: '/',
         currentResourcePath: '',
         currentShare: null,
-        sideBarVisible: true,
+        previewPanelVisible: true,
         breadCrumbs: [],
         breadCrumbHome: {
           icon: 'pi pi-home',
@@ -401,8 +403,8 @@ export default {
       onSelectionChanged(selectedEntries) {
         this.selectedEntries = selectedEntries;
       },
-      onToggleSideBar() {
-        this.sideBarVisible = !this.sideBarVisible;
+      onTogglePreviewPanel() {
+        this.previewPanelVisible = !this.previewPanelVisible;
       },
       async onFileSaved(entry, content, done) {
         try {
@@ -865,7 +867,7 @@ label {
   left: 0;
 }
 
-.sidebar {
+.navigation-panel {
     display: flex;
     height: 100%;
     width: 250px;
@@ -875,7 +877,7 @@ label {
     flex-direction: column;
 }
 
-.sidebar-entry {
+.navigation-panel-entry {
   cursor: pointer;
   color: white;
   padding: 10px;
@@ -883,11 +885,11 @@ label {
   border-radius: 3px;
 }
 
-.sidebar-entry:hover {
+.navigation-panel-entry:hover {
   background-color: rgba(255,255,255,0.2);
 }
 
-.sidebar-entry > i {
+.navigation-panel-entry > i {
   padding-right: 10px;
 }
 

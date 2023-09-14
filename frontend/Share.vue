@@ -8,14 +8,14 @@
       <MainToolbar :breadCrumbs="breadCrumbs" :breadCrumbHome="breadCrumbHome" :currentPath="currentPath" :selectedEntries="selectedEntries" :pathPrefix="''" @download="onDownload"/>
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
-          <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (sideBarVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onToggleSideBar" v-tooltip="sideBarVisible ? 'Hide Sidebar' : 'Show Sidebar'"/>
+          <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (previewPanelVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onTogglePreviewPanel" v-tooltip="previewPanelVisible ? 'Hide Preview' : 'Show Preview'"/>
           <EntryList :entries="entries" :sort-folders-first="true" :editable="false" :shareable="false"
             @entry-activated="onOpen"
             @download="onDownload"
             @selection-changed="onSelectionChanged"
           />
         </div>
-        <SideBar :selectedEntries="selectedEntries" :visible="sideBarVisible"/>
+        <PreviewPanel :selectedEntries="selectedEntries" :visible="previewPanelVisible"/>
       </div>
     </div>
   </div>
@@ -31,8 +31,13 @@
 import superagent from 'superagent';
 import { decode, sanitize, urlSearchQuery, getExtension, getDirectLink, prettyFileSize } from './utils.js';
 
+import PreviewPanel from './components/PreviewPanel.vue';
+
 export default {
-    name: 'Index',
+    name: 'Share',
+    components: {
+        PreviewPanel
+    },
     data() {
         return {
             ready: false,
@@ -44,7 +49,7 @@ export default {
             entries: [],
             selectedEntries: [],
             currentPath: '/',
-            sideBarVisible: true,
+            previewPanelVisible: true,
             breadCrumbs: [],
             breadCrumbHome: {
                 icon: 'pi pi-share-alt',
@@ -57,8 +62,8 @@ export default {
         onSelectionChanged(selectedEntries) {
             this.selectedEntries = selectedEntries;
         },
-        onToggleSideBar() {
-            this.sideBarVisible = !this.sideBarVisible;
+        onTogglePreviewPanel() {
+            this.previewPanelVisible = !this.previewPanelVisible;
         },
         onDownload(entries) {
             if (!entries) entries = this.selectedEntries;
@@ -176,16 +181,6 @@ label {
     display: flex;
     width: 100%;
     height: 100%;
-}
-
-.sidebar {
-    display: flex;
-    height: 100%;
-    width: 250px;
-    background-color: #2196f3;
-    color: white;
-    padding: 10px;
-    flex-direction: column;
 }
 
 .content {

@@ -31,7 +31,7 @@
 import { getPreviewUrl, prettyLongDate, prettyFileSize } from '../utils.js';
 
 export default {
-    name: 'SideBar',
+    name: 'PreviewPanel',
     emits: [ 'close' ],
     data() {
         return {};
