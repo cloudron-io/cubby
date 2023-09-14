@@ -15,7 +15,6 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
-    async = require('async'),
     debug = require('debug')('cubby:routes:shares'),
     shares = require('../shares.js'),
     files = require('../files.js'),
@@ -153,7 +152,7 @@ async function listShares(req, res, next) {
     // Collect all file entries from shares
     let sharedFiles = [];
     try {
-        await async.each(result, async function (share) {
+        for (let share of result) {
             let file = await files.get(share.owner, share.filePath);
 
             file.isShare = true;
@@ -161,7 +160,7 @@ async function listShares(req, res, next) {
             file = file.asShare(share.filePath);
 
             sharedFiles.push(file);
-        });
+        }
     } catch (error) {
         return next(new HttpError(500, error));
     }

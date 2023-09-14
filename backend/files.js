@@ -19,7 +19,6 @@ var assert = require('assert'),
     constants = require('./constants.js'),
     debug = require('debug')('cubby:files'),
     fs = require('fs-extra'),
-    async = require('async'),
     path = require('path'),
     util = require('util'),
     exec = util.promisify(require('child_process').exec),
@@ -173,20 +172,20 @@ async function getDirectory(username, fullFilePath, filePath, stats) {
     }
 
     // attach shares
-    await async.each(files, async function (file) {
+    for (let file of files) {
         let result;
         try {
             result = await shares.getByOwnerAndFilepath(username, file.filePath);
         } catch (error) {
             // TODO not sure what to do here
-            console.error(error);
+            console.error('getDirectory: Failed to attach shares.', error);
         }
 
         file.sharedWith = result || null;
-    });
+    }
 
     // attach diskusage
-    await async.each(files, async function (file) {
+    for (let file of files) {
         if (!file.isDirectory) return;
 
         let result;
@@ -194,11 +193,11 @@ async function getDirectory(username, fullFilePath, filePath, stats) {
             result = await diskusage.getByUsernameAndDirectory(username, file.filePath);
         } catch (error) {
             // TODO not sure what to do here
-            console.error(error);
+            console.error('getDirectory: Failed to attach diskusage.', error);
         }
 
         file.size = result;
-    });
+    }
 
     let sharedWith;
     try {
@@ -396,16 +395,16 @@ async function recent(username, daysAgo = 3, maxFiles = 100) {
 
     const localResolvedPrefix = path.join(constants.DATA_ROOT, username);
 
-    // we limit files to
-    await async.eachLimit(filePaths.slice(0, maxFiles), 20, async function (filePath) {
+    // we limit files to maxFiles
+    for (let filePath of filePaths.slice(0, maxFiles)) {
         try {
             const stat = await fs.stat(filePath);
             if (!stat.isFile()) throw new MainError(MainError.FS_ERROR, 'recent should only list files');
             result.push(await getFile(username, filePath, filePath.slice(localResolvedPrefix.length), stat));
         } catch (error) {
-            console.error('error in getting recents:', error);
+            console.error(`Error in getting recent file ${filePath}`, error);
         }
-    });
+    }
 
     return result;
 }

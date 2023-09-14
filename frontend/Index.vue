@@ -190,7 +190,6 @@
 'use strict';
 
 import superagent from 'superagent';
-import async from 'async';
 import { parseResourcePath, decode, getExtension, getShareLink, copyToClipboard, sanitize, prettyFileSize } from './utils.js';
 
 import { TextEditor, ImageViewer, DirectoryView, FileUploader, PdfViewer } from 'pankow';

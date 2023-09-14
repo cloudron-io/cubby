@@ -7,7 +7,6 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
-    async = require('async'),
     debug = require('debug')('cubby:diskusage'),
     execSync = require('child_process').execSync,
     constants = require('./constants.js'),
@@ -80,7 +79,7 @@ async function calculate() {
 
     const userList = await users.list();
 
-    await async.eachSeries(userList, async function (user) {
+    for (let user of userList) {
         await calculateByUsername(user.username);
-    });
+    }
 }

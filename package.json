@@ -10,7 +10,6 @@
   "dependencies": {
     "@fontsource/roboto": "^5.0.8",
     "archiver": "^5.3.2",
-    "async": "^3.2.4",
     "body-parser": "^1.20.2",
     "commander": "^11.0.0",
     "connect-lastmile": "^2.1.1",

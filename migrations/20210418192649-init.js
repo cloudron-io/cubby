@@ -1,34 +1,20 @@
 'use strict';
 
 var fs = require('fs'),
-    async = require('async'),
     path = require('path');
 
-var dbm;
-var type;
-var seed;
-
-/**
-  * We receive the dbmigrate dependency from dbmigrate initially.
-  * This enables us to not have to rely on NODE_PATH.
-  */
-exports.setup = function(options, seedLink) {
-  dbm = options.dbmigrate;
-  type = dbm.dataType;
-  seed = seedLink;
-};
-
-exports.up = function(db, callback) {
+exports.up = async function(db) {
     var schema = fs.readFileSync(path.join(__dirname, 'initial-schema.sql')).toString('utf8');
     var statements = schema.split(';');
-    async.eachSeries(statements, function (statement, callback) {
-        if (statement.trim().length === 0) return callback(null);
-        db.runSql(statement, callback);
-    }, callback);
+
+    for (let statement of statements) {
+        if (statement.trim().length === 0) continue;
+        await db.runSql(statement);
+    }
 };
 
-exports.down = function(db, callback) {
-    db.runSql('DROP TABLE users, tokens, clients, apps, appPortBindings, authcodes, settings', callback);
+exports.down = async function(db) {
+    await db.runSql('DROP TABLE users, tokens, clients, apps, appPortBindings, authcodes, settings');
 };
 
 exports._meta = {
