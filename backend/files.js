@@ -186,7 +186,7 @@ async function getDirectory(username, fullFilePath, filePath, stats) {
 
     // attach diskusage
     for (let file of files) {
-        if (!file.isDirectory) return;
+        if (!file.isDirectory) continue;
 
         let result;
         try {
@@ -279,14 +279,17 @@ async function get(username, filePath) {
     const fullFilePath = getValidFullPath(username, filePath);
     if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);
 
+    let result;
     try {
         const stat = await fs.stat(fullFilePath);
-        if (stat.isDirectory()) return await getDirectory(username, fullFilePath, filePath, stat);
-        if (stat.isFile()) return await getFile(username, fullFilePath, filePath, stat);
+        if (stat.isDirectory()) result = await getDirectory(username, fullFilePath, filePath, stat);
+        if (stat.isFile()) result = await getFile(username, fullFilePath, filePath, stat);
     } catch (error) {
         if (error.code === 'ENOENT') throw new MainError(MainError.NOT_FOUND);
         throw new MainError(MainError.FS_ERROR, error);
     }
+
+    return result;
 }
 
 async function head(username, filePath) {
