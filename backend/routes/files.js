@@ -13,6 +13,7 @@ var assert = require('assert'),
     files = require('../files.js'),
     Entry = require('../entry.js'),
     util = require('util'),
+    shares = require('../shares.js'),
     MainError = require('../mainerror.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
@@ -141,6 +142,53 @@ async function get(req, res, next) {
         });
 
         next(new HttpSuccess(200, entry.withoutPrivate()));
+    } else if (resource === 'shares') {
+        const shareId = filePath.split('/')[1];
+        if (shareId) {
+            console.log('loading share', shareId);
+        } else {
+            debug('listShares');
+
+            let result = [];
+
+            try {
+                result = await shares.list(req.user.username);
+            } catch (error) {
+                return next(new HttpError(500, error));
+            }
+
+            // Collect all file entries from shares
+            let sharedFiles = [];
+            try {
+                for (let share of result) {
+                    let file = await files.get(share.owner, share.filePath);
+
+                    file.isShare = true;
+                    file.share = share;
+                    file = file.asShare(share.filePath);
+
+                    sharedFiles.push(file);
+                }
+            } catch (error) {
+                return next(new HttpError(500, error));
+            }
+
+            const entry = new Entry({
+                id: 'shares',
+                fullFilePath: '/shares',
+                fileName: 'Shares',
+                filePath: '/',
+                isDirectory: true,
+                isFile: false,
+                isShare: true,
+                owner: req.user.username,
+                mimeType: 'inode/share',
+                files: sharedFiles
+            });
+
+            next(new HttpSuccess(200, entry.withoutPrivate()));
+        }
+        next(new HttpError(500, 'not implemented'));
     } else {
         next(new HttpError(500, `Unknown resource type ${resource}`));
     }
