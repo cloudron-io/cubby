@@ -55,7 +55,7 @@
             style="position: absolute;"
           />
         </div>
-        <PreviewPanel :selectedEntries="selectedEntries" :visible="previewPanelVisible"/>
+        <PreviewPanel :parentEntry="entry" :selectedEntries="selectedEntries" :visible="previewPanelVisible"/>
       </div>
       <FileUploader
         ref="fileUploader"
@@ -238,6 +238,7 @@ export default {
         // TODO show busy state for those
         pasteInProgress: false,
         deleteInProgress: false,
+        entry: {},
         entries: [],
         selectedEntries: [],
         currentPath: '/',
@@ -720,6 +721,7 @@ export default {
           e.filePathNew = e.fileName;
         });
 
+        this.entry = entry;
         this.entries = entry.files;
         this.viewer = '';
 
