@@ -1,23 +1,23 @@
 <template>
     <Toolbar>
         <template #start>
-          <Button icon="pi pi-chevron-left" class="p-button-sm p-button-text" :disabled="breadCrumbs.length === 0" @click="onUp"/>
+          <Button icon="pi pi-chevron-left" class="p-button-text" :disabled="breadCrumbs.length === 0" @click="onUp"/>
           <Breadcrumb :home="breadCrumbHome" :model="breadCrumbs"/>
         </template>
 
         <template #end>
             <!-- file action buttons -->
             <div class="file-actions">
-                <Button v-show="selectedEntries.length" icon="pi pi-download" class="p-button-outlined p-button-sm" v-tooltip="'Download'" @click="onDownload"/>
-                <Button v-show="displayName && selectedEntries.length" icon="pi pi-trash" class="p-button-outlined p-button-sm p-button-danger" v-tooltip="'Delete'" @click="onDelete"/>
+                <Button v-show="selectedEntries.length" icon="pi pi-download" class="p-button-outlined" v-tooltip="'Download'" @click="onDownload"/>
+                <Button v-show="displayName && selectedEntries.length" icon="pi pi-trash" class="p-button-outlined p-button-danger" v-tooltip="'Delete'" @click="onDelete"/>
             </div>
 
             <!-- Always visible if we have a login session-->
-            <Button v-show="displayName" icon="pi pi-upload" class="p-button-sm" label="Upload" @click="onToggleMenuUpload"/>
-            <Button v-show="displayName" icon="pi pi-plus" class="p-button-sm" label="New" @click="onToggleMenuNew"/>
+            <Button v-show="displayName" icon="pi pi-upload" label="Upload" @click="onToggleMenuUpload"/>
+            <Button v-show="displayName" icon="pi pi-plus" label="New" @click="onToggleMenuNew"/>
 
             <div class="profile-actions">
-                <Button v-show="displayName" icon="pi pi-user" class="p-button-sm p-button-secondary" @click="onToggleMenuMain" :label="displayName"/>
+                <Button v-show="displayName" icon="pi pi-user" class="p-button-secondary" @click="onToggleMenuMain" :label="displayName"/>
 
                 <Menu ref="menuUpload" :model="uploadMenu" :popup="true"/>
                 <Menu ref="menuNew" :model="newMenu" :popup="true"/>
