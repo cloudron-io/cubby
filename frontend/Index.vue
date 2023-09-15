@@ -182,7 +182,11 @@
     </div>
   </Transition>
       <!-- <OfficeViewer ref="officeViewer" :config="config.viewers.collabora" @close="onViewerClose" v-show="viewer === 'office'" /> -->
-      <!-- <GenericViewer ref="genericViewer" @close="onViewerClose" v-show="viewer === 'generic'" /> -->
+  <Transition name="pop">
+    <div class="viewer-container" v-show="viewer === 'generic'">
+      <GenericViewer ref="genericViewer" @close="onViewerClose" />
+    </div>
+  </Transition>
 </template>
 
 <script>
@@ -192,7 +196,7 @@
 import superagent from 'superagent';
 import { parseResourcePath, decode, getExtension, getShareLink, copyToClipboard, sanitize, prettyFileSize } from './utils.js';
 
-import { TextEditor, ImageViewer, DirectoryView, FileUploader, PdfViewer } from 'pankow';
+import { TextEditor, ImageViewer, DirectoryView, FileUploader, PdfViewer, GenericViewer } from 'pankow';
 import { createDirectoryModel, DirectoryModelError } from './models/DirectoryModel.js';
 import { createMainModel } from './models/MainModel.js';
 
@@ -211,6 +215,7 @@ export default {
     name: 'IndexView',
     components: {
       DirectoryView,
+      GenericViewer,
       ImageViewer,
       MainToolbar,
       TextEditor,

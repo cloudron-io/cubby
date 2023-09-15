@@ -38,9 +38,7 @@ import EntryList from './components/EntryList.vue';
 import EntryListItem from './components/EntryListItem.vue';
 
 import LoginView from './components/LoginView.vue';
-// import PdfViewer from './components/PdfViewer.vue';
 // import OfficeViewer from './components/OfficeViewer.vue';
-import GenericViewer from './components/GenericViewer.vue';
 
 const app = createApp(Index);
 
@@ -83,6 +81,5 @@ app.component('LoginView', LoginView);
 app.component('EntryList', EntryList);
 app.component('EntryListItem', EntryListItem);
 // app.component('OfficeViewer', OfficeViewer);
-app.component('GenericViewer', GenericViewer);
 
 app.mount('#app');
