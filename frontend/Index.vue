@@ -729,6 +729,8 @@ export default {
       async loadPath(path, forceLoad = false) {
         const resource = parseResourcePath(path || this.currentResourcePath || '/home/');
 
+        if (!forceLoad && this.currentResourcePath === resource.resourcePath) return;
+
         let entry;
         try {
           entry = await this.directoryModel.get(resource);
@@ -802,6 +804,7 @@ export default {
 
         if (hash.indexOf('files/home/') === 0) this.loadPath(hash.slice('files'.length));
         else if (hash.indexOf('files/recent/') === 0) this.loadPath(hash.slice('files'.length));
+        else if (hash.indexOf('files/shares/') === 0) this.loadPath(hash.slice('files'.length));
         else if (hash.indexOf('settings/') === 0) return;
         else window.location.hash = 'files/home/';
       }, false);
@@ -815,7 +818,6 @@ export default {
         this.ready = true;
         return;
       }
-
 
       try {
         this.config = await this.mainModel.getConfig();
@@ -832,7 +834,7 @@ export default {
 
       if (hash.indexOf('files/home/') === 0) this.loadPath(hash.slice('files'.length));
       else if (hash.indexOf('files/recent/') === 0) this.loadPath(hash.slice('files'.length));
-      else if (hash.indexOf('files/shares/') === 0) this.loadPath(hash);
+      else if (hash.indexOf('files/shares/') === 0) this.loadPath(hash.slice('files'.length));
       else this.loadPath('/home/');
 
       this.ready = true;
