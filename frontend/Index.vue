@@ -685,7 +685,7 @@ export default {
           });
           this.breadCrumbHome = {
             icon: 'pi pi-home',
-            url: '#files/home'
+            url: '#files/home/'
           };
         } else if (resource.type === 'recent') {
           this.breadCrumbs = [];
@@ -697,12 +697,12 @@ export default {
           this.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
             return {
               label: decode(e),
-              url: '#shares/' + resource.shareId  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
+              url: '#files/shares/' + resource.shareId  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
             };
           });
           this.breadCrumbHome = {
             icon: 'pi pi-share-alt',
-            url: '#shares/'
+            url: '#files/shares/'
           };
 
           // if we are not toplevel, add the share information
