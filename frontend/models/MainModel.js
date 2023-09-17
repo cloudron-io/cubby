@@ -40,6 +40,18 @@ export function createMainModel(origin) {
         }
       };
     },
+    async getUsers() {
+      let error, result;
+      try {
+        result = await superagent.get(`${origin}/api/v1/users`).withCredentials();
+      } catch (e) {
+        error = e;
+      }
+
+      if (error || result.statusCode !== 200) throw new Error('Failed to get users', { cause: error || result })
+
+      return result.body.users;
+    },
     async logout() {
       try {
         await superagent.get('/api/v1/oidc/logout').withCredentials();

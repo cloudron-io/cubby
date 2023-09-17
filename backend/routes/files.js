@@ -188,7 +188,6 @@ async function get(req, res, next) {
 
             next(new HttpSuccess(200, entry.withoutPrivate()));
         }
-        next(new HttpError(500, 'not implemented'));
     } else {
         next(new HttpError(500, `Unknown resource type ${resource}`));
     }

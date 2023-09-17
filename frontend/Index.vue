@@ -31,11 +31,13 @@
             :show-owner="false"
             :show-size="true"
             :show-modified="true"
+            :show-share="true"
             :editable="!isReadonly()"
             :multi-download="true"
             @selection-changed="onSelectionChanged"
             @item-activated="onOpen"
             :delete-handler="deleteHandler"
+            :share-handler="shareHandler"
             :rename-handler="renameHandler"
             :change-owner-handler="changeOwnerHandler"
             :copy-handler="copyHandler"
@@ -109,7 +111,7 @@
   </Dialog>
 
   <!-- Share Dialog -->
-  <Dialog :header="shareDialog.entry.fileName" v-model:visible="shareDialog.visible" :dismissableMask="true" :closable="true" :style="{width: '550px'}" :modal="true">
+  <Dialog :header="shareDialog.entry.fileName" v-model:visible="shareDialog.visible" :dismissableMask="true" :closable="true" :style="{width: '720px'}" :modal="true">
     <h3 style="margin-top: 0;">Share Link</h3>
     <div class="p-formgroup-inline">
       <div class="p-field-checkbox">
@@ -558,36 +560,32 @@ export default {
           var resource = parseResourcePath(this.currentResourcePath || 'files/');
           return resource.type !== 'shares';
         },
-        onShare(entry) {
-            var that = this;
+      async shareHandler(entry) {
+        this.shareDialog.error = '';
+        this.shareDialog.receiverUsername = '';
+        this.shareDialog.readonly = false;
+        this.shareDialog.entry = entry;
+        this.shareDialog.shareLink.expires = false;
+        this.shareDialog.shareLink.expiresAt = new Date();
 
-            that.shareDialog.error = '';
-            that.shareDialog.receiverUsername = '';
-            that.shareDialog.readonly = false;
-            that.shareDialog.entry = entry;
-            that.shareDialog.shareLink.expires = false;
-            that.shareDialog.shareLink.expiresAt = new Date();
+        // start with tomorrow
+        this.shareDialog.shareLink.expiresAt.setDate(this.shareDialog.shareLink.expiresAt.getDate() + 1);
 
-            // start with tomorrow
-            that.shareDialog.shareLink.expiresAt.setDate(that.shareDialog.shareLink.expiresAt.getDate() + 1);
+        const users = await this.mainModel.getUsers();
 
-            superagent.get('/api/v1/users').end(function (error, result) {
-                if (error) return console.error('Failed to get user list.', error);
+        this.shareDialog.users = users.filter((u) => { return u.username !== this.profile.username; });
 
-                that.shareDialog.users = result.body.users.filter(function (u) { return u.username !== that.profile.username; });
+        this.shareDialog.users.forEach(function (user) {
+          if (entry.sharedWith.find(function (share) { return share.receiverUsername === user.username; })) user.alreadyUsed = true;
+        });
 
-                that.shareDialog.users.forEach(function (user) {
-                    if (entry.sharedWith.find(function (share) { return share.receiverUsername === user.username; })) user.alreadyUsed = true;
-                });
+        // TODO this is just to be prettier, should be in UI code though
+        this.shareDialog.users.forEach(function (u) {
+          u.userAndDisplayName = u.displayName + ' ( ' + u.username + ' )';
+        });
 
-                // TODO this is just to be prettier, should be in UI code though
-                that.shareDialog.users.forEach(function (u) {
-                    u.userAndDisplayName = u.displayName + ' ( ' + u.username + ' )';
-                });
-
-                that.shareDialog.visible = true;
-            });
-        },
+        this.shareDialog.visible = true;
+      },
         onCreateShareLink() {
             var that = this;
 
