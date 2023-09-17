@@ -9,11 +9,11 @@
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-sm p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (previewPanelVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onTogglePreviewPanel" v-tooltip="previewPanelVisible ? 'Hide Preview' : 'Show Preview'"/>
-          <EntryList :entries="entries" :sort-folders-first="true" :editable="false" :shareable="false"
+         <!--  <EntryList :entries="entries" :sort-folders-first="true" :editable="false" :shareable="false"
             @entry-activated="onOpen"
             @download="onDownload"
             @selection-changed="onSelectionChanged"
-          />
+          /> -->
         </div>
         <PreviewPanel :selectedEntries="selectedEntries" :visible="previewPanelVisible"/>
       </div>

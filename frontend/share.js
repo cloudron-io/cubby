@@ -34,8 +34,6 @@ import '@fontsource/roboto';
 import './style.css';
 
 import Share from './Share.vue';
-import EntryList from './components/EntryList.vue';
-import EntryListItem from './components/EntryListItem.vue';
 import LoginView from './components/LoginView.vue';
 import MainToolbar from './components/MainToolbar.vue';
 // import ImageViewer from './components/ImageViewer.vue';
@@ -82,8 +80,6 @@ app.directive('badge', BadgeDirective);
 // custom components
 app.component('LoginView', LoginView);
 app.component('MainToolbar', MainToolbar);
-app.component('EntryList', EntryList);
-app.component('EntryListItem', EntryListItem);
 // app.component('ImageViewer', ImageViewer);
 // app.component('TextEditor', TextEditor);
 // app.component('PdfViewer', PdfViewer);
