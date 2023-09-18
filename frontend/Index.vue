@@ -196,11 +196,12 @@
 'use strict';
 
 import superagent from 'superagent';
-import { parseResourcePath, decode, getExtension, getShareLink, copyToClipboard, sanitize, prettyFileSize } from './utils.js';
+import { parseResourcePath, decode, getExtension, copyToClipboard, sanitize, prettyFileSize } from './utils.js';
 
 import { TextEditor, ImageViewer, DirectoryView, FileUploader, PdfViewer, GenericViewer } from 'pankow';
 import { createDirectoryModel, DirectoryModelError } from './models/DirectoryModel.js';
 import { createMainModel } from './models/MainModel.js';
+import { createShareModel } from './models/ShareModel.js';
 
 import MainToolbar from './components/MainToolbar.vue';
 import PreviewPanel from './components/PreviewPanel.vue';
@@ -231,6 +232,7 @@ export default {
         ready: false,
         busy: true,
         mainModel: null,
+        shareModel: null,
         directoryModel: null,
         search: '',
         viewer: '',
@@ -586,53 +588,36 @@ export default {
 
         this.shareDialog.visible = true;
       },
-        onCreateShareLink() {
-            var that = this;
+      async onCreateShareLink() {
+        const path = this.shareDialog.entry.filePath;
+        const readonly = true; // always readonly for now
+        const expiresAt = this.shareDialog.shareLink.expires ? this.shareDialog.shareLink.expiresAt : 0;
 
-            var path = this.shareDialog.entry.filePath;
-            var readonly = true; // always readonly for now
-            var expires_at = this.shareDialog.shareLink.expires ? this.shareDialog.shareLink.expiresAt : 0;
+        const shareId = await this.shareModel.create({ path, readonly, expiresAt });
 
-            superagent.post('/api/v1/shares').query({ path, readonly, expires_at }).end(function (error, result) {
-                if (result && result.statusCode === 401) return that.onLogout();
-                if (result && result.statusCode !== 200) return that.shareDialog.error = 'Error creating link share: ' + result.statusCode;
-                if (error) return console.error(error.message);
+        copyToClipboard(this.shareModel.getLink(shareId));
 
-                copyToClipboard(getShareLink(result.body.shareId));
+        this.shareDialog.visible = false;
 
-                that.shareDialog.visible = false;
+        this.$toast.add({ severity:'success', summary: 'Share link copied to clipboard', life: 2000 });
+      },
+      async onCreateShare() {
+        const path = this.shareDialog.entry.filePath;
+        const readonly = this.shareDialog.readonly;
+        const receiverUsername = this.shareDialog.receiverUsername;
 
-                that.$toast.add({ severity:'success', summary: 'Share link copied to clipboard', life: 2000 });
-            });
-        },
-        onCreateShare() {
-            var that = this;
+        const shareId = await this.shareModel.create({ path, readonly, receiverUsername });
 
-            var path = this.shareDialog.entry.filePath;
-            var readonly = this.shareDialog.readonly;
-            var receiver_username = this.shareDialog.receiverUsername;
+        // reset the form
+        this.shareDialog.error = '';
+        this.shareDialog.receiverUsername = '';
+        this.shareDialog.readonly = false;
+        console.log(this.shareDialog.entry)
 
-            superagent.post('/api/v1/shares').query({ path, readonly, receiver_username }).end(function (error, result) {
-                if (result && result.statusCode === 401) return that.onLogout();
-                if (result && result.statusCode !== 200) return that.shareDialog.error = 'Error creating share: ' + result.statusCode;
-                if (error) return console.error(error.message);
-
-                // reset the form
-                that.shareDialog.error = '';
-                that.shareDialog.receiverUsername = '';
-                that.shareDialog.readonly = false;
-
-                superagent.get('/api/v1/files').query({ path: that.shareDialog.entry.filePath }).end(function (error, result) {
-                    if (result && result.statusCode === 401) return that.logout();
-                    if (result && result.statusCode !== 200) return console.error('Error getting file or folder');
-                    if (error) return console.error(error.message);
-
-                    that.shareDialog.entry = result.body;
-
-                    that.refresh();
-                });
-            });
-        },
+        // refresh the entry
+        this.shareDialog.entry = await this.directoryModel.get(this.shareDialog.entry);
+        this.refresh();
+      },
         onDeleteShare(share) {
             var that = this;
 
@@ -757,10 +742,7 @@ export default {
         // if we don't have a folder load the viewer
         if (!entry.isDirectory) {
           if (this.$refs.imageViewer.canHandle(entry)) {
-            const otherSupportedEntries = this.entries.filter((e) => this.$refs.imageViewer.canHandle(e)).map((e) => {
-              e.resourceUrl = `/viewer/${resource.apiPath}/${e.folderPath}/${e.fileName}`;
-              return e;
-            });
+            const otherSupportedEntries = this.entries.filter((e) => this.$refs.imageViewer.canHandle(e));
 
             this.$refs.imageViewer.open(entry, otherSupportedEntries);
             this.viewer = 'image';
@@ -815,6 +797,7 @@ export default {
       }, false);
 
       this.mainModel = createMainModel(API_ORIGIN);
+      this.shareModel = createShareModel(API_ORIGIN);
 
       try {
         this.profile = await this.mainModel.getProfile();

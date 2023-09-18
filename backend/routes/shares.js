@@ -101,11 +101,11 @@ async function optionalAttachReceiver(req, res, next) {
 async function createShare(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
-    const filePath = decodeURIComponent(req.query.path);
-    const receiverUsername = req.query.receiver_username || null;
-    const receiverEmail = req.query.receiver_email || null;
-    const readonly = boolLike(req.query.readonly);
-    const expiresAt = req.query.expires_at ? parseInt(req.query.expires_at) : 0;
+    const filePath = req.body.path;
+    const receiverUsername = req.body.receiverUsername || null;
+    const receiverEmail = req.body.receiverEmail || null;
+    const readonly = boolLike(req.body.readonly);
+    const expiresAt = req.body.expiresAt ? parseInt(req.body.expiresAt) : 0;
 
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
 

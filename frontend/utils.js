@@ -65,10 +65,6 @@ function getPreviewUrl(entry) {
     return entry.previewUrl;
 }
 
-function getShareLink(shareId) {
-    return window.location.origin + '/api/v1/shares/' + shareId + '?type=raw';
-}
-
 function getFileTypeGroup(entry) {
     return entry.mimeType.split('/')[0];
 }
@@ -159,7 +155,6 @@ function entryListSort(list, prop, desc) {
 export {
     getDirectLink,
     getPreviewUrl,
-    getShareLink,
     getFileTypeGroup,
     prettyDate,
     prettyLongDate,

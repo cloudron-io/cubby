@@ -61,7 +61,8 @@ export function createDirectoryModel(origin) {
 
       // translate for pankow
       entry.name = entry.fileName;
-      entry.folderPath = resource.path.slice(-entry.fileName.length);
+      entry.filePath = entry.filePath || resource.path;
+      entry.folderPath = entry.filePath.slice(-entry.fileName.length);
       entry.previewUrl = origin + entry.previewUrl;
       entry.fullFileUrl = `${origin}/api/v1/files?path=/${resource.id}${entry.filePath}&type=raw`;
       entry.downloadFileUrl = `${origin}/api/v1/files?path=/${resource.id}${entry.filePath}&type=download`;
@@ -69,8 +70,8 @@ export function createDirectoryModel(origin) {
       entry.type = entry.isDirectory ? 'directory' : 'file',
       entry.icon = entry.previewUrl;
       entry.resourcePath = resource.resourcePath;
+      entry.resourceUrl = entry.resourcePath;
       entry.resource = parseResourcePath(entry.resourcePath);
-      // entry.resourceUrl = `/viewer/${resource.apiPath}/${this.resourceId}${e.folderPath}/${e.fileName}`;
 
       // this prepares the entries to be compatible with all components
       entry.files.forEach(child => {
@@ -82,8 +83,8 @@ export function createDirectoryModel(origin) {
         child.modified = new Date(child.mtime);
         child.type = child.isDirectory ? 'directory' : 'file',
         child.icon = child.previewUrl;
-        child.resourceUrl = '';
         child.resourcePath = `/${resource.id}${child.filePath}`;
+        child.resourceUrl = child.resourcePath;
         child.resource = parseResourcePath(child.resourcePath);
 
         // if we have an image, attach previewUrl
