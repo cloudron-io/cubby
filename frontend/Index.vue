@@ -196,7 +196,7 @@
 'use strict';
 
 import superagent from 'superagent';
-import { parseResourcePath, decode, getExtension, copyToClipboard, sanitize } from './utils.js';
+import { parseResourcePath, getExtension, copyToClipboard, sanitize } from './utils.js';
 import { prettyFileSize } from 'pankow/utils';
 
 import { TextEditor, ImageViewer, DirectoryView, FileUploader, PdfViewer, GenericViewer } from 'pankow';
@@ -668,7 +668,7 @@ export default {
         if (resource.type === 'home') {
           this.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
             return {
-              label: decode(e),
+              label: e,
               url: '#files/home' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
             };
           });
@@ -685,7 +685,7 @@ export default {
         } else if (resource.type === 'shares') {
           this.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
             return {
-              label: decode(e),
+              label: e,
               url: '#files/shares/' + resource.shareId  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
             };
           });

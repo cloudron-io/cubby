@@ -29,7 +29,7 @@
 <script>
 
 import superagent from 'superagent';
-import { decode, sanitize, urlSearchQuery, getExtension, getDirectLink } from './utils.js';
+import { sanitize, urlSearchQuery, getExtension, getDirectLink } from './utils.js';
 import { prettyFileSize } from 'pankow/utils';
 
 import PreviewPanel from './components/PreviewPanel.vue';
@@ -97,7 +97,7 @@ export default {
 
                 that.breadCrumbs = sanitize(filePath).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
                     return {
-                        label: decode(e),
+                        label: e,
                         url: '#'  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
                     };
                 });

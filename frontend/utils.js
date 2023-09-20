@@ -4,14 +4,6 @@ function sanitize(path) {
     return path.replace(/\/+/g, '/');
 }
 
-function encode(path) {
-    return path.split('/').map(encodeURIComponent).join('/');
-}
-
-function decode(path) {
-    return path.split('/').map(decodeURIComponent).join('/');
-}
-
 // TODO create share links instead of using access token
 function getDirectLink(entry) {
     if (entry.share) {
@@ -111,8 +103,6 @@ export {
     getPreviewUrl,
     getFileTypeGroup,
     sanitize,
-    encode,
-    decode,
     getExtension,
     copyToClipboard,
     urlSearchQuery,
