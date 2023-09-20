@@ -24,7 +24,7 @@
     "morgan": "^1.10.0",
     "multiparty": "^4.2.3",
     "once": "^1.4.0",
-    "pankow": "^0.7.0",
+    "pankow": "^1.0.1",
     "primeicons": "^6.0.1",
     "primevue": "^3.34.1",
     "safetydance": "^2.2.0",
@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.3.4",
-    "chromedriver": "^116.0.0",
+    "chromedriver": "^117.0.1",
     "eslint": "^8.49.0",
     "eslint-plugin-vue": "^9.17.0",
     "expect.js": "^0.3.1",
