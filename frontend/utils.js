@@ -1,41 +1,4 @@
 
-import { filesize } from 'filesize';
-import superagent from 'superagent';
-
-function prettyDate(value) {
-    var date = new Date(value),
-    diff = (((new Date()).getTime() - date.getTime()) / 1000),
-    day_diff = Math.floor(diff / 86400);
-
-    if (isNaN(day_diff) || day_diff < 0)
-        return;
-
-    return day_diff === 0 && (
-        diff < 60 && 'just now' ||
-        diff < 120 && '1 min ago' ||
-        diff < 3600 && Math.floor( diff / 60 ) + ' min ago' ||
-        diff < 7200 && '1 hour ago' ||
-        diff < 86400 && Math.floor( diff / 3600 ) + ' hours ago') ||
-        day_diff === 1 && 'Yesterday' ||
-        day_diff < 7 && day_diff + ' days ago' ||
-        day_diff < 31 && Math.ceil( day_diff / 7 ) + ' weeks ago' ||
-        day_diff < 365 && Math.round( day_diff / 30 ) +  ' months ago' ||
-        Math.round( day_diff / 365 ) + ' years ago';
-}
-
-function prettyLongDate(value) {
-    if (!value) return 'unkown';
-
-    var date = new Date(value);
-    return `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-}
-
-function prettyFileSize(value) {
-    if (typeof value !== 'number') return 'unkown';
-
-    return filesize(value);
-}
-
 function sanitize(path) {
     path = '/' + path;
     return path.replace(/\/+/g, '/');
@@ -147,9 +110,6 @@ export {
     getDirectLink,
     getPreviewUrl,
     getFileTypeGroup,
-    prettyDate,
-    prettyLongDate,
-    prettyFileSize,
     sanitize,
     encode,
     decode,

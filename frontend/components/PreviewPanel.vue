@@ -29,7 +29,8 @@
 
 <script>
 
-import { getPreviewUrl, prettyLongDate, prettyFileSize } from '../utils.js';
+import { getPreviewUrl } from '../utils.js';
+import { prettyLongDate, prettyFileSize } from 'pankow/utils';
 
 export default {
     name: 'PreviewPanel',

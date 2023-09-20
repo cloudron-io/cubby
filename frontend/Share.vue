@@ -29,7 +29,8 @@
 <script>
 
 import superagent from 'superagent';
-import { decode, sanitize, urlSearchQuery, getExtension, getDirectLink, prettyFileSize } from './utils.js';
+import { decode, sanitize, urlSearchQuery, getExtension, getDirectLink } from './utils.js';
+import { prettyFileSize } from 'pankow/utils';
 
 import PreviewPanel from './components/PreviewPanel.vue';
 

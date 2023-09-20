@@ -196,7 +196,8 @@
 'use strict';
 
 import superagent from 'superagent';
-import { parseResourcePath, decode, getExtension, copyToClipboard, sanitize, prettyFileSize } from './utils.js';
+import { parseResourcePath, decode, getExtension, copyToClipboard, sanitize } from './utils.js';
+import { prettyFileSize } from 'pankow/utils';
 
 import { TextEditor, ImageViewer, DirectoryView, FileUploader, PdfViewer, GenericViewer } from 'pankow';
 import { createDirectoryModel, DirectoryModelError } from './models/DirectoryModel.js';

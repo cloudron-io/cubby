@@ -20,7 +20,6 @@
     "express": "^4.18.2",
     "express-openid-connect": "^2.16.0",
     "express-session": "^1.17.3",
-    "filesize": "^10.0.12",
     "fs-extra": "^11.1.1",
     "morgan": "^1.10.0",
     "multiparty": "^4.2.3",
