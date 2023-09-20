@@ -714,7 +714,6 @@ export default {
         this.viewer = '';
 
         this.clearSelection();
-
       },
       async loadPath(path, forceLoad = false) {
         const resource = parseResourcePath(path || this.currentResourcePath || '/home/');

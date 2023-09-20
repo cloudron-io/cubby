@@ -84,15 +84,6 @@ function copyToClipboard(value) {
     elem.remove();
 }
 
-function clearSelection() {
-    if(document.selection && document.selection.empty) {
-        document.selection.empty();
-    } else if(window.getSelection) {
-        var sel = window.getSelection();
-        sel.removeAllRanges();
-    }
-}
-
 function urlSearchQuery() {
     return decodeURIComponent(window.location.search).slice(1).split('&').map(function (item) { return item.split('='); }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
 }
@@ -164,7 +155,6 @@ export {
     decode,
     getExtension,
     copyToClipboard,
-    clearSelection,
     urlSearchQuery,
     parseResourcePath,
     getEntryIdentifier,
