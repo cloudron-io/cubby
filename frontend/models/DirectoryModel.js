@@ -1,6 +1,6 @@
 
 import superagent from 'superagent';
-import { buildFilePath, sanitize } from 'pankow/utils';
+import { sanitize } from 'pankow/utils';
 import { parseResourcePath } from '../utils.js';
 
 export function DirectoryModelError(reason, errorOrMessage) {
@@ -70,7 +70,6 @@ export function createDirectoryModel(origin) {
       entry.type = entry.isDirectory ? 'directory' : 'file',
       entry.icon = entry.previewUrl;
       entry.resourcePath = resource.resourcePath;
-      entry.resourceUrl = entry.resourcePath;
       entry.resource = parseResourcePath(entry.resourcePath);
 
       // this prepares the entries to be compatible with all components
@@ -84,7 +83,6 @@ export function createDirectoryModel(origin) {
         child.type = child.isDirectory ? 'directory' : 'file',
         child.icon = child.previewUrl;
         child.resourcePath = `/${resource.id}${child.filePath}`;
-        child.resourceUrl = child.resourcePath;
         child.resource = parseResourcePath(child.resourcePath);
 
         // if we have an image, attach previewUrl
