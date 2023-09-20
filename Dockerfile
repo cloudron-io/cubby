@@ -1,4 +1,4 @@
-FROM cloudron/base:4.0.0@sha256:31b195ed0662bdb06a6e8a5ddbedb6f191ce92e8bee04c03fb02dd4e9d0286df
+FROM cloudron/base:4.2.0@sha256:b5117f36a07d1fd7136e8086694056adbb9a53ef6f0c822ab9c5c84f2ef4fe4f
 
 ENV CLOUDRON_POSTGRESQL_USERNAME="postgres" \
     CLOUDRON_POSTGRESQL_PASSWORD="password" \
