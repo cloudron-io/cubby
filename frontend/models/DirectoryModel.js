@@ -41,29 +41,11 @@ export function createDirectoryModel(origin) {
 
       const entry = result.body;
 
-      // extension: ""
-      // fileName: "Accounting"
-      // filePath: "/Accounting"
-      // filePathNew: "Accounting"
-      // files: Array []
-      // id: "SW7qw4MAFnUXq8lfSF8psPwyYYo="
-      // isDirectory: true
-      // isFile: false
-      // isShare: false
-      // mimeType: "inode/directory"
-      // mtime: "2022-07-23T17:26:43.456Z"
-      // owner: "admin"
-      // previewUrl: "http://localhost:3000/mime-types/inode-directory.svg"
-      // rename: false
-      // share: null
-      // sharedWith: Array []
-      // size: 164720946
-
       // translate for pankow
       entry.name = entry.fileName;
       entry.filePath = entry.filePath || resource.path;
       entry.folderPath = entry.filePath.slice(-entry.fileName.length);
-      entry.previewUrl = origin + entry.previewUrl;
+      entry.previewUrl = `${origin}${entry.previewUrl}`;
       entry.modified = new Date(entry.mtime);
       entry.type = entry.isDirectory ? 'directory' : 'file',
       entry.icon = entry.previewUrl;
@@ -76,7 +58,7 @@ export function createDirectoryModel(origin) {
       entry.files.forEach(child => {
         child.name = child.fileName;
         child.folderPath = entry.folderPath.slice(-child.fileName.length);
-        child.previewUrl = origin + child.previewUrl;
+        child.previewUrl = `${origin}${child.previewUrl}`;
         child.modified = new Date(child.mtime);
         child.type = child.isDirectory ? 'directory' : 'file',
         child.icon = child.previewUrl;
@@ -84,11 +66,6 @@ export function createDirectoryModel(origin) {
         child.resource = parseResourcePath(child.resourcePath);
         child.fullFileUrl = `${origin}/api/v1/files?path=${child.resourcePath}&type=raw`;
         child.downloadFileUrl = `${origin}/api/v1/files?path=${child.resourcePath}&type=download`;
-
-        // if we have an image, attach previewUrl
-        // if (item.mimeType.indexOf('image/') === 0) {
-        //   item.previewUrl = `${origin}/api/v1/${resource.apiPath}/files/${encodeURIComponent(path + '/' + item.fileName)}`;
-        // }
       });
 
       return entry;
