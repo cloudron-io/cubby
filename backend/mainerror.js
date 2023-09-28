@@ -2,8 +2,7 @@
 
 const assert = require('assert'),
     HttpError = require('connect-lastmile').HttpError,
-    util = require('util'),
-    _ = require('underscore');
+    util = require('util');
 
 exports = module.exports = MainError;
 
@@ -26,7 +25,7 @@ function MainError(reason, errorOrMessage, details) {
     } else { // error object
         this.message = errorOrMessage.message;
         this.nestedError = errorOrMessage;
-        _.extend(this.details, errorOrMessage); // copy enumerable properies
+        Object.assign(this.details, errorOrMessage); // copy enumerable properies
     }
 }
 util.inherits(MainError, Error);
@@ -51,5 +50,5 @@ MainError.TIMEOUT = 'Timeout';
 MainError.TRY_AGAIN = 'Try Again';
 
 MainError.prototype.toPlainObject = function () {
-    return _.extend({}, { message: this.message, reason: this.reason }, this.details);
+    return Object.assign({ message: this.message, reason: this.reason }, this.details);
 };
