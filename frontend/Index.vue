@@ -167,7 +167,7 @@
 
   <Transition name="pop">
     <div class="viewer-container" v-show="viewer === 'image'">
-      <ImageViewer ref="imageViewer" @close="onViewerClose" :download-handler="downloadHandler" />
+      <ImageViewer ref="imageViewer" @close="onViewerClose" :navigation-handler="onViewerEntryChanged" :download-handler="downloadHandler" />
     </div>
   </Transition>
   <Transition name="pop">
@@ -241,6 +241,7 @@ export default {
           action: '', // copy or cut
           files: []
         },
+        currentHash: '',
         error: '',
         // TODO show busy state for those
         pasteInProgress: false,
@@ -316,6 +317,11 @@ export default {
         this.config = await this.mainModel.getConfig();
 
         this.loadPath(window.location.hash.slice(1));
+      },
+      onViewerEntryChanged(entry) {
+        // prevent to reload image
+        this.currentHash = `#files${entry.resourcePath}`
+        window.location.hash = `files${entry.resourcePath}`;
       },
       onUploadFinished() {
         this.refresh();
@@ -715,6 +721,9 @@ export default {
       async loadPath(path, forceLoad = false) {
         const resource = parseResourcePath(path || this.currentResourcePath || '/home/');
 
+        // clear potential viewer first
+        if (this.viewer) this.viewer = '';
+
         if (!forceLoad && this.currentResourcePath === resource.resourcePath) return;
 
         let entry;
@@ -783,6 +792,10 @@ export default {
     },
     async mounted() {
       window.addEventListener('hashchange', () => {
+        // allows us to not reload but only change the hash
+        if (this.currentHash === decodeURIComponent(window.location.hash)) return;
+        this.currentHash = window.location.hash;
+
         const hash = window.location.hash.slice(1);
 
         if (hash.indexOf('files/home/') === 0) this.loadPath(hash.slice('files'.length));
