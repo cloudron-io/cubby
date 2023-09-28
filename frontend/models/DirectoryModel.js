@@ -64,26 +64,26 @@ export function createDirectoryModel(origin) {
       entry.filePath = entry.filePath || resource.path;
       entry.folderPath = entry.filePath.slice(-entry.fileName.length);
       entry.previewUrl = origin + entry.previewUrl;
-      entry.fullFileUrl = `${origin}/api/v1/files?path=/${resource.id}${entry.filePath}&type=raw`;
-      entry.downloadFileUrl = `${origin}/api/v1/files?path=/${resource.id}${entry.filePath}&type=download`;
       entry.modified = new Date(entry.mtime);
       entry.type = entry.isDirectory ? 'directory' : 'file',
       entry.icon = entry.previewUrl;
       entry.resourcePath = resource.resourcePath;
       entry.resource = parseResourcePath(entry.resourcePath);
+      entry.fullFileUrl = `${origin}/api/v1/files?path=${entry.resourcePath}&type=raw`;
+      entry.downloadFileUrl = `${origin}/api/v1/files?path=${entry.resourcePath}&type=download`;
 
       // this prepares the entries to be compatible with all components
       entry.files.forEach(child => {
         child.name = child.fileName;
         child.folderPath = entry.folderPath.slice(-child.fileName.length);
         child.previewUrl = origin + child.previewUrl;
-        child.fullFileUrl = `${origin}/api/v1/files?path=/${resource.id}${child.filePath}&type=raw`;
-        child.downloadFileUrl = `${origin}/api/v1/files?path=/${resource.id}${child.filePath}&type=download`;
         child.modified = new Date(child.mtime);
         child.type = child.isDirectory ? 'directory' : 'file',
         child.icon = child.previewUrl;
         child.resourcePath = `/${resource.id}${child.filePath}`;
         child.resource = parseResourcePath(child.resourcePath);
+        child.fullFileUrl = `${origin}/api/v1/files?path=${child.resourcePath}&type=raw`;
+        child.downloadFileUrl = `${origin}/api/v1/files?path=${child.resourcePath}&type=download`;
 
         // if we have an image, attach previewUrl
         // if (item.mimeType.indexOf('image/') === 0) {

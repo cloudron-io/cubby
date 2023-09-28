@@ -725,7 +725,7 @@ export default {
           entry = {};
 
           if (error.status === 401) return this.onLogout();
-          else if (error.status === 404) this.error = 'Does not exist';
+          else if (error.status === 404) return console.error('Failed to load entry', resource, error);
           else console.error(error);
         }
 
