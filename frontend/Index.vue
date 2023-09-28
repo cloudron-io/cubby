@@ -604,13 +604,12 @@ export default {
         const readonly = this.shareDialog.readonly;
         const receiverUsername = this.shareDialog.receiverUsername;
 
-        const shareId = await this.shareModel.create({ path, readonly, receiverUsername });
+        await this.shareModel.create({ path, readonly, receiverUsername });
 
         // reset the form
         this.shareDialog.error = '';
         this.shareDialog.receiverUsername = '';
         this.shareDialog.readonly = false;
-        console.log(this.shareDialog.entry)
 
         // refresh the entry
         this.shareDialog.entry = await this.directoryModel.get(this.shareDialog.entry);
