@@ -13,6 +13,7 @@ var assert = require('assert'),
     files = require('../files.js'),
     Entry = require('../entry.js'),
     util = require('util'),
+    path = require('path'),
     shares = require('../shares.js'),
     MainError = require('../mainerror.js'),
     HttpError = require('connect-lastmile').HttpError,
@@ -145,7 +146,35 @@ async function get(req, res, next) {
     } else if (resource === 'shares') {
         const shareId = filePath.split('/')[1];
         if (shareId) {
-            console.log('loading share', shareId);
+            const share = await shares.get(shareId);
+
+            // actual path is without shares/<shareId>/
+            const shareFilePath = filePath.split('/').slice(2).join('/');
+
+            let file;
+            try {
+                file = await files.get(share.owner, path.join(share.filePath, shareFilePath));
+            } catch (error) {
+                if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'file not found'));
+                return next(new HttpError(500, error));
+            }
+
+            if (type === 'raw') {
+                if (file.isDirectory) return res.redirect(`/share.html?shareId=${shareId}#/`);
+                return res.sendFile(file._fullFilePath);
+            } else if (type === 'download') {
+                if (file.isDirectory) return next(new HttpError(417, 'type "download" is not supported for directories'));
+                return res.download(file._fullFilePath);
+            }
+
+            // for now we only allow raw or download on publicly shared links
+            // if (!req.user) return next(new HttpError(403, 'not allowed'));
+
+            // those files are always part of this share
+            file.files.forEach(function (f) { f.share = share; });
+            file.share = share;
+
+            next(new HttpSuccess(200, file.asShare(share.filePath).withoutPrivate()));
         } else {
             debug('listShares');
 

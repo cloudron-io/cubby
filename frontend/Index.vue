@@ -758,8 +758,8 @@ export default {
         }
       },
       onOpen(entry) {
-        if (entry.share && entry.share.id) window.location.hash = 'shares/' + entry.share.id + '/' + entry.filePath;
-        else window.location.hash = 'files/home' + entry.filePath;
+        if (entry.share && entry.share.id) window.location.hash = `files/shares/${entry.share.id}${entry.filePath}`;
+        else window.location.hash = `files/home${entry.filePath}`;
       },
       onViewerClose() {
         this.viewer = '';
