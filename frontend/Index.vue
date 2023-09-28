@@ -414,6 +414,9 @@ export default {
         this.refresh();
         this.newFolderDialog.visible = false;
       },
+      clearSelection() {
+        this.selectedEntries = [];
+      },
       onSelectionChanged(selectedEntries) {
         this.selectedEntries = selectedEntries;
       },
@@ -428,9 +431,6 @@ export default {
         }
 
         if (typeof done === 'function') done();
-      },
-      clearSelection() {
-        this.selectedEntries = [];
       },
         showConflictingFileDialog(file, path) {
             this.conflictingFileDialog.file = file;
@@ -715,8 +715,6 @@ export default {
         this.entry = entry;
         this.entries = entry.files;
         this.viewer = '';
-
-        this.clearSelection();
       },
       async loadPath(path, forceLoad = false) {
         const resource = parseResourcePath(path || this.currentResourcePath || '/home/');
@@ -764,6 +762,8 @@ export default {
             this.viewer = 'generic';
             this.$refs.genericViewer.open(entry);
           }
+        } else {
+          this.clearSelection();
         }
       },
       onOpen(entry) {
