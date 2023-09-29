@@ -148,11 +148,11 @@
           {{ slotProps.data.receiverUsername || slotProps.data.receiverEmail }}
         </template>
       </Column>
-      <Column header="Readonly" headerClass="share-readonly-column" :style="{ textAlign: 'center' }">
+      <!-- <Column header="Readonly" headerClass="share-readonly-column" :style="{ textAlign: 'center' }">
         <template #body="slotProps">
           <Checkbox v-model="slotProps.data.readonly" :binary="true" readonly/>
         </template>
-      </Column>
+      </Column> -->
       <Column header="" :style="{ textAlign: 'right' }">
         <template #body="slotProps">
           <Button class="p-button-rounded p-button-danger p-button-text" icon="pi pi-trash" v-tooltip.top="'Delete'" @click="onDeleteShare(slotProps.data)"/>
