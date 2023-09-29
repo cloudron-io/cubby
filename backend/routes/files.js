@@ -45,12 +45,29 @@ async function add(req, res, next) {
 
     debug(`add: ${resource} ${filePath} ${mtime}`);
 
-    // FIXME currently we still operate on username only
-    resource = req.user.username;
+    let finalUsername;
+    let finalFilePath;
+    if (resource === 'home') {
+        finalUsername = req.user.username;
+        finalFilePath = filePath;
+    } else if (resource === 'shares') {
+        const shareId = filePath.split('/')[1];
+        if (!shareId) return next(new HttpError(500, 'unknown resource'));
+
+        // actual path is without shares/<shareId>/
+        const actualFilePath = filePath.split('/').slice(2).join('/');
+
+        const share = await shares.get(shareId);
+
+        finalUsername = share.owner;
+        finalFilePath = path.join(share.filePath, actualFilePath);
+    } else {
+        next(new HttpError(500, `adding to ${resource} not supported`));
+    }
 
     try {
-        if (directory) await files.addDirectory(resource, filePath);
-        else await files.addOrOverwriteFile(resource, filePath, req.files.file.path, mtime, overwrite);
+        if (directory) await files.addDirectory(finalUsername, finalFilePath);
+        else await files.addOrOverwriteFile(finalUsername, finalFilePath, req.files.file.path, mtime, overwrite);
     } catch (error) {
         if (error.reason === MainError.ALREADY_EXISTS) return next(new HttpError(409, 'already exists'));
         return next(new HttpError(500, error));
