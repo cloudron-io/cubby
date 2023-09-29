@@ -70,7 +70,13 @@ function parseResourcePath(resourcePath) {
         result.type = 'shares';
         result.shareId = resourcePath.split('/')[2];
         result.path = resourcePath.slice(('/' + result.type + '/' + result.shareId).length) || '/';
-        result.parentResourcePath = result.shareId ? ('/shares/' + result.shareId + result.path.slice(0, result.path.lastIndexOf('/')) + '/') : '/shares/';
+        // parent could be parten folder inside share or  the virutal shares folder
+        if (!result.shareId || result.path === '/') {
+            result.parentResourcePath = '/shares/';
+        } else {
+            const oneFolderUp = result.path.slice(0, result.path.lastIndexOf('/'));
+            result.parentResourcePath = `/shares/${result.shareId}${oneFolderUp}/`;
+        }
         result.id = 'shares';
         // without shareId we show the root (share listing)
         result.resourcePath = `/${result.type}/` + (result.shareId ? (result.shareId + result.path) : '');
