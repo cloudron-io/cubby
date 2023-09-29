@@ -579,10 +579,12 @@ export default {
 
         const users = await this.mainModel.getUsers();
 
+        // remove logged in user
         this.shareDialog.users = users.filter((u) => { return u.username !== this.profile.username; });
 
-        this.shareDialog.users.forEach(function (user) {
-          if (entry.sharedWith.find(function (share) { return share.receiverUsername === user.username; })) user.alreadyUsed = true;
+        // disable already shared with users
+        this.shareDialog.users.forEach((user) => {
+          user.alreadyUsed = this.shareDialog.entry.sharedWith.find((share) => { return share.receiverUsername === user.username; });
         });
 
         // TODO this is just to be prettier, should be in UI code though
@@ -591,6 +593,15 @@ export default {
         });
 
         this.shareDialog.visible = true;
+      },
+      async refreshShareDialogEntry() {
+        this.shareDialog.entry = await this.directoryModel.get(this.shareDialog.entry);
+
+        this.shareDialog.users.forEach((user) => {
+          user.alreadyUsed = this.shareDialog.entry.sharedWith.find((share) => { return share.receiverUsername === user.username; });
+        });
+
+        this.refresh();
       },
       async onCreateShareLink() {
         const path = this.shareDialog.entry.filePath;
@@ -619,27 +630,12 @@ export default {
 
         // refresh the entry
         this.shareDialog.entry = await this.directoryModel.get(this.shareDialog.entry);
-        this.refresh();
+        this.refreshShareDialogEntry();
       },
-        onDeleteShare(share) {
-            var that = this;
-
-            superagent.delete('/api/v1/shares').query({ share_id: share.id }).end(function (error, result) {
-                if (result && result.statusCode === 401) return that.logout();
-                if (result && result.statusCode !== 200) return console.error('Error deleting share');
-                if (error) return console.error(error.message);
-
-                superagent.get('/api/v1/files').query({ path: that.shareDialog.entry.filePath }).end(function (error, result) {
-                    if (result && result.statusCode === 401) return that.logout();
-                    if (result && result.statusCode !== 200) return console.error('Error getting file or folder');
-                    if (error) return console.error(error.message);
-
-                    that.shareDialog.entry = result.body;
-
-                    that.refresh();
-                });
-            });
-        },
+      async onDeleteShare(share) {
+        await this.shareModel.remove(share.id);
+        this.refreshShareDialogEntry();
+      },
       async refresh() {
         await this.loadPath(null, true);
       },

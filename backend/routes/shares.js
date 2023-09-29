@@ -184,7 +184,7 @@ async function listShares(req, res, next) {
 async function removeShare(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
-    const shareId = req.query.share_id;
+    const shareId = req.query.shareId;
 
     if (!shareId) return next(new HttpError(400, 'share_id must be a non-empty string'));
 
