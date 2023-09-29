@@ -195,6 +195,7 @@ async function get(req, res, next) {
                     file.isShare = true;
                     file.share = share;
                     file = file.asShare(share.filePath);
+                    file.id = share.id;
 
                     sharedFiles.push(file);
                 }

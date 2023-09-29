@@ -76,7 +76,7 @@ Entry.prototype.getPreviewUrl = function () {
 
 Entry.prototype.withoutPrivate = function () {
     return {
-        id: crypto.createHash('sha1').update(this.owner + this.filePath).digest('base64'),
+        id: this.id || crypto.createHash('sha1').update(this.owner + this.filePath).digest('base64'),
         fileName: this.fileName,
         filePath: this.filePath,
         owner: this.owner,
