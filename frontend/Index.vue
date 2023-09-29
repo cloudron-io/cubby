@@ -130,10 +130,10 @@
         </div>
       </div>
       <div>
-        <div class="p-field-checkbox">
+        <!-- <div class="p-field-checkbox">
           <Checkbox id="binary" v-model="shareDialog.readonly" :binary="true" />
           <label for="binary">Share read-only</label>
-        </div>
+        </div> -->
         <Button label="Create share" icon="pi pi-check" class="p-button p-button-success" @click="onCreateShare" :disabled="!shareDialog.receiverUsername"/>
       </div>
     </form>
@@ -557,15 +557,15 @@ export default {
       showAllShares() {
         window.location.hash = 'shares/';
       },
-        isReadonly() {
-          if (window.location.hash === '/shares/') return true;
-          if (!this.currentShare) return false;
-          return this.currentShare.readonly;
-        },
-        isShareable() {
-          var resource = parseResourcePath(this.currentResourcePath || 'files/');
-          return resource.type !== 'shares';
-        },
+      isReadonly() {
+        if (window.location.hash === 'shares/') return true;
+        if (!this.currentShare) return false;
+        return this.currentShare.readonly;
+      },
+      isShareable() {
+        const resource = parseResourcePath(this.currentResourcePath || 'files/');
+        return resource.type !== 'shares';
+      },
       async shareHandler(entry) {
         this.shareDialog.error = '';
         this.shareDialog.receiverUsername = '';
