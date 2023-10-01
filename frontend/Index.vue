@@ -919,6 +919,12 @@ label {
     top: 3px;
 }
 
+@media only screen and (max-width: 767px) {
+  .side-bar-toggle {
+    display: none;
+  }
+}
+
 </style>
 
 <style>
