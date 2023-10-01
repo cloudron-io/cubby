@@ -570,12 +570,13 @@ export default {
         this.shareDialog.error = '';
         this.shareDialog.receiverUsername = '';
         this.shareDialog.readonly = false;
-        this.shareDialog.entry = entry;
         this.shareDialog.shareLink.expires = false;
         this.shareDialog.shareLink.expiresAt = new Date();
 
         // start with tomorrow
         this.shareDialog.shareLink.expiresAt.setDate(this.shareDialog.shareLink.expiresAt.getDate() + 1);
+
+        this.shareDialog.entry = await this.directoryModel.get(entry);
 
         const users = await this.mainModel.getUsers();
 
