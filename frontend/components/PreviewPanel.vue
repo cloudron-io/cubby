@@ -1,9 +1,9 @@
 <template>
-    <div class="container" :class="{ 'visible': visible }">
+    <div class="preview-container" :class="{ 'visible': visible }">
       <div class="p-d-flex p-jc-between header" style="padding-bottom: 10px;">Details</div>
-      <div class="preview-container">
-        <div class="preview" v-for="entry in selectedEntries.slice(0, 15)" :key="entry.id" :style="{ backgroundImage: entry && getPreviewUrl(entry) ? 'url(' + getPreviewUrl(entry) + ')' : 'none' }"></div>
-        <div class="preview" v-show="!selectedEntries.length" :style="{ backgroundImage: entry && getPreviewUrl(entry) ? 'url(' + getPreviewUrl(entry) + ')' : 'none' }"></div>
+      <div class="preview-icon-container">
+        <div class="preview-icon" v-for="entry in selectedEntries.slice(0, 15)" :key="entry.id" :style="{ backgroundImage: entry && getPreviewUrl(entry) ? 'url(' + getPreviewUrl(entry) + ')' : 'none' }"></div>
+        <div class="preview-icon" v-show="!selectedEntries.length" :style="{ backgroundImage: entry && getPreviewUrl(entry) ? 'url(' + getPreviewUrl(entry) + ')' : 'none' }"></div>
       </div>
       <div class="detail" v-show="selectedEntries.length <= 1">
         <p>Owner</p>
@@ -70,7 +70,7 @@ export default {
 
 <style scoped>
 
-.container {
+.preview-container {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -80,11 +80,11 @@ export default {
     border-left: 1px solid #f8f9fa;
 }
 
-.container.visible {
+.preview-container.visible {
     width: 350px;
 }
 
-.preview-container {
+.preview-icon-container {
     display: flex;
     width: 100%;
     height: 250px;
@@ -92,7 +92,7 @@ export default {
     flex-wrap: wrap-reverse;
 }
 
-.preview {
+.preview-icon {
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
@@ -119,11 +119,8 @@ export default {
 }
 
 @media only screen and (max-width: 767px)  {
-    .container.visible {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        top: 0;
+    .preview-container {
+        display: none;
     }
 }
 
