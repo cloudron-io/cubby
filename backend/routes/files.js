@@ -28,7 +28,8 @@ function boolLike(arg) {
 }
 
 async function add(req, res, next) {
-    assert.strictEqual(typeof req.user, 'object');
+    // only allowed for authenticated users until we check for !read-only shares
+    if (!req.user) return next(new HttpError(403, 'not allowed'));
 
     const directory = boolLike(req.query.directory);
     const overwrite = boolLike(req.query.overwrite);
@@ -77,7 +78,8 @@ async function add(req, res, next) {
 }
 
 async function head(req, res, next) {
-    assert.strictEqual(typeof req.user, 'object');
+    // only allowed for authenticated users until we check for !read-only shares
+    if (!req.user) return next(new HttpError(403, 'not allowed'));
 
     const filePath = req.query.path ? decodeURIComponent(req.query.path) : '';
 
@@ -115,6 +117,9 @@ async function get(req, res, next) {
     filePath = filePath.slice(resource.length+1);
 
     debug(`get: ${resource} ${filePath} type:${type || 'json'}`);
+
+    // only shares may have optional auth
+    if (resource !== 'shares' && !req.user) return next(new HttpError(401, 'Unauthorized'));
 
     if (resource === 'home') {
         let result;
@@ -165,6 +170,9 @@ async function get(req, res, next) {
         if (shareId) {
             const share = await shares.get(shareId);
 
+            // check if this share is a public link or only for a specific user
+            if (req.user && share.receiverUsername && share.receiverUsername !== req.user.username) return next(new HttpError(403, 'not allowed'));
+
             // actual path is without shares/<shareId>/
             const shareFilePath = filePath.split('/').slice(2).join('/');
 
@@ -177,7 +185,7 @@ async function get(req, res, next) {
             }
 
             if (type === 'raw') {
-                if (file.isDirectory) return res.redirect(`/share.html?shareId=${shareId}#/`);
+                if (file.isDirectory) return res.redirect(`/#files/shares/${shareId}/`);
                 return res.sendFile(file._fullFilePath);
             } else if (type === 'download') {
                 if (file.isDirectory) return next(new HttpError(417, 'type "download" is not supported for directories'));
@@ -194,6 +202,9 @@ async function get(req, res, next) {
             next(new HttpSuccess(200, file.asShare(share.filePath).withoutPrivate()));
         } else {
             debug('listShares');
+
+            // only allowed for authenticated users
+            if (!req.user) return next(new HttpError(403, 'not allowed'));
 
             let result = [];
 
@@ -241,7 +252,8 @@ async function get(req, res, next) {
 }
 
 async function update(req, res, next) {
-    assert.strictEqual(typeof req.user, 'object');
+    // only allowed for authenticated users until we check for !read-only shares
+    if (!req.user) return next(new HttpError(403, 'not allowed'));
 
     const action = req.query.action;
     let filePath = decodeURIComponent(req.query.path);
@@ -295,6 +307,9 @@ async function update(req, res, next) {
 }
 
 async function remove(req, res, next) {
+    // only allowed for authenticated users until we check for !read-only shares
+    if (!req.user) return next(new HttpError(403, 'not allowed'));
+
     assert.strictEqual(typeof req.user, 'object');
 
     let filePath = req.query.path ? decodeURIComponent(req.query.path) : '';

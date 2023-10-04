@@ -32,7 +32,7 @@ export function createMainModel(origin) {
         error = e;
       }
 
-      if (error || result.statusCode !== 200) throw new Error('Failed to get profile', { cause: error || result })
+      if (error || result.statusCode !== 200) throw new Error('Failed to get config', { cause: error || result })
 
       return {
         viewers: {

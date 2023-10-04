@@ -122,11 +122,11 @@ function init(callback) {
 
     router.get ('/api/v1/users', users.isAuthenticated, users.list);
 
-    router.head('/api/v1/files', users.isAuthenticated, files.head);
-    router.get ('/api/v1/files', users.isAuthenticated, files.get);
-    router.post('/api/v1/files', users.isAuthenticated, multipart({ maxFieldsSize: 2 * 1024, limit: '512mb', timeout: 3 * 60 * 1000 }), files.add);
-    router.put ('/api/v1/files', users.isAuthenticated, files.update);
-    router.del ('/api/v1/files', users.isAuthenticated, files.remove);
+    router.head('/api/v1/files', users.optionalSessionAuth, files.head);
+    router.get ('/api/v1/files', users.optionalSessionAuth, files.get);
+    router.post('/api/v1/files', users.optionalSessionAuth, multipart({ maxFieldsSize: 2 * 1024, limit: '512mb', timeout: 3 * 60 * 1000 }), files.add);
+    router.put ('/api/v1/files', users.optionalSessionAuth, files.update);
+    router.del ('/api/v1/files', users.optionalSessionAuth, files.remove);
 
     router.get ('/api/v1/shares', users.isAuthenticated, shares.listShares);
     router.post('/api/v1/shares', users.isAuthenticated, shares.createShare);

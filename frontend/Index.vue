@@ -3,19 +3,19 @@
   <ConfirmDialog></ConfirmDialog>
   <Toast position="top-center" />
 
-  <LoginView v-show="ready && !profile.username" @success="onLoggedIn"/>
+  <LoginView v-show="ready && showLogin" @success="onLoggedIn"/>
 
-  <div class="container" v-show="ready && profile.username">
+  <div class="container" v-show="ready && !showLogin">
     <div class="navigation-panel">
       <h1 style="margin-bottom: 50px; text-align: center;"><img src="/logo-plain.svg" height="60" width="60"/><br/>Cubby</h1>
 
-      <a class="navigation-panel-entry" href="#files/home/"><i class="pi pi-folder-open"></i> All Files</a>
-      <a class="navigation-panel-entry" href="#files/recent/"><i class="pi pi-clock"></i> Recent Files</a>
-      <a class="navigation-panel-entry" href="#files/shares/"><i class="pi pi-share-alt"></i> Shared With You</a>
+      <a class="navigation-panel-entry" v-show="profile.username" href="#files/home/"><i class="pi pi-folder-open"></i> All Files</a>
+      <a class="navigation-panel-entry" v-show="profile.username" href="#files/recent/"><i class="pi pi-clock"></i> Recent Files</a>
+      <a class="navigation-panel-entry" v-show="profile.username" href="#files/shares/"><i class="pi pi-share-alt"></i> Shared With You</a>
 
       <div style="flex-grow: 1">&nbsp;</div>
 
-      <div class="p-fluid" v-tooltip.top="profile.diskusage ? (prettyFileSize(profile.diskusage.used) + ' of ' + prettyFileSize(profile.diskusage.available)) : ''">
+      <div class="p-fluid" v-show="profile.diskusage" v-tooltip.top="profile.diskusage ? (prettyFileSize(profile.diskusage.used) + ' of ' + prettyFileSize(profile.diskusage.available)) : ''">
         <span>
           <b>{{ profile.diskusage ? parseInt(profile.diskusage.used / profile.diskusage.available * 100) : 0 }}%</b> of storage used
         </span>
@@ -23,7 +23,7 @@
       </div>
     </div>
     <div class="content">
-      <MainToolbar :breadCrumbs="breadCrumbs" :breadCrumbHome="breadCrumbHome" :selectedEntries="selectedEntries" :displayName="profile.displayName" @reload="refresh" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @directory-up="onUp" @new-folder="onNewFolder" @delete="onDelete" @download="downloadHandler"/>
+      <MainToolbar :breadCrumbs="breadCrumbs" :breadCrumbHome="breadCrumbHome" :selectedEntries="selectedEntries" :displayName="profile.displayName" @reload="refresh" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @directory-up="onUp" @new-folder="onNewFolder" @delete="deleteHandler" @download="downloadHandler" @login="showLogin=true;"/>
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (previewPanelVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onTogglePreviewPanel" v-tooltip="previewPanelVisible ? 'Hide Preview' : 'Show Preview'"/>
@@ -192,7 +192,6 @@
 
 'use strict';
 
-import superagent from 'superagent';
 import { parseResourcePath, getExtension, copyToClipboard, sanitize } from './utils.js';
 import { prettyFileSize } from 'pankow/utils';
 
@@ -229,6 +228,7 @@ export default {
         BASE_URL,
         ready: false,
         busy: true,
+        showLogin: false,
         mainModel: null,
         shareModel: null,
         directoryModel: null,
@@ -301,8 +301,11 @@ export default {
         this.refresh();
       },
       async onLogout() {
+        console.log('onLogout');
+
         await this.mainModel.logout();
 
+        this.showLogin = true;
         this.profile.username = '';
         this.profile.email = '';
         this.profile.displayName = '';
@@ -315,6 +318,8 @@ export default {
       async onLoggedIn() {
         this.profile = await this.mainModel.getProfile();
         this.config = await this.mainModel.getConfig();
+
+        this.showLogin = false;
 
         this.loadPath(window.location.hash.slice(1));
       },
@@ -558,6 +563,7 @@ export default {
         window.location.hash = 'shares/';
       },
       isReadonly() {
+        if (!this.profile.username) return false;
         if (window.location.hash === 'shares/') return true;
         if (!this.currentShare) return false;
         return this.currentShare.readonly;
@@ -714,7 +720,7 @@ export default {
         this.viewer = '';
       },
       async loadPath(path, forceLoad = false) {
-        const resource = parseResourcePath(path || this.currentResourcePath || '/home/');
+        const resource = parseResourcePath(path || this.currentResourcePath);
 
         // clear potential viewer first
         if (this.viewer) this.viewer = '';
@@ -808,17 +814,13 @@ export default {
       try {
         this.profile = await this.mainModel.getProfile();
       } catch (e) {
-        console.error('Failed to get profile.', e);
-        this.ready = true;
-        return;
+        if (e.cause && e.cause.status !== 401) return console.error('Failed to get profile.', e);
       }
 
       try {
         this.config = await this.mainModel.getConfig();
       } catch (e) {
-        console.error('Failed to get config.', e);
-        this.ready = true;
-        return;
+        if (e.cause && e.cause.status !== 401) return console.error('Failed to get config.', e);
       }
 
       this.directoryModel = createDirectoryModel(API_ORIGIN);

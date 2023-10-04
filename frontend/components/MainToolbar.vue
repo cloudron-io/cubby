@@ -19,6 +19,7 @@
 
             <div class="profile-actions">
                 <Button v-show="displayName" icon="pi pi-user" class="p-button-secondary" @click="onToggleMenuMain" :label="displayName"/>
+                <Button v-show="!displayName" icon="pi pi-sign-in" class="p-button-secondary" @click="onLogin" label="Login"/>
 
                 <Menu ref="menuUpload" :model="uploadMenu" :popup="true"/>
                 <Menu ref="menuNew" :model="newMenu" :popup="true"/>
@@ -44,7 +45,7 @@
 
 export default {
     name: 'MainToolbar',
-    emits: [ 'reload', 'logout', 'upload-file', 'upload-folder', 'new-file', 'new-folder', 'download', 'delete', 'directory-up' ],
+    emits: [ 'reload', 'login', 'logout', 'upload-file', 'upload-folder', 'new-file', 'new-folder', 'download', 'delete', 'directory-up' ],
     props: {
         breadCrumbs: {
             type: Array,
@@ -103,6 +104,9 @@ export default {
         };
     },
     methods: {
+        onLogin() {
+            this.$emit('login');
+        },
         onToggleMenuUpload(event) {
             this.$refs.menuUpload.toggle(event);
         },
