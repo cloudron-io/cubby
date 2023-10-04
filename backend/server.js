@@ -138,7 +138,7 @@ function init(callback) {
     router.put ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.update);
     router.del ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.remove);
 
-    router.get ('/api/v1/preview/:type/:id/:hash', users.optionalSessionAuth, misc.getPreview);
+    router.get ('/api/v1/preview/:type/:id/:hash', users.optionalSessionAuth, shares.optionalAttachReceiver, misc.getPreview);
 
     router.get ('/api/v1/download', users.isAuthenticated, misc.download);
 

@@ -84,10 +84,9 @@ async function sessionAuth(req, res, next) {
     next();
 }
 
+// following middlewares have to check req.user if needed, like public share links
 async function optionalSessionAuth(req, res, next) {
-    if (!req.oidc.isAuthenticated()) return next(new HttpError(401, 'Unauthorized'));
-
-    if (!req.oidc.user.sub) {
+    if (!req.oidc.user || !req.oidc.user.sub) {
         req.user = null;
         return next();
     }

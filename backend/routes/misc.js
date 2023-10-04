@@ -34,6 +34,9 @@ async function getPreview(req, res, next) {
     } else if (type === 'shares') {
         // req.share is verified and attached by now via optionalAttachReceiver
 
+        // permissions are checked in routes/shares.js
+        if (!req.share) return next(new HttpError(404, 'not found'));
+
         const localPreviewPath = preview.getLocalPath(hash);
         if (localPreviewPath) return res.sendFile(localPreviewPath);
 
