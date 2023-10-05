@@ -109,18 +109,6 @@
 
   <!-- Share Dialog -->
   <Dialog :header="shareDialog.entry.fileName" v-model:visible="shareDialog.visible" :dismissableMask="true" :closable="true" :style="{width: '720px'}" :modal="true">
-    <h3 style="margin-top: 0;">Share Link</h3>
-    <div class="p-formgroup-inline">
-      <div class="p-field-checkbox">
-        <Checkbox id="expireShareLinkAt" v-model="shareDialog.shareLink.expire" :binary="true" />
-        <label for="expireShareLinkAt">Expire At</label>
-      </div>
-      <div class="p-field">
-        <Calendar v-model="shareDialog.shareLink.expiresAt" :minDate="new Date()" :disabled="!shareDialog.shareLink.expire"/>
-      </div>
-      <Button label="Create and Copy Link" icon="pi pi-link" class="p-button p-button-success" @click="onCreateShareLink"/>
-    </div>
-
     <h3>Create Share</h3>
     <form @submit="onCreateShare" @submit.prevent>
       <div class="p-fluid">
@@ -139,13 +127,49 @@
     </form>
 
     <h3>Shared with</h3>
-    <DataTable :value="shareDialog.entry.sharedWith" class="p-datatable-sm" responsiveLayout="scroll">
+    <DataTable :value="shareDialog.sharedWith" class="p-datatable-sm" responsiveLayout="scroll">
       <template #empty>
         Not shared with anyone yet
       </template>
       <Column header="User">
         <template #body="slotProps">
           {{ slotProps.data.receiverUsername || slotProps.data.receiverEmail }}
+        </template>
+      </Column>
+      <!-- <Column header="Readonly" headerClass="share-readonly-column" :style="{ textAlign: 'center' }">
+        <template #body="slotProps">
+          <Checkbox v-model="slotProps.data.readonly" :binary="true" readonly/>
+        </template>
+      </Column> -->
+      <Column header="" :style="{ textAlign: 'right' }">
+        <template #body="slotProps">
+          <Button class="p-button-rounded p-button-danger p-button-text" icon="pi pi-trash" v-tooltip.top="'Delete'" @click="onDeleteShare(slotProps.data)"/>
+        </template>
+      </Column>
+    </DataTable>
+
+    <br/>
+
+    <h3 style="margin-top: 0;">Create Share Link</h3>
+    <div class="p-formgroup-inline">
+      <div class="p-field-checkbox">
+        <Checkbox id="expireShareLinkAt" v-model="shareDialog.shareLink.expire" :binary="true" />
+        <label for="expireShareLinkAt">Expire At</label>
+      </div>
+      <div class="p-field">
+        <Calendar v-model="shareDialog.shareLink.expiresAt" :minDate="new Date()" :disabled="!shareDialog.shareLink.expire"/>
+      </div>
+      <Button label="Create and Copy Link" icon="pi pi-link" class="p-button p-button-success" @click="onCreateShareLink"/>
+    </div>
+
+    <h3>Shared Links</h3>
+    <DataTable :value="shareDialog.sharedLinks" class="p-datatable-sm" responsiveLayout="scroll">
+      <template #empty>
+        No shared links yet
+      </template>
+      <Column header="Link">
+        <template #body="slotProps">
+          <Button class="p-button p-button-sm p-button-text" @click="copyShareIdLinkToClipboard(slotProps.data.id)">Copy Link to Clipboard</Button>
         </template>
       </Column>
       <!-- <Column header="Readonly" headerClass="share-readonly-column" :style="{ textAlign: 'center' }">
@@ -280,6 +304,7 @@ export default {
           readonly: false,
           users: [],
           sharedWith: [],
+          shareLinks: [],
           entry: {},
           shareLink: {
             expire: false,
@@ -572,12 +597,20 @@ export default {
         const resource = parseResourcePath(this.currentResourcePath || 'files/');
         return resource.type !== 'shares';
       },
+      postprocessSharesInDialog() {
+        this.shareDialog.sharedWith = this.shareDialog.entry.sharedWith.filter((s) => s.receiverUsername);
+        this.shareDialog.sharedLinks = this.shareDialog.entry.sharedWith.filter((s) => !s.receiverUsername);
+
+        this.shareDialog.users.forEach((user) => {
+          user.alreadyUsed = this.shareDialog.entry.sharedWith.find((share) => { return share.receiverUsername === user.username; });
+        });
+      },
       async shareHandler(entry) {
         this.shareDialog.error = '';
         this.shareDialog.receiverUsername = '';
         this.shareDialog.readonly = false;
         this.shareDialog.shareLink.expires = false;
-        this.shareDialog.shareLink.expiresAt = new Date();
+        this.shareDialog.shareLink.expiresAt = new Date()
 
         // start with tomorrow
         this.shareDialog.shareLink.expiresAt.setDate(this.shareDialog.shareLink.expiresAt.getDate() + 1);
@@ -589,26 +622,25 @@ export default {
         // remove logged in user
         this.shareDialog.users = users.filter((u) => { return u.username !== this.profile.username; });
 
-        // disable already shared with users
-        this.shareDialog.users.forEach((user) => {
-          user.alreadyUsed = this.shareDialog.entry.sharedWith.find((share) => { return share.receiverUsername === user.username; });
-        });
-
         // TODO this is just to be prettier, should be in UI code though
         this.shareDialog.users.forEach(function (u) {
           u.userAndDisplayName = u.displayName + ' ( ' + u.username + ' )';
         });
+
+        this.postprocessSharesInDialog();
 
         this.shareDialog.visible = true;
       },
       async refreshShareDialogEntry() {
         this.shareDialog.entry = await this.directoryModel.get(this.shareDialog.entry);
 
-        this.shareDialog.users.forEach((user) => {
-          user.alreadyUsed = this.shareDialog.entry.sharedWith.find((share) => { return share.receiverUsername === user.username; });
-        });
+        this.postprocessSharesInDialog();
 
         this.refresh();
+      },
+      copyShareIdLinkToClipboard(shareId) {
+        copyToClipboard(this.shareModel.getLink(shareId));
+        this.$toast.add({ severity:'success', summary: 'Share link copied to clipboard', life: 2000 });
       },
       async onCreateShareLink() {
         const path = this.shareDialog.entry.filePath;
@@ -617,11 +649,9 @@ export default {
 
         const shareId = await this.shareModel.create({ path, readonly, expiresAt });
 
-        copyToClipboard(this.shareModel.getLink(shareId));
+        this.copyShareIdLinkToClipboard(shareId);
 
         this.shareDialog.visible = false;
-
-        this.$toast.add({ severity:'success', summary: 'Share link copied to clipboard', life: 2000 });
       },
       async onCreateShare() {
         const path = this.shareDialog.entry.filePath;

@@ -172,45 +172,17 @@ async function getDirectory(username, fullFilePath, filePath, stats) {
     }
 
     // attach shares
+    const sharedWith = await shares.getByOwnerAndFilepath(username, filePath);
     for (let file of files) {
-        let result;
-        try {
-            result = await shares.getByOwnerAndFilepath(username, file.filePath);
-        } catch (error) {
-            // TODO not sure what to do here
-            console.error('getDirectory: Failed to attach shares.', error);
-        }
-
-        file.sharedWith = result || null;
+        file.sharedWith = await shares.getByOwnerAndFilepath(username, file.filePath);
     }
 
     // attach diskusage
+    const size = await diskusage.getByUsernameAndDirectory(username, filePath);
     for (let file of files) {
         if (!file.isDirectory) continue;
 
-        let result;
-        try {
-            result = await diskusage.getByUsernameAndDirectory(username, file.filePath);
-        } catch (error) {
-            // TODO not sure what to do here
-            console.error('getDirectory: Failed to attach diskusage.', error);
-        }
-
-        file.size = result;
-    }
-
-    let sharedWith;
-    try {
-        sharedWith = await shares.getByOwnerAndFilepath(username, filePath);
-    } catch (error) {
-        console.error(error);
-    }
-
-    let size = 0;
-    try {
-        size = await diskusage.getByUsernameAndDirectory(username, filePath);
-    } catch (error) {
-        console.error(error);
+        file.size = await diskusage.getByUsernameAndDirectory(username, file.filePath);
     }
 
     return new Entry({

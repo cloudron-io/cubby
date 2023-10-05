@@ -97,8 +97,7 @@ async function getByOwnerAndFilepath(username, filepath) {
 
     result.rows.forEach(postProcess);
 
-    // only return non link shares
-    return result.rows.filter(function (share) { return share.receiverUsername || share.receiverEmail; });
+    return result.rows;
 }
 
 async function getByReceiverAndFilepath(receiver, filepath, exactMatch = false) {
@@ -117,8 +116,7 @@ async function getByReceiverAndFilepath(receiver, filepath, exactMatch = false) 
 
     result.rows.forEach(postProcess);
 
-    // only return non link shares
-    return result.rows.filter(function (share) { return share.receiverUsername || share.receiverEmail; });
+    return result.rows;
 }
 
 async function remove(shareId) {
