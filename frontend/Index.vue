@@ -216,6 +216,18 @@
 
 'use strict';
 
+import Button from 'primevue/button';
+import Calendar from 'primevue/calendar';
+import Checkbox from 'primevue/checkbox';
+import Column from 'primevue/column';
+import ConfirmDialog from 'primevue/confirmdialog';
+import DataTable from 'primevue/datatable';
+import Dialog from 'primevue/dialog';
+import Dropdown from 'primevue/dropdown';
+import InputText from 'primevue/inputtext';
+import ProgressBar from 'primevue/progressbar';
+import Toast from 'primevue/toast';
+
 import { parseResourcePath, getExtension, copyToClipboard, sanitize } from './utils.js';
 import { prettyFileSize } from 'pankow/utils';
 
@@ -224,6 +236,8 @@ import { createDirectoryModel, DirectoryModelError } from './models/DirectoryMod
 import { createMainModel } from './models/MainModel.js';
 import { createShareModel } from './models/ShareModel.js';
 
+// import OfficeViewer from './components/OfficeViewer.vue';
+import LoginView from './components/LoginView.vue';
 import MainToolbar from './components/MainToolbar.vue';
 import PreviewPanel from './components/PreviewPanel.vue';
 
@@ -238,14 +252,27 @@ const beforeUnloadListener = (event) => {
 export default {
     name: 'IndexView',
     components: {
+      Button,
+      Calendar,
+      Checkbox,
+      Column,
+      ConfirmDialog,
+      DataTable,
+      Dialog,
       DirectoryView,
+      Dropdown,
       GenericViewer,
       ImageViewer,
+      InputText,
+      LoginView,
       MainToolbar,
       TextEditor,
+      // OfficeViewer,
       PdfViewer,
       PreviewPanel,
-      FileUploader
+      ProgressBar,
+      FileUploader,
+      Toast
     },
     data() {
       return {

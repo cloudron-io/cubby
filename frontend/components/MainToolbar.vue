@@ -43,8 +43,21 @@
 
 <script>
 
+import Breadcrumb from 'primevue/breadcrumb';
+import Button from 'primevue/button';
+import Dialog from 'primevue/dialog';
+import Menu from 'primevue/menu';
+import Toolbar from 'primevue/toolbar';
+
 export default {
     name: 'MainToolbar',
+    components: {
+        Breadcrumb,
+        Button,
+        Dialog,
+        Menu,
+        Toolbar
+    },
     emits: [ 'reload', 'login', 'logout', 'upload-file', 'upload-folder', 'new-file', 'new-folder', 'download', 'delete', 'directory-up' ],
     props: {
         breadCrumbs: {

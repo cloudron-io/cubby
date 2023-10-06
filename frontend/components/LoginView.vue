@@ -17,8 +17,13 @@
 
 const API_ORIGIN = import.meta.env.VITE_API_ORIGIN ? import.meta.env.VITE_API_ORIGIN : '';
 
+import Button from 'primevue/button';
+
 export default {
     name: 'LoginView',
+    components: {
+      Button
+    },
     data() {
       return {
         apiOrigin: API_ORIGIN,
