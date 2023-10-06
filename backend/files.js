@@ -292,15 +292,16 @@ async function head(username, filePath) {
     }
 }
 
-async function move(username, filePath, newFilePath) {
+async function move(username, filePath, newUsername, newFilePath) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof filePath, 'string');
+    assert.strictEqual(typeof newUsername, 'string');
     assert.strictEqual(typeof newFilePath, 'string');
 
     const fullFilePath = getValidFullPath(username, filePath);
     if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);
 
-    const fullNewFilePath = getValidFullPath(username, newFilePath);
+    const fullNewFilePath = getValidFullPath(newUsername, newFilePath);
     if (!fullNewFilePath) throw new MainError(MainError.INVALID_PATH);
 
     debug(`move ${fullFilePath} -> ${fullNewFilePath}`);
@@ -314,15 +315,16 @@ async function move(username, filePath, newFilePath) {
     }
 }
 
-async function copy(username, filePath, newFilePath) {
+async function copy(username, filePath, newUsername, newFilePath) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof filePath, 'string');
+    assert.strictEqual(typeof newUsername, 'string');
     assert.strictEqual(typeof newFilePath, 'string');
 
     const fullFilePath = getValidFullPath(username, filePath);
     if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);
 
-    const fullNewFilePath = getValidFullPath(username, newFilePath);
+    const fullNewFilePath = getValidFullPath(newUsername, newFilePath);
     if (!fullNewFilePath) throw new MainError(MainError.INVALID_PATH);
 
     debug(`copy ${fullFilePath} -> ${fullNewFilePath}`);
