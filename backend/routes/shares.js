@@ -6,12 +6,7 @@ exports = module.exports = {
     optionalAttachReceiver,
     listShares,
     createShare,
-    removeShare,
-    add,
-    get,
-    head,
-    update,
-    remove
+    removeShare
 };
 
 var assert = require('assert'),
@@ -192,133 +187,6 @@ async function removeShare(req, res, next) {
 
     try {
         await shares.remove(shareId);
-    } catch (error) {
-        return next(new HttpError(500, error));
-    }
-
-    next(new HttpSuccess(200, {}));
-}
-
-async function add(req, res, next) {
-    assert.strictEqual(typeof req.share, 'object');
-
-    const filePath = req.query.path || '';
-    const directory = boolLike(req.query.directory);
-    const overwrite = boolLike(req.query.overwrite);
-
-    if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
-    if (!(req.files && req.files.file) && !directory) return next(new HttpError(400, 'missing file or directory'));
-    if ((req.files && req.files.file) && directory) return next(new HttpError(400, 'either file or directory'));
-
-    const mtime = req.fields && req.fields.mtime ? new Date(req.fields.mtime) : null;
-
-    debug(`add: ${req.share.id} path:${filePath} mtime:${mtime}`);
-
-    try {
-        if (directory) await files.addDirectory(req.share.owner, path.join(req.share.filePath, filePath));
-        else await files.addOrOverwriteFile(req.share.owner, path.join(req.share.filePath, filePath), req.files.file.path, mtime, overwrite);
-    } catch (error) {
-        if (error.reason === MainError.ALREADY_EXISTS) return next(new HttpError(409, 'already exists'));
-        return next(new HttpError(500, error));
-    }
-
-    next(new HttpSuccess(200, {}));
-}
-
-async function get(req, res, next) {
-    assert.strictEqual(typeof req.share, 'object');
-
-    const filePath = req.query.path || '';//? decodeURIComponent(req.query.path) : '';
-    const type = req.query.type;
-
-    if (type && (type !== 'raw' && type !== 'download')) return next(new HttpError(400, 'type must be either empty, "download" or "raw"'));
-
-    debug(`get: ${req.share.id} path:${filePath} type:${type || 'json'}`);
-
-    let file;
-    try {
-        file = await files.get(req.share.owner, path.join(req.share.filePath, filePath));
-    } catch (error) {
-        if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'file not found'));
-        return next(new HttpError(500, error));
-    }
-
-    if (type === 'raw') {
-        if (file.isDirectory) return res.redirect(`/#files/shares/${req.share.id}/`);
-        return res.sendFile(file._fullFilePath);
-    } else if (type === 'download') {
-        if (file.isDirectory) return next(new HttpError(417, 'type "download" is not supported for directories'));
-        return res.download(file._fullFilePath);
-    }
-
-    // for now we only allow raw or download on publicly shared links
-    // if (!req.user) return next(new HttpError(403, 'not allowed'));
-
-    // those files are always part of this share
-    file.files.forEach(function (f) { f.share = req.share; });
-    file.share = req.share;
-
-    next(new HttpSuccess(200, file.asShare(req.share.filePath).withoutPrivate()));
-}
-
-async function head(req, res, next) {
-    assert.strictEqual(typeof req.share, 'object');
-
-    const filePath = req.query.path || '';//? decodeURIComponent(req.query.path) : '';
-
-    debug(`head: ${req.share.id} path:${filePath}`);
-
-    let result;
-    try {
-        result = await files.head(req.share.owner, path.join(req.share.filePath, filePath));
-    } catch (error) {
-        if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'file not found'));
-        return next(new HttpError(500, error));
-    }
-
-    next(new HttpSuccess(200, result));
-}
-
-async function update(req, res, next) {
-    assert.strictEqual(typeof req.user, 'object');
-    assert.strictEqual(typeof req.share, 'object');
-
-    const filePath = req.query.path;
-    const action = req.query.action;
-
-    if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
-
-    debug(`update: [${action}] ${req.share.id} ${filePath}`);
-
-    if (action === 'move') {
-        const newFilePath = decodeURIComponent(req.query.new_path);
-        if (!newFilePath) return next(new HttpError(400, 'move action requires new_path argument'));
-
-        try {
-            await files.move(req.share.owner, path.join(req.share.filePath, filePath), path.join(req.share.filePath, newFilePath));
-        } catch (error) {
-            if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'not found'));
-            return next(new HttpError(500, error));
-        }
-
-        return next(new HttpSuccess(200, {}));
-    } else {
-        return next(new HttpError(400, 'unknown action'));
-    }
-}
-
-async function remove(req, res, next) {
-    assert.strictEqual(typeof req.user, 'object');
-    assert.strictEqual(typeof req.share, 'object');
-
-    const filePath = req.query.path;
-
-    if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
-
-    debug(`remove: ${req.share.id} path=${filePath}`);
-
-    try {
-        await files.remove(req.share.owner, path.join(req.share.filePath, filePath));
     } catch (error) {
         return next(new HttpError(500, error));
     }

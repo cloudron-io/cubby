@@ -132,12 +132,6 @@ function init(callback) {
     router.post('/api/v1/shares', users.isAuthenticated, shares.createShare);
     router.del ('/api/v1/shares', users.isAuthenticated, shares.removeShare);
 
-    router.head('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.head);
-    router.get ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.get);
-    router.post('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, multipart({ maxFieldsSize: 2 * 1024, limit: '512mb', timeout: 3 * 60 * 1000 }), shares.add);
-    router.put ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.update);
-    router.del ('/api/v1/shares/:shareId', users.optionalTokenAuth, shares.attachReceiver, shares.remove);
-
     router.get ('/api/v1/preview/:type/:id/:hash', users.optionalSessionAuth, shares.optionalAttachReceiver, misc.getPreview);
 
     router.get ('/api/v1/download', users.isAuthenticated, misc.download);
