@@ -55,15 +55,16 @@ async function add(req, res, next) {
         const shareId = filePath.split('/')[1];
         if (!shareId) return next(new HttpError(500, 'unknown resource'));
 
-        // actual path is without shares/<shareId>/
-        const actualFilePath = filePath.split('/').slice(2).join('/');
-
         const share = await shares.get(shareId);
 
+        // check if this share is a public link or only for a specific user
+        if (req.user && share.receiverUsername && share.receiverUsername !== req.user.username) return next(new HttpError(403, 'not allowed'));
+
         finalUsername = share.owner;
-        finalFilePath = path.join(share.filePath, actualFilePath);
+        // actual path is without shares/<shareId>/
+        finalFilePath = path.join(share.filePath, filePath.split('/').slice(2).join('/'));
     } else {
-        next(new HttpError(500, `adding to ${resource} not supported`));
+        next(new HttpError(500, `POST for ${resource} not supported`));
     }
 
     try {
@@ -78,19 +79,37 @@ async function add(req, res, next) {
 }
 
 async function head(req, res, next) {
-    // only allowed for authenticated users until we check for !read-only shares
-    if (!req.user) return next(new HttpError(403, 'not allowed'));
-
     const filePath = req.query.path ? decodeURIComponent(req.query.path) : '';
-
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
 
-    debug(`head: ${filePath}`);
+    const resource = filePath.split('/')[1];
+
+    debug(`head: ${resource} ${filePath}`);
+
+    let finalUsername;
+    let finalFilePath;
+    if (resource === 'home') {
+        finalUsername = req.user.username;
+        finalFilePath = filePath;
+    } else if (resource === 'shares') {
+        const shareId = filePath.split('/')[1];
+        if (!shareId) return next(new HttpError(500, 'unknown resource'));
+
+        const share = await shares.get(shareId);
+
+        // check if this share is a public link or only for a specific user
+        if (req.user && share.receiverUsername && share.receiverUsername !== req.user.username) return next(new HttpError(403, 'not allowed'));
+
+        finalUsername = share.owner;
+        // actual path is without shares/<shareId>/
+        finalFilePath = path.join(share.filePath, filePath.split('/').slice(2).join('/'));
+    } else {
+        next(new HttpError(500, `HEAD for ${resource} not supported`));
+    }
 
     let result;
-
     try {
-        result = await files.head(req.user.username, filePath);
+        result = await files.head(finalUsername, finalFilePath);
     } catch (error) {
         if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'not found'));
         return next(new HttpError(500, error));
