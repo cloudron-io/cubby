@@ -307,7 +307,7 @@ export default {
         breadCrumbs: [],
         breadCrumbHome: {
           icon: 'pi pi-home',
-          url: '#files'
+          route: '#files'
         },
         newFileDialog: {
           visible: false,
@@ -731,36 +731,36 @@ export default {
           this.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
             return {
               label: e,
-              url: '#files/home' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
+              route: '#files/home' + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
             };
           });
           this.breadCrumbHome = {
             icon: 'pi pi-home',
-            url: '#files/home/'
+            route: '#files/home/'
           };
         } else if (resource.type === 'recent') {
           this.breadCrumbs = [];
           this.breadCrumbHome = {
             icon: 'pi pi-clock',
-            url: '#files/recent/'
+            route: '#files/recent/'
           };
         } else if (resource.type === 'shares') {
           this.breadCrumbs = sanitize(resource.path).split('/').filter(function (i) { return !!i; }).map(function (e, i, a) {
             return {
               label: e,
-              url: '#files/shares/' + resource.shareId  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
+              route: '#files/shares/' + resource.shareId  + sanitize('/' + a.slice(0, i).join('/') + '/' + e)
             };
           });
           this.breadCrumbHome = {
             icon: 'pi pi-share-alt',
-            url: '#files/shares/'
+            route: '#files/shares/'
           };
 
           // if we are not toplevel, add the share information
           if (entry.share) {
             this.breadCrumbs.unshift({
               label: entry.share.filePath.slice(1), // remove slash at the beginning
-              url: '#shares/' + resource.shareId + '/'
+              route: '#shares/' + resource.shareId + '/'
             });
           }
         } else {

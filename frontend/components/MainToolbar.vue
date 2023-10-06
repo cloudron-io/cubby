@@ -3,7 +3,15 @@
         <template #start>
           <Button icon="pi pi-chevron-left" class="p-button-text" :disabled="breadCrumbs.length === 0" @click="onUp"/>
           <Button icon="pi pi-refresh" class="p-button-text" @click="onReload"/>
-          <Breadcrumb :home="breadCrumbHome" :model="breadCrumbs"/>
+
+          <Breadcrumb :home="breadCrumbHome" :model="breadCrumbs">
+            <template #item="{ label, item, props }">
+              <a :href="item.route" :target="item.target" v-bind="props.action">
+                <span v-if="item.icon" v-bind="props.icon" />
+                <span v-bind="props.label">{{ label }}</span>
+              </a>
+            </template>
+          </Breadcrumb>
         </template>
 
         <template #end>

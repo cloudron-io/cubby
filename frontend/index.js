@@ -1,5 +1,4 @@
 import { createApp } from 'vue';
-import { createRouter, createWebHistory } from 'vue-router';
 
 import PrimeVue from 'primevue/config';
 import Tooltip from 'primevue/tooltip';
@@ -18,14 +17,6 @@ import './style.css';
 import Index from './Index.vue';
 
 const app = createApp(Index);
-
-// dummy router for breadcrumb component
-const router = createRouter({
-    history: createWebHistory(),
-    routes: []
-});
-
-app.use(router);
 
 app.use(PrimeVue);
 app.use(ConfirmationService);
