@@ -345,6 +345,8 @@ async function remove(username, filePath) {
     const fullFilePath = getValidFullPath(username, filePath);
     if (!fullFilePath) throw new MainError(MainError.INVALID_PATH);
 
+    debug(`remove ${fullFilePath}`);
+
     try {
         await fs.remove(fullFilePath);
     } catch (error) {

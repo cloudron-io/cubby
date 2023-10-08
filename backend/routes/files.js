@@ -85,10 +85,10 @@ async function head(req, res, next) {
     const filePath = decodeURIComponent(req.query.path);
     if (!filePath) return next(new HttpError(400, 'path must be a non-empty string'));
 
-    debug(`head: ${subject.resource} ${subject.filePath}`);
-
     const subject = await translateResourcePath(req.user, filePath);
     if (!subject) return next(new HttpError(403, 'not allowed'));
+
+    debug(`head: ${subject.resource} ${subject.filePath}`);
 
     let result;
     try {

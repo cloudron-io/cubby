@@ -590,10 +590,9 @@ export default {
         window.addEventListener('beforeunload', beforeUnloadListener, { capture: true });
         this.deleteInProgress = true;
 
-
         for (let i in entries) {
           try {
-            const resource = parseResourcePath(sanitize(this.currentResourcePath + '/' + entries[i].filePath));
+            const resource = parseResourcePath(sanitize(this.currentResourcePath + '/' + entries[i].fileName));
             await this.directoryModel.remove(resource);
           } catch (e) {
             console.error(`Failed to remove file ${entries[i].name}:`, e);

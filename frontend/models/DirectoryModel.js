@@ -116,9 +116,9 @@ export function createDirectoryModel(origin) {
         throw new DirectoryModelError(DirectoryModelError.GENERIC, error);
       }
     },
-    async exists(resource) {
+    async exists(resource, relativeFilePath) {
       try {
-        await superagent.head(`${origin}/api/v1/files`).query({ path: resource.resourcePath }).withCredentials();
+        await superagent.head(`${origin}/api/v1/files`).query({ path: resource.resourcePath + '/' + relativeFilePath }).withCredentials();
       } catch (error) {
         if (error.status === 401) throw new DirectoryModelError(DirectoryModelError.NO_AUTH, error);
         if (error.status === 404) return false;
