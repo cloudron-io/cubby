@@ -85,7 +85,6 @@ function init(callback) {
         });
     }
 
-    // router.post('/api/v1/login', users.login);
     router.get ('/api/v1/logout', users.logout);
 
     router.get ('/api/v1/profile', users.isAuthenticated, users.profile);
@@ -104,7 +103,7 @@ function init(callback) {
 
                 const doc = new Dom().parseFromString(result.text);
                 if (doc) {
-                    const nodes = xpath.select("/wopi-discovery/net-zone/app/action", doc);
+                    const nodes = xpath.select('/wopi-discovery/net-zone/app/action', doc);
                     if (nodes) {
                         const extensions = nodes.map(function (n) { return n.getAttribute('ext'); }).filter(function (e) { return !!e; });
                         tmp.viewers.collabora = { extensions };
