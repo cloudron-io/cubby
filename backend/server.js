@@ -101,17 +101,17 @@ function init(callback) {
             let result;
             try {
                 result = await superagent.get(`${collaboraHost}/hosting/discovery`);
-            } catch (error) {
-                console.error('Failed to get collabora config.', error);
-            }
 
-            var doc = new Dom().parseFromString(result.text);
-            if (doc) {
-                var nodes = xpath.select("/wopi-discovery/net-zone/app/action", doc);
-                if (nodes) {
-                    const extensions = nodes.map(function (n) { return n.getAttribute('ext'); }).filter(function (e) { return !!e; });
-                    tmp.viewers.collabora = { extensions };
+                const doc = new Dom().parseFromString(result.text);
+                if (doc) {
+                    const nodes = xpath.select("/wopi-discovery/net-zone/app/action", doc);
+                    if (nodes) {
+                        const extensions = nodes.map(function (n) { return n.getAttribute('ext'); }).filter(function (e) { return !!e; });
+                        tmp.viewers.collabora = { extensions };
+                    }
                 }
+            } catch (error) {
+                console.error('Failed to get collabora config. Disabling office viewer.', error);
             }
         }
 
