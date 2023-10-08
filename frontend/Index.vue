@@ -563,12 +563,6 @@ export default {
         await this.directoryModel.rename(fromResource, toResource);
         await this.refresh();
       },
-      showAllRecent() {
-        window.location.hash = 'recent/';
-      },
-      showAllShares() {
-        window.location.hash = 'shares/';
-      },
       isReadonly() {
         if (!this.profile.username) return false;
         if (window.location.hash === 'shares/') return true;
@@ -579,13 +573,17 @@ export default {
         const resource = parseResourcePath(this.currentResourcePath || 'files/');
         return resource.type !== 'shares';
       },
-      postprocessSharesInDialog() {
+      async refreshShareDialogEntry(entry = null) {
+        this.shareDialog.entry = await this.directoryModel.get(entry || this.shareDialog.entry);
+
         this.shareDialog.sharedWith = this.shareDialog.entry.sharedWith.filter((s) => s.receiverUsername);
         this.shareDialog.sharedLinks = this.shareDialog.entry.sharedWith.filter((s) => !s.receiverUsername);
 
         this.shareDialog.users.forEach((user) => {
           user.alreadyUsed = this.shareDialog.entry.sharedWith.find((share) => { return share.receiverUsername === user.username; });
         });
+
+        this.refresh();
       },
       async shareHandler(entry) {
         this.shareDialog.error = '';
@@ -597,28 +595,14 @@ export default {
         // start with tomorrow
         this.shareDialog.shareLink.expiresAt.setDate(this.shareDialog.shareLink.expiresAt.getDate() + 1);
 
-        this.shareDialog.entry = await this.directoryModel.get(entry);
-
+        // prepare available users for sharing
         const users = await this.mainModel.getUsers();
-
-        // remove logged in user
         this.shareDialog.users = users.filter((u) => { return u.username !== this.profile.username; });
+        this.shareDialog.users.forEach((u) => { u.userAndDisplayName = u.displayName + ' ( ' + u.username + ' )'; });
 
-        // TODO this is just to be prettier, should be in UI code though
-        this.shareDialog.users.forEach(function (u) {
-          u.userAndDisplayName = u.displayName + ' ( ' + u.username + ' )';
-        });
-
-        this.postprocessSharesInDialog();
+        this.refreshShareDialogEntry(entry);
 
         this.shareDialog.visible = true;
-      },
-      async refreshShareDialogEntry() {
-        this.shareDialog.entry = await this.directoryModel.get(this.shareDialog.entry);
-
-        this.postprocessSharesInDialog();
-
-        this.refresh();
       },
       copyShareIdLinkToClipboard(shareId) {
         copyToClipboard(this.shareModel.getLink(shareId));
@@ -633,7 +617,7 @@ export default {
 
         this.copyShareIdLinkToClipboard(shareId);
 
-        this.shareDialog.visible = false;
+        this.refreshShareDialogEntry();
       },
       async onCreateShare() {
         const path = this.shareDialog.entry.filePath;

@@ -111,6 +111,7 @@ async function get(req, res, next) {
     if (type && (type !== 'raw' && type !== 'download' && type !== 'json')) return next(new HttpError(400, 'type must be either empty, "download" or "raw"'));
 
     const resource = filePath.split('/')[1];
+    if (!resource) return next(new HttpError(400, 'invalid resource'));
     filePath = filePath.slice(resource.length+1);
 
     debug(`get: ${resource} ${filePath} type:${type || 'json'}`);
