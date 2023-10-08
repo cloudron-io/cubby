@@ -3,7 +3,7 @@
   <ConfirmDialog></ConfirmDialog>
   <Toast position="top-center" />
 
-  <LoginView v-show="ready && showLogin" @success="onLoggedIn"/>
+  <LoginView v-show="ready && showLogin"/>
 
   <div class="container" v-show="ready && !showLogin">
     <div class="navigation-panel">
@@ -354,14 +354,6 @@ export default {
           size: 0,
           available: 0
         };
-      },
-      async onLoggedIn() {
-        this.profile = await this.mainModel.getProfile();
-        this.config = await this.mainModel.getConfig();
-
-        this.showLogin = false;
-
-        this.loadPath(window.location.hash.slice(1));
       },
       onViewerEntryChanged(entry) {
         // prevent to reload image
