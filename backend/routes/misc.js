@@ -9,11 +9,8 @@ var assert = require('assert'),
     archiver = require('archiver'),
     debug = require('debug')('cubby:routes:preview'),
     files = require('../files.js'),
-    path = require('path'),
-    shares = require('../shares.js'),
     preview = require('../preview.js'),
-    HttpError = require('connect-lastmile').HttpError,
-    HttpSuccess = require('connect-lastmile').HttpSuccess;
+    HttpError = require('connect-lastmile').HttpError;
 
 async function getPreview(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
@@ -32,8 +29,6 @@ async function getPreview(req, res, next) {
 
         return next(new HttpError(412, 'try again later'));
     } else if (type === 'shares') {
-        // req.share is verified and attached by now via optionalAttachReceiver
-
         // permissions are checked in routes/shares.js
         if (!req.share) return next(new HttpError(404, 'not found'));
 

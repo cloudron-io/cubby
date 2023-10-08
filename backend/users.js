@@ -42,6 +42,7 @@ async function localLogin(username, password) {
     return derivedKeyHex === user.password;
 }
 
+// Only used for webDAV for now
 async function login(username, password) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof password, 'string');

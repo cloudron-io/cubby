@@ -343,8 +343,6 @@ export default {
         this.refresh();
       },
       async onLogout() {
-        console.log('onLogout');
-
         await this.mainModel.logout();
 
         this.showLogin = true;

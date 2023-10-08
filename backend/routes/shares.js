@@ -1,8 +1,6 @@
 'use strict';
 
 exports = module.exports = {
-    attachOwner,
-    attachReceiver,
     optionalAttachReceiver,
     listShares,
     createShare,
@@ -15,7 +13,6 @@ var assert = require('assert'),
     files = require('../files.js'),
     Entry = require('../entry.js'),
     util = require('util'),
-    path = require('path'),
     MainError = require('../mainerror.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
@@ -26,47 +23,6 @@ function boolLike(arg) {
     if (util.isString(arg) && arg.toLowerCase() === 'false') return false;
 
     return true;
-}
-
-// just handles the :shareId param and adds req.share if valid
-async function attachOwner(req, res, next) {
-    assert.strictEqual(typeof req.user, 'object');
-    assert.strictEqual(typeof req.params.shareId, 'string');
-
-    const shareId = req.params.shareId;
-
-    debug(`attach: ${shareId}`);
-
-    try {
-        req.share = await shares.get(shareId);
-    } catch (error) {
-        if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'share not found'));
-        return next(new HttpError(500, error));
-    }
-
-    if (req.user && req.share.owner !== req.user.username) return next(new HttpError(403, 'not allowed'));
-
-    next();
-}
-
-async function attachReceiver(req, res, next) {
-    assert.strictEqual(typeof req.user, 'object');
-    assert.strictEqual(typeof req.params.shareId, 'string');
-
-    const shareId = req.params.shareId;
-
-    debug(`attach: ${shareId}`);
-
-    try {
-        req.share = await shares.get(shareId);
-    } catch (error) {
-        if (error.reason === MainError.NOT_FOUND) return next(new HttpError(404, 'share not found'));
-        return next(new HttpError(500, error));
-    }
-
-    if (req.user && req.share.receiverUsername && req.share.receiverUsername !== req.user.username) return next(new HttpError(403, 'not allowed'));
-
-    next();
 }
 
 async function optionalAttachReceiver(req, res, next) {

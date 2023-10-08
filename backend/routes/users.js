@@ -2,19 +2,16 @@
 
 exports = module.exports = {
     isAuthenticated,
-    login,
     logout,
     tokenAuth,
     sessionAuth,
     optionalSessionAuth,
-    optionalTokenAuth,
     profile,
     list
 };
 
 var assert = require('assert'),
     users = require('../users.js'),
-    tokens = require('../tokens.js'),
     constants = require('../constants.js'),
     diskusage = require('../diskusage.js'),
     HttpError = require('connect-lastmile').HttpError,
@@ -44,25 +41,6 @@ async function isAuthenticated(req, res, next) {
     req.user = user;
 
     next();
-}
-
-async function login(req, res, next) {
-    assert.strictEqual(typeof req.body, 'object');
-
-    if (!req.body.username && typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be string'));
-    if (!req.body.password && typeof req.body.password !== 'string') return next(new HttpError(400, 'password must be string'));
-
-    const user = await users.login(req.body.username, req.body.password);
-    if (!user) return next(new HttpError(403, 'invalid username or password'));
-
-    const accessToken = await tokens.add(user.username);
-
-    user.diskusage = await diskusage.getByUsername(user.username);
-
-    // req.session.username indicates a valid login session
-    req.session.username = user.username;
-
-    next(new HttpSuccess(200, { user, accessToken }));
 }
 
 async function logout(req, res, next) {
@@ -103,24 +81,6 @@ async function optionalSessionAuth(req, res, next) {
 
 async function tokenAuth(req, res, next) {
     var accessToken = req.query.access_token || req.body.accessToken || '';
-
-    try {
-        req.user = await users.getByAccessToken(accessToken);
-        if (!req.user) return next(new HttpError(401, 'Invalid Access Token'));
-    } catch (error) {
-        return next(new HttpError(500, error));
-    }
-
-    next();
-}
-
-async function optionalTokenAuth(req, res, next) {
-    var accessToken = req.query.access_token || req.body.accessToken || '';
-
-    if (!accessToken) {
-        req.user = null;
-        return next();
-    }
 
     try {
         req.user = await users.getByAccessToken(accessToken);
