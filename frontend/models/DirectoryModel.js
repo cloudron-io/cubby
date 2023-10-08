@@ -1,6 +1,6 @@
 
 import superagent from 'superagent';
-import { sanitize } from 'pankow/utils';
+import { sanitize, pathJoin } from 'pankow/utils';
 import { parseResourcePath } from '../utils.js';
 
 export function DirectoryModelError(reason, errorOrMessage) {
@@ -94,7 +94,7 @@ export function createDirectoryModel(origin) {
       const formData = new FormData();
       formData.append('file', new Blob());
 
-      const newFilePath = `${resource.resourcePath}/${newFileName}`;
+      const newFilePath = pathJoin(resource.resourcePath, newFileName);
 
       try {
         await superagent.post(`${origin}/api/v1/files`).withCredentials().query({ path: newFilePath }).send(formData);
@@ -106,7 +106,7 @@ export function createDirectoryModel(origin) {
       }
     },
     async newFolder(resource, newFolderName) {
-      const newFolderPath = `${resource.resourcePath}/${newFolderName}`;
+      const newFolderPath = pathJoin(resource.resourcePath, newFolderName);
       try {
         await superagent.post(`${origin}/api/v1/files`).withCredentials().query({ path: newFolderPath, directory: true });
       } catch (error) {
@@ -118,7 +118,7 @@ export function createDirectoryModel(origin) {
     },
     async exists(resource, relativeFilePath) {
       try {
-        await superagent.head(`${origin}/api/v1/files`).query({ path: resource.resourcePath + '/' + relativeFilePath }).withCredentials();
+        await superagent.head(`${origin}/api/v1/files`).query({ path: pathJoin(resource.resourcePath, relativeFilePath) }).withCredentials();
       } catch (error) {
         if (error.status === 401) throw new DirectoryModelError(DirectoryModelError.NO_AUTH, error);
         if (error.status === 404) return false;
@@ -196,7 +196,7 @@ export function createDirectoryModel(origin) {
       // this will not overwrite but tries to find a new unique name to past to
       for (let f in files) {
         let done = false;
-        let targetPath = sanitize(resource.resourcePath + '/' + files[f].name);
+        let targetPath = pathJoin(resource.resourcePath, files[f].name);
         while (!done) {
           const targetResource = parseResourcePath(targetPath);
           try {
