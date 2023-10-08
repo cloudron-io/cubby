@@ -23,7 +23,7 @@
       </div>
     </div>
     <div class="content">
-      <MainToolbar :breadCrumbs="breadCrumbs" :breadCrumbHome="breadCrumbHome" :selectedEntries="selectedEntries" :displayName="profile.displayName" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @directory-up="onUp" @new-folder="onNewFolder" @delete="deleteHandler" @download="downloadHandler" @login="showLogin=true;"/>
+      <MainToolbar :breadCrumbs="breadCrumbs" :breadCrumbHome="breadCrumbHome" :selectedEntries="selectedEntries" :displayName="profile.displayName" :readonly="isReadonly()" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @directory-up="onUp" @new-folder="onNewFolder" @delete="deleteHandler" @download="downloadHandler" @login="showLogin=true;"/>
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (previewPanelVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onTogglePreviewPanel" v-tooltip="previewPanelVisible ? 'Hide Preview' : 'Show Preview'"/>
@@ -564,8 +564,7 @@ export default {
         await this.refresh();
       },
       isReadonly() {
-        if (!this.profile.username) return false;
-        if (window.location.hash === 'shares/') return true;
+        if (window.location.hash === '#files/shares/' || window.location.hash === '#files/recent/') return true;
         if (!this.currentShare) return false;
         return this.currentShare.readonly;
       },

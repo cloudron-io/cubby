@@ -19,10 +19,8 @@
         <Button v-show="displayName && selectedEntries.length" icon="pi pi-trash" class="p-button-outlined p-button-danger" @click="onDelete"/>
       </div>
 
-      <div v-show="displayName">
-        <Button icon="pi pi-upload" label="Upload" @click="onToggleMenuUpload"/>
-        <Button icon="pi pi-plus" label="New" @click="onToggleMenuNew"/>
-      </div>
+      <Button icon="pi pi-upload" label="Upload" @click="onToggleMenuUpload" :disabled="readonly"/>
+      <Button icon="pi pi-plus" label="New" @click="onToggleMenuNew" :disabled="readonly"/>
 
       <div class="profile-actions">
         <Button v-show="displayName" icon="pi pi-user" class="p-button-secondary" @click="onToggleMenuMain" :label="displayName"/>
@@ -82,6 +80,10 @@ export default {
       selectedEntries: {
         type: Array,
         default: () =>[]
+      },
+      readonly: {
+        type: Boolean,
+        default: true
       }
     },
     data() {
