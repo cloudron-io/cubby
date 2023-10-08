@@ -27,7 +27,12 @@
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (previewPanelVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onTogglePreviewPanel" v-tooltip="previewPanelVisible ? 'Hide Preview' : 'Show Preview'"/>
-          <DirectoryView
+          <div v-show="!entries.length" class="no-entries-placeholder">
+            <p v-show="activeResourceType === 'home' || (activeResourceType === 'shares' && breadCrumbs.length)">Folder is empty</p>
+            <p v-show="activeResourceType === 'recent'">No recent files</p>
+            <p v-show="activeResourceType === 'shares' && !breadCrumbs.length">Nothing shared with you yet.</p>
+          </div>
+          <DirectoryView v-show="entries.length"
             :show-owner="false"
             :show-size="true"
             :show-modified="true"
@@ -285,6 +290,7 @@ export default {
         directoryModel: null,
         search: '',
         viewer: '',
+        activeResourceType: '',
         profile: {},
         config: {},
         viewers: [],
@@ -723,6 +729,7 @@ export default {
           }
         }
 
+        this.activeResourceType = resource.type;
         this.currentPath = resource.path;
         this.currentResourcePath = resource.resourcePath;
         this.currentShare = entry.share || null;
@@ -911,6 +918,13 @@ label {
     display: flex;
     width: 100%;
     height: 100%;
+}
+
+.no-entries-placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 
 .viewer-container {
