@@ -101,17 +101,6 @@
     </template>
   </Dialog>
 
-  <!-- Conflicting Files Dialog -->
-  <Dialog header="Conflicting file or folder" v-model:visible="conflictingFileDialog.visible" :dismissableMask="false" :closable="false" :style="{width: '550px'}" :modal="true">
-    <h3 style="margin-top: 0;"><i>{{ conflictingFileDialog.path }}</i></h3>
-    <template #footer>
-      <Button label="Overwrite" icon="pi pi-check" class="p-button-text p-button-danger" @click="onSubmitConflictingFileDialog('overwrite')"/>
-      <Button label="Overwrite All" icon="pi pi-check-circle" class="p-button-text p-button-danger" @click="onSubmitConflictingFileDialog('overwriteAll')"/>
-      <Button label="Skip" icon="pi pi-times" class="p-button-text" @click="onSubmitConflictingFileDialog('skip')"/>
-      <Button label="Skip All" icon="pi pi-times-circle" class="p-button-text" @click="onSubmitConflictingFileDialog('skipAll')"/>
-    </template>
-  </Dialog>
-
   <!-- Share Dialog -->
   <Dialog :header="shareDialog.entry.fileName" v-model:visible="shareDialog.visible" :dismissableMask="true" :closable="true" :style="{width: '720px'}" :modal="true">
     <h3>Create Share</h3>
@@ -325,11 +314,6 @@ export default {
           error: '',
           folderName: ''
         },
-        conflictingFileDialog: {
-          visible: false,
-          path: '',
-          file: null
-        },
         shareDialog: {
           visible: false,
           error: '',
@@ -495,40 +479,6 @@ export default {
 
         if (typeof done === 'function') done();
       },
-        showConflictingFileDialog(file, path) {
-            this.conflictingFileDialog.file = file;
-            this.conflictingFileDialog.path = path;
-            this.conflictingFileDialog.visible = true;
-        },
-        onSubmitConflictingFileDialog(action) {
-            var that = this;
-
-            if (action === 'skip') {
-                this.conflictingFileDialog.file.skip = true;
-            } else if (action === 'skipAll') {
-                this.conflictingFileDialog.file.skip = true;
-                this.uploadStatus.queue.forEach(function (file) { file.skip = true; });
-            } else if (action === 'overwrite') {
-                this.conflictingFileDialog.file.overwrite = true;
-            } else if (action === 'overwriteAll') {
-                this.conflictingFileDialog.file.overwrite = true;
-                this.uploadStatus.queue.forEach(function (file) { file.overwrite = true; });
-            } else {
-                console.error('This should never happen');
-            }
-
-            this.conflictingFileDialog.visible = false;
-
-            that.uploadFile(this.conflictingFileDialog.file, this.conflictingFileDialog.path, function (error) {
-                if (error) return console.error(error);
-
-                that.conflictingFileDialog.file = null;
-                that.conflictingFileDialog.path = '';
-
-                // continue
-                that.uploadNext();
-            });
-        },
       async downloadHandler(entries) {
         if (!entries) entries = this.selectedEntries;
         if (!Array.isArray(entries)) entries = [ entries ];
