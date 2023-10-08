@@ -2,7 +2,6 @@
     <Toolbar>
         <template #start>
           <Button icon="pi pi-chevron-left" class="p-button-text" :disabled="breadCrumbs.length === 0" @click="onUp"/>
-          <Button icon="pi pi-refresh" class="p-button-text" @click="onReload"/>
 
           <Breadcrumb :home="breadCrumbHome" :model="breadCrumbs">
             <template #item="{ label, item, props }">
@@ -66,7 +65,7 @@ export default {
         Menu,
         Toolbar
     },
-    emits: [ 'reload', 'login', 'logout', 'upload-file', 'upload-folder', 'new-file', 'new-folder', 'download', 'delete', 'directory-up' ],
+    emits: [ 'login', 'logout', 'upload-file', 'upload-folder', 'new-file', 'new-folder', 'download', 'delete', 'directory-up' ],
     props: {
         breadCrumbs: {
             type: Array,
@@ -136,9 +135,6 @@ export default {
         },
         onToggleMenuMain(event) {
             this.$refs.menuMain.toggle(event);
-        },
-        onReload() {
-            this.$emit('reload');
         },
         onLogout() {
             this.$emit('logout');
