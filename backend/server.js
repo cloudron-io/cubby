@@ -85,8 +85,6 @@ function init(callback) {
         });
     }
 
-    router.get ('/api/v1/logout', users.logout);
-
     router.get ('/api/v1/profile', users.isAuthenticated, users.profile);
     router.get ('/api/v1/config', users.isAuthenticated, async function (req, res, next) {
         // currently we only send configs for collabora
@@ -203,6 +201,7 @@ function init(callback) {
         });
 
         app.use('/api/v1/logout', (req, res) => {
+            req.session.username = null;
             res.status(200).send({});
         });
     }

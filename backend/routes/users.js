@@ -2,7 +2,6 @@
 
 exports = module.exports = {
     isAuthenticated,
-    logout,
     tokenAuth,
     sessionAuth,
     optionalSessionAuth,
@@ -41,12 +40,6 @@ async function isAuthenticated(req, res, next) {
     req.user = user;
 
     next();
-}
-
-async function logout(req, res, next) {
-    req.session.username = null;
-
-    next(new HttpSuccess(200, {}));
 }
 
 async function sessionAuth(req, res, next) {
