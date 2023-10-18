@@ -129,6 +129,9 @@ function init(callback) {
     router.post('/api/v1/shares', users.isAuthenticated, shares.createShare);
     router.del ('/api/v1/shares', users.isAuthenticated, shares.removeShare);
 
+    // this is for share links
+    router.get ('/api/v1/shares/:id', users.optionalSessionAuth, shares.attachReceiver, shares.getShareLink);
+
     router.get ('/api/v1/preview/:type/:id/:hash', users.optionalSessionAuth, shares.optionalAttachReceiver, misc.getPreview);
 
     router.get ('/api/v1/download', users.isAuthenticated, misc.download);

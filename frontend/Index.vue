@@ -814,10 +814,10 @@ export default {
       // initial load with hash if present
       const hash = window.location.hash.slice(1);
 
-      if (hash.indexOf('files/home/') === 0) this.loadPath(hash.slice('files'.length));
-      else if (hash.indexOf('files/recent/') === 0) this.loadPath(hash.slice('files'.length));
-      else if (hash.indexOf('files/shares/') === 0) this.loadPath(hash.slice('files'.length));
-      else this.loadPath('/home/');
+      if (hash.indexOf('files/home/') === 0) await this.loadPath(hash.slice('files'.length));
+      else if (hash.indexOf('files/recent/') === 0) await this.loadPath(hash.slice('files'.length));
+      else if (hash.indexOf('files/shares/') === 0) await this.loadPath(hash.slice('files'.length));
+      else await this.loadPath('/home/');
 
       this.ready = true;
     }
