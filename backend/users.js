@@ -1,17 +1,17 @@
 'use strict';
 
 exports = module.exports = {
-    login,
+    webdavLogin,
     add,
     get,
     getByAccessToken,
     list,
+    setWebdavPassword,
     update,
     remove
 };
 
 var assert = require('assert'),
-    constants = require('./constants.js'),
     crypto = require('crypto'),
     debug = require('debug')('cubby:users'),
     database = require('./database.js'),
@@ -30,44 +30,28 @@ function postProcess(data) {
     return data;
 }
 
-async function localLogin(username, password) {
-    assert.strictEqual(typeof username, 'string');
-    assert.strictEqual(typeof password, 'string');
-
-    const user = await get(username);
-    const saltBinary = Buffer.from(user.salt, 'hex');
-    const derivedKey = crypto.pbkdf2Sync(password, saltBinary, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, CRYPTO_DIGEST);
-    const derivedKeyHex = Buffer.from(derivedKey, 'binary').toString('hex');
-
-    return derivedKeyHex === user.password;
-}
-
-// Only used for webDAV for now
-async function login(username, password) {
+async function webdavLogin(username, password) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof password, 'string');
 
     if (username === '' || password === '') return null;
 
-    debug('login: ', username);
+    debug('webdavLogin: ', username);
 
     const user = await get(username);
     if (!user) return null;
 
-    if (user.source === constants.USER_SOURCE_LOCAL) {
-        if (await localLogin(username, password)) return user;
-        else return null;
-    } else {
-        debug(`login: ${username} has invalid source type ${user.source}.`);
-        return null;
-    }
+    const saltBinary = Buffer.from(user.salt, 'hex');
+    const derivedKey = crypto.pbkdf2Sync(password, saltBinary, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, CRYPTO_DIGEST);
+    const derivedKeyHex = Buffer.from(derivedKey, 'binary').toString('hex');
+
+    if (derivedKeyHex !== user.password) return null;
+
+    return user;
 }
 
-async function add(user, source) {
+async function add(user) {
     assert.strictEqual(typeof user, 'object');
-    assert.strictEqual(typeof source, 'string');
-
-    if (source !== constants.USER_SOURCE_OIDC && source !== constants.USER_SOURCE_LOCAL) throw new MainError(MainError.BAD_FIELD, `source must be "${constants.USER_SOURCE_LOCAL}" or "${constants.USER_SOURCE_OIDC}"`);
 
     const username = user.username;
     const email = user.email;
@@ -75,20 +59,8 @@ async function add(user, source) {
     let password = '';
     let salt = '';
 
-    if (source === constants.USER_SOURCE_LOCAL) {
-        try {
-            const rawSalt = crypto.randomBytes(CRYPTO_SALT_SIZE);
-            const derivedKey = crypto.pbkdf2Sync(user.password, rawSalt, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, CRYPTO_DIGEST);
-
-            salt = rawSalt.toString('hex');
-            password = Buffer.from(derivedKey, 'binary').toString('hex');
-        } catch (error) {
-            throw new MainError(MainError.CRYPTO_ERROR, error);
-        }
-    }
-
     try {
-        const result = await database.query('INSERT INTO users (username, email, display_name, source, password, salt) VALUES ($1, $2, $3, $4, $5, $6)', [ username, email, displayName, source, password, salt ]);
+        const result = await database.query('INSERT INTO users (username, email, display_name, password, salt) VALUES ($1, $2, $3, $4, $5)', [ username, email, displayName, password, salt ]);
         if (result.rowCount !== 1) throw new MainError(MainError.DATABASE_ERROR, 'failed to insert');
     } catch (error) {
         if (error.nestedError && error.nestedError.detail && error.nestedError.detail.indexOf('already exists') !== -1 && error.nestedError.detail.indexOf('email') !== -1) throw new MainError(MainError.ALREADY_EXISTS, 'email already exists');
@@ -129,6 +101,25 @@ async function update(username, user) {
     assert.strictEqual(typeof user, 'object');
 
     await database.query('UPDATE users SET email = $1, display_name = $2 WHERE username = $3', [ user.email, user.displayName, username ]);
+}
+
+async function setWebdavPassword(username, password) {
+    assert.strictEqual(typeof username, 'string');
+    assert.strictEqual(typeof password, 'string');
+
+    const user = await get(username);
+
+     try {
+        const rawSalt = crypto.randomBytes(CRYPTO_SALT_SIZE);
+        const derivedKey = crypto.pbkdf2Sync(user.password, rawSalt, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, CRYPTO_DIGEST);
+
+        const salt = rawSalt.toString('hex');
+        const saltedPassword = Buffer.from(derivedKey, 'binary').toString('hex');
+
+        await database.query('UPDATE users SET password = $1, salt = $2 WHERE username = $3', [ saltedPassword, salt, username ]);
+    } catch (error) {
+        throw new MainError(MainError.CRYPTO_ERROR, error);
+    }
 }
 
 async function remove(username) {

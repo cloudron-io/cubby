@@ -30,7 +30,7 @@ async function isAuthenticated(req, res, next) {
                 email: req.oidc.user.email,
                 displayName: req.oidc.user.name
             };
-            await users.add(user, constants.USER_SOURCE_OIDC);
+            await users.add(user);
         } catch (e) {
             console.error('Failed to add user', req.user.oidc.user, e);
             return next(new HttpError(500, 'internal error'));

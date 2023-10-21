@@ -53,7 +53,7 @@ WebdavUserManager.prototype.getUserByNamePassword = async function (username, pa
         delete this._authCache[cacheKey];
     }
 
-    const user = await users.login(username, password);
+    const user = await users.webdavLogin(username, password);
     if (!user) return callback(webdavErrors.UserNotFound);
 
     this._authCache[cacheKey] = { user: user, expiresAt: Date.now() + (60 * 1000) }; // cache for up to 1 min
