@@ -79,11 +79,15 @@ export default {
       },
       selectedEntries: {
         type: Array,
-        default: () =>[]
+        default: () => []
       },
       readonly: {
         type: Boolean,
         default: true
+      },
+      onWebDavSettings: {
+        type: Function,
+        default: () => {}
       }
     },
     data() {
@@ -97,6 +101,10 @@ export default {
           items: []
         },
         mainMenu: [{
+          label: 'WebDAV',
+          icon: 'pi pi-globe',
+          command: this.onWebDavSettings
+        }, {
           label: 'About',
           icon: 'pi pi-info-circle',
           command: () => this.aboutDialog.visible = true

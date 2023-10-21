@@ -36,7 +36,7 @@ async function webdavLogin(username, password) {
 
     if (username === '' || password === '') return null;
 
-    debug('webdavLogin: ', username);
+    debug('webdavLogin: ', username, password);
 
     const user = await get(username);
     if (!user) return null;
@@ -107,11 +107,9 @@ async function setWebdavPassword(username, password) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof password, 'string');
 
-    const user = await get(username);
-
-     try {
+    try {
         const rawSalt = crypto.randomBytes(CRYPTO_SALT_SIZE);
-        const derivedKey = crypto.pbkdf2Sync(user.password, rawSalt, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, CRYPTO_DIGEST);
+        const derivedKey = crypto.pbkdf2Sync(password, rawSalt, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, CRYPTO_DIGEST);
 
         const salt = rawSalt.toString('hex');
         const saltedPassword = Buffer.from(derivedKey, 'binary').toString('hex');

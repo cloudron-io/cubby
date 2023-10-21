@@ -52,6 +52,16 @@ export function createMainModel(origin) {
 
       return result.body.users;
     },
+    async setWebDavPassword(password) {
+      let error, result;
+      try {
+        result = await superagent.put(`${origin}/api/v1/users`).send({ password }).withCredentials();
+      } catch (e) {
+        error = e;
+      }
+
+      if (error || result.statusCode !== 200) throw new Error('Failed to set password', { cause: error || result })
+    },
     async logout() {
       try {
         await superagent.get(`${origin}/api/v1/logout`).withCredentials();

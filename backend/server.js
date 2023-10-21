@@ -118,6 +118,7 @@ function init(callback) {
     router.get ('/api/v1/oidc/login', oidcLogin);
 
     router.get ('/api/v1/users', users.isAuthenticated, users.list);
+    router.put ('/api/v1/users', users.isAuthenticated, users.update);
 
     router.head('/api/v1/files', users.optionalSessionAuth, files.head);
     router.get ('/api/v1/files', users.optionalSessionAuth, files.get);

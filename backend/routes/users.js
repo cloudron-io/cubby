@@ -6,12 +6,12 @@ exports = module.exports = {
     sessionAuth,
     optionalSessionAuth,
     profile,
+    update,
     list
 };
 
 var assert = require('assert'),
     users = require('../users.js'),
-    constants = require('../constants.js'),
     diskusage = require('../diskusage.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
@@ -105,4 +105,18 @@ async function list(req, res, next) {
     } catch (error) {
         return next(new HttpError(500, error));
     }
+}
+
+async function update(req, res, next) {
+    assert.strictEqual(typeof req.user, 'object');
+
+    if (typeof req.body.password !== 'string' || !req.body.password) return next(new HttpError(400, 'password must be a non-empty string'));
+
+    try {
+        await users.setWebdavPassword(req.user.username, req.body.password);
+    } catch (error) {
+        return next(new HttpError(500, error));
+    }
+
+    next(new HttpSuccess(200, {}));
 }

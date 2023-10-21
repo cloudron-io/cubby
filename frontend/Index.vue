@@ -23,7 +23,7 @@
       </div>
     </div>
     <div class="content">
-      <MainToolbar :breadCrumbs="breadCrumbs" :breadCrumbHome="breadCrumbHome" :selectedEntries="selectedEntries" :displayName="profile.displayName" :readonly="isReadonly()" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @directory-up="onUp" @new-folder="onNewFolder" @delete="deleteHandler" @download="downloadHandler" @login="showLogin=true;"/>
+      <MainToolbar :breadCrumbs="breadCrumbs" :breadCrumbHome="breadCrumbHome" :selectedEntries="selectedEntries" :displayName="profile.displayName" :readonly="isReadonly()" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @directory-up="onUp" @new-folder="onNewFolder" @delete="deleteHandler" @download="downloadHandler" @login="showLogin=true;" :on-web-dav-settings="onWebDavSettings"/>
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (previewPanelVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onTogglePreviewPanel" v-tooltip="previewPanelVisible ? 'Hide Preview' : 'Show Preview'"/>
@@ -68,6 +68,24 @@
       />
     </div>
   </div>
+
+  <!-- WebDAV Password Dialog -->
+  <Dialog header="WebDAV Password" v-model:visible="webDavPasswordDialog.visible" :dismissableMask="true" :closable="true" :style="{width: '640px'}" :modal="true">
+    <p>Files can be used over WebDAV at <i>{{ API_ORIGIN }}/webdav</i>.</p>
+    <p>Set a WebDAV password:</p>
+    <form @submit="onSaveWebDavDialog" @submit.prevent>
+      <div class="p-fluid">
+        <div class="p-field">
+          <Password v-model="webDavPasswordDialog.password" autofocus required :class="{ 'p-invalid': webDavPasswordDialog.error }"/>
+          <small class="p-invalid" v-show="webDavPasswordDialog.error">{{ webDavPasswordDialog.error }}</small>
+        </div>
+      </div>
+    </form>
+    <template #footer>
+      <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="webDavPasswordDialog.visible = false"/>
+      <Button label="Save" icon="pi pi-check" class="p-button-text p-button-success" @click="onSaveWebDavDialog" :disabled="!webDavPasswordDialog.password"/>
+    </template>
+  </Dialog>
 
   <!-- New File Dialog -->
   <Dialog header="New Filename" v-model:visible="newFileDialog.visible" :dismissableMask="true" :closable="true" :style="{width: '350px'}" :modal="true">
@@ -219,6 +237,7 @@ import DataTable from 'primevue/datatable';
 import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';
 import InputText from 'primevue/inputtext';
+import Password from 'primevue/password';
 import ProgressBar from 'primevue/progressbar';
 import Toast from 'primevue/toast';
 
@@ -262,6 +281,7 @@ export default {
       MainToolbar,
       TextEditor,
       // OfficeViewer,
+      Password,
       PdfViewer,
       PreviewPanel,
       ProgressBar,
@@ -270,6 +290,7 @@ export default {
     },
     data() {
       return {
+        API_ORIGIN,
         BASE_URL,
         ready: false,
         busy: true,
@@ -304,6 +325,11 @@ export default {
           icon: 'pi pi-home',
           route: '#files'
         },
+        webDavPasswordDialog: {
+          visible: false,
+          error: '',
+          password: ''
+        },
         newFileDialog: {
           visible: false,
           error: '',
@@ -334,6 +360,11 @@ export default {
       prettyFileSize,
       showAllFiles() {
         window.location.hash = 'files/home/';
+      },
+      async onWebDavSettings() {
+        this.webDavPasswordDialog.error = '';
+        this.webDavPasswordDialog.password = '';
+        this.webDavPasswordDialog.visible = true;
       },
       async uploadHandler(targetDir, file, progressHandler) {
         const resource = parseResourcePath(targetDir);
@@ -430,6 +461,21 @@ export default {
 
         this.refresh();
         this.newFileDialog.visible = false;
+      },
+      async onSaveWebDavDialog() {
+        try {
+          await this.mainModel.setWebDavPassword(this.webDavPasswordDialog.password);
+        } catch (error) {
+          if (error.reason === DirectoryModelError.NO_AUTH) this.onLogout();
+          else {
+            this.webDavPasswordDialog.error = 'Unkown error, check logs';
+            console.error('Failed to set webdav password:', error)
+          }
+
+          return;
+        }
+
+        this.webDavPasswordDialog.visible = false;
       },
       async onSaveNewFolderDialog() {
         const resource = parseResourcePath(this.currentResourcePath || 'files/');
