@@ -11,7 +11,6 @@
     "@fontsource/roboto": "^5.0.8",
     "archiver": "^6.0.1",
     "body-parser": "^1.20.2",
-    "commander": "^11.1.0",
     "connect-lastmile": "^2.2.0",
     "connect-timeout": "^1.9.0",
     "db-migrate": "^0.11.14",
