@@ -167,6 +167,7 @@ async function get(req, res, next) {
         const shareId = filePath.split('/')[1];
         if (shareId) {
             const share = await shares.get(shareId);
+            if (!share) return next(new HttpError(404, 'no such share'));
 
             // check if this share is a public link or only for a specific user
             if (req.user && share.receiverUsername && share.receiverUsername !== req.user.username) return next(new HttpError(403, 'not allowed'));
