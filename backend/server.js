@@ -139,7 +139,7 @@ function init(callback) {
 
     router.get ('/api/v1/download', users.isAuthenticated, misc.download);
 
-    router.get ('/api/v1/office/handle', users.sessionAuth, office.getHandle);
+    router.get ('/api/v1/office/handle', users.isAuthenticated, office.getHandle);
     router.get ('/api/v1/office/wopi/files/:shareId', users.tokenAuth, office.checkFileInfo);
     router.get ('/api/v1/office/wopi/files/:shareId/contents', users.tokenAuth, office.getFile);
     router.post('/api/v1/office/wopi/files/:shareId/contents', users.tokenAuth, bodyParser.raw(), office.putFile);

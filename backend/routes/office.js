@@ -55,8 +55,8 @@ async function getHandle(req, res, next) {
     }
 
     const token = await tokens.add(req.user.username);
+    const onlineUrl = nodes[0].getAttribute('urlsrc');
 
-    var onlineUrl = nodes[0].getAttribute('urlsrc');
     res.json({
         shareId: shareId,
         url: onlineUrl,

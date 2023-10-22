@@ -1,9 +1,8 @@
 <template>
-  <MainLayout :gap="false">
+  <MainLayout :gap="false" class="main-layout">
     <template #header>
       <TopBar class="navbar" :gap="false">
         <template #left>
-          where
         </template>
         <template #center>
           <div class="file-name">{{ entry ? entry.fileName : '' }}</div>
@@ -31,7 +30,7 @@
 
 import Button from 'primevue/button';
 
-import { MainLayout, TopBar } from 'pankow';
+import { MainLayout, TopBar, utils } from 'pankow';
 
 export default {
   name: 'OfficeViewer',
@@ -52,7 +51,7 @@ export default {
     config: {},
     tr: {
       type: Function,
-      default(id) { console.warn('Missing tr for OfficeViewer'); return id; }
+      default(id) { console.warn('Missing tr for OfficeViewer'); return utils.translation(id); }
     }
   },
   methods: {
@@ -71,8 +70,8 @@ export default {
 
       const handle = await this.$root.mainModel.getOfficeHandle(entry.filePath);
 
-      const wopiSrc = this.$root.API_ORIGIN + '/api/v1/office/wopi/files/' + handle.shareId;
-      this.wopiUrl = handle.url + 'WOPISrc=' + wopiSrc;
+      const wopiSrc = `${window.location.origin}/api/v1/office/wopi/files/${handle.shareId}`;
+      this.wopiUrl = `${handle.url}WOPISrc=${wopiSrc}`;
       this.wopiToken = handle.token;
 
       setTimeout(() => {
@@ -82,6 +81,9 @@ export default {
     onClose() {
       this.$refs.officeViewer.src = 'about:blank';
       this.$emit('close');
+    },
+    onDownload() {
+      window.location.href = this.entry.downloadFileUrl;
     }
   },
   mounted() {
@@ -96,6 +98,10 @@ export default {
   height: 100%;
   width: 100%;
   border: none;
+}
+
+.main-layout {
+  background-color: #d4d4d7;
 }
 
 </style>
