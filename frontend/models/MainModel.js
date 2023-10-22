@@ -62,6 +62,18 @@ export function createMainModel(origin) {
 
       if (error || result.statusCode !== 200) throw new Error('Failed to set password', { cause: error || result })
     },
+    async getOfficeHandle(filePath) {
+      let error, result;
+      try {
+        result = await superagent.get(`${origin}/api/v1/office/handle`).query({ filePath }).withCredentials();
+      } catch (e) {
+        error = e;
+      }
+
+      if (error || result.statusCode !== 200) throw new Error('Failed to get office handle', { cause: error || result })
+
+      return result.body;
+    },
     async logout() {
       try {
         await superagent.get(`${origin}/api/v1/logout`).withCredentials();

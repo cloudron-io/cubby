@@ -106,6 +106,8 @@ function init(callback) {
                         const extensions = nodes.map(function (n) { return n.getAttribute('ext'); }).filter(function (e) { return !!e; });
                         tmp.viewers.collabora = { extensions };
                     }
+
+                    console.log(`Supported office extensions on ${collaboraHost}:`, tmp.viewers.collabora);
                 }
             } catch (error) {
                 console.error('Failed to get collabora config. Disabling office viewer.', error);

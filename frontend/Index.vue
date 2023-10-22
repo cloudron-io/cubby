@@ -216,7 +216,11 @@
       <PdfViewer ref="pdfViewer" @close="onViewerClose" />
     </div>
   </Transition>
-      <!-- <OfficeViewer ref="officeViewer" :config="config.viewers.collabora" @close="onViewerClose" v-show="viewer === 'office'" /> -->
+  <Transition name="pop">
+    <div class="viewer-container" v-show="viewer === 'office'">
+      <OfficeViewer ref="officeViewer" :config="config" @close="onViewerClose" />
+    </div>
+  </Transition>
   <Transition name="pop">
     <div class="viewer-container" v-show="viewer === 'generic'">
       <GenericViewer ref="genericViewer" @close="onViewerClose" />
@@ -253,6 +257,7 @@ import { createShareModel } from './models/ShareModel.js';
 import LoginView from './components/LoginView.vue';
 import MainToolbar from './components/MainToolbar.vue';
 import PreviewPanel from './components/PreviewPanel.vue';
+import OfficeViewer from './components/OfficeViewer.vue';
 
 const API_ORIGIN = import.meta.env.VITE_API_ORIGIN ? import.meta.env.VITE_API_ORIGIN : '';
 const BASE_URL = import.meta.env.BASE_URL || '/';
@@ -279,8 +284,8 @@ export default {
       InputText,
       LoginView,
       MainToolbar,
+      OfficeViewer,
       TextEditor,
-      // OfficeViewer,
       Password,
       PdfViewer,
       PreviewPanel,
@@ -787,9 +792,9 @@ export default {
           } else if (this.$refs.pdfViewer.canHandle(entry)) {
             this.$refs.pdfViewer.open(entry);
             this.viewer = 'pdf';
-          // } else if (this.$refs.officeViewer.canHandle(entry)) {
-          //   this.$refs.officeViewer.open(entry);
-          //   this.viewer = 'office';
+          } else if (this.$refs.officeViewer.canHandle(entry)) {
+            this.$refs.officeViewer.open(entry);
+            this.viewer = 'office';
           } else if (this.$refs.textEditor.canHandle(entry)) {
             this.$refs.textEditor.open(entry, await this.directoryModel.getRawContent(resource));
             this.viewer = 'text';
