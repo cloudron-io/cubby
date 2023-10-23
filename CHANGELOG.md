@@ -121,3 +121,8 @@
 [1.1.4]
 * Fix various overflow issues
 * Update dependencies
+
+[2.0.0]
+* Rework most of the UI
+* Remove local user support and use OpenID
+

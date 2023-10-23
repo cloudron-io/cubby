@@ -1,6 +1,6 @@
 {
   "name": "Cubby",
-  "version": "1.1.4",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "dev": "vite --port 5555 --force",
