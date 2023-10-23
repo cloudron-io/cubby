@@ -71,7 +71,7 @@
 
   <!-- WebDAV Password Dialog -->
   <Dialog header="WebDAV Password" v-model:visible="webDavPasswordDialog.visible" :dismissableMask="true" :closable="true" :style="{width: '640px'}" :modal="true">
-    <p>Files can be used over WebDAV at <i>{{ API_ORIGIN }}/webdav</i>.</p>
+    <p>Files can be used over WebDAV at <i>{{ API_ORIGIN }}/webdav/{{ profile.username }}/</i></p>
     <p>Set a WebDAV password:</p>
     <form @submit="onSaveWebDavDialog" @submit.prevent>
       <div class="p-fluid">
