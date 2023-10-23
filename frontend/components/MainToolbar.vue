@@ -15,8 +15,8 @@
 
     <template #end>
       <div class="file-actions">
-        <Button v-show="selectedEntries.length" icon="pi pi-download" class="p-button-outlined" @click="onDownload"/>
-        <Button v-show="displayName && selectedEntries.length" icon="pi pi-trash" class="p-button-outlined p-button-danger" @click="onDelete"/>
+        <Button v-show="selectedEntries.length" icon="pi pi-download" class="p-button-outlined" @click="onDownload(selectedEntries)"/>
+        <Button v-show="displayName && selectedEntries.length" icon="pi pi-trash" class="p-button-outlined p-button-danger" @click="onDelete(selectedEntries)"/>
       </div>
 
       <Button icon="pi pi-upload" label="Upload" @click="onToggleMenuUpload" :disabled="readonly"/>
@@ -63,7 +63,7 @@ export default {
       Menu,
       Toolbar
     },
-    emits: [ 'login', 'logout', 'upload-file', 'upload-folder', 'new-file', 'new-folder', 'download', 'delete', 'directory-up' ],
+    emits: [ 'login', 'logout', 'upload-file', 'upload-folder', 'new-file', 'new-folder', 'directory-up' ],
     props: {
       breadCrumbs: {
         type: Array,
@@ -86,6 +86,14 @@ export default {
         default: true
       },
       onWebDavSettings: {
+        type: Function,
+        default: () => {}
+      },
+      onDownload: {
+        type: Function,
+        default: () => {}
+      },
+      onDelete: {
         type: Function,
         default: () => {}
       }
@@ -163,15 +171,6 @@ export default {
       },
       onNewFolder() {
         this.$emit('new-folder');
-      },
-      onDownload() {
-        this.$emit('download');
-      },
-      onCopy() {
-        this.$emit('copy');
-      },
-      onDelete() {
-        this.$emit('delete');
       }
     }
 };

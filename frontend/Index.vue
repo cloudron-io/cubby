@@ -23,7 +23,7 @@
       </div>
     </div>
     <div class="content">
-      <MainToolbar :breadCrumbs="breadCrumbs" :breadCrumbHome="breadCrumbHome" :selectedEntries="selectedEntries" :displayName="profile.displayName" :readonly="isReadonly()" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @directory-up="onUp" @new-folder="onNewFolder" @delete="deleteHandler" @download="downloadHandler" @login="showLogin=true;" :on-web-dav-settings="onWebDavSettings"/>
+      <MainToolbar :breadCrumbs="breadCrumbs" :breadCrumbHome="breadCrumbHome" :selectedEntries="selectedEntries" :displayName="profile.displayName" :readonly="isReadonly()" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @directory-up="onUp" @new-folder="onNewFolder" :on-delete="deleteHandler" :on-download="downloadHandler" @login="showLogin=true;" :on-web-dav-settings="onWebDavSettings"/>
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (previewPanelVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onTogglePreviewPanel" v-tooltip="previewPanelVisible ? 'Hide Preview' : 'Show Preview'"/>
@@ -578,22 +578,39 @@ export default {
       async deleteHandler(entries) {
         if (!entries) return;
 
-        window.addEventListener('beforeunload', beforeUnloadListener, { capture: true });
-        this.deleteInProgress = true;
-
-        for (let i in entries) {
-          try {
-            const resource = parseResourcePath(sanitize(this.currentResourcePath + '/' + entries[i].fileName));
-            await this.directoryModel.remove(resource);
-          } catch (e) {
-            console.error(`Failed to remove file ${entries[i].name}:`, e);
+        function start_and_end(str) {
+          if (str.length > 100) {
+            return str.substr(0, 45) + ' ... ' + str.substr(str.length-45, str.length);
           }
+          return str;
         }
 
-        await this.refresh();
+        this.$confirm.require({
+          header: 'Really delete files?',
+          message: start_and_end(entries.map((f) => f.name).join(', ')),
+          icon: '',
+          acceptClass: 'p-button-danger',
+          accept: async () => {
+            this.$confirm.close();
 
-        window.removeEventListener('beforeunload', beforeUnloadListener, { capture: true });
-        this.deleteInProgress = false;
+            window.addEventListener('beforeunload', beforeUnloadListener, { capture: true });
+            this.deleteInProgress = true;
+
+            for (let i in entries) {
+              try {
+                const resource = parseResourcePath(sanitize(this.currentResourcePath + '/' + entries[i].fileName));
+                await this.directoryModel.remove(resource);
+              } catch (e) {
+                console.error(`Failed to remove file ${entries[i].name}:`, e);
+              }
+            }
+
+            await this.refresh();
+
+            window.removeEventListener('beforeunload', beforeUnloadListener, { capture: true });
+            this.deleteInProgress = false;
+          }
+        });
       },
       async renameHandler(file, newName) {
         const fromResource = file.resource;
