@@ -840,10 +840,10 @@ export default {
 
           // if we are first level of that share, go back to all shares
           if (!hash.split('/')[1]) window.location.hash = 'shares/';
-          else window.location.hash = hash.split('/')[0] + sanitize(hash.split('/').slice(1, -1).filter(function (p) { return !!p; }).join('/'));
+          else window.location.hash = hash.split('/')[0] + sanitize(hash.split('/').filter(function (p) { return !!p; }).slice(1, -1).join('/'));
         } else {
           const hash = window.location.hash.slice(1);
-          window.location.hash = hash.split('/')[0] + sanitize(hash.split('/').slice(1, -1).filter(function (p) { return !!p; }).join('/'));
+          window.location.hash = hash.split('/')[0] + sanitize(hash.split('/').filter(function (p) { return !!p; }).slice(1, -1).join('/'));
         }
       },
     },
