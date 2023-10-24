@@ -4,25 +4,18 @@
    version="1.1"
    fill="none"
    id="svg8"
-   sodipodi:docname="logo.svg"
+   sodipodi:docname="logo_transparent.svg"
    width="512"
    height="512"
    inkscape:version="1.3 (0e150ed6c4, 2023-07-21)"
-   xml:space="preserve"
-   inkscape:export-filename="logo.png"
-   inkscape:export-xdpi="96"
-   inkscape:export-ydpi="96"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns:penpot="https://penpot.app/xmlns"><defs
-     id="defs9"><linearGradient
-       id="linearGradient5606"
-       inkscape:swatch="solid"><stop
-         style="stop-color:#000000;stop-opacity:1;"
-         offset="0"
-         id="stop5608" /></linearGradient></defs><sodipodi:namedview
+   xmlns:penpot="https://penpot.app/xmlns">
+  <defs
+     id="defs9" />
+  <sodipodi:namedview
      id="namedview8"
      pagecolor="#ffffff"
      bordercolor="#666666"
@@ -40,12 +33,15 @@
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g9" /><penpot:page
-     id="12c52011-66fe-81c0-8003-52d94eb6a788" /><g
+     inkscape:current-layer="svg8" />
+  <penpot:page
+     id="12c52011-66fe-81c0-8003-52d94eb6a788" />
+  <g
      id="g9"
-     transform="matrix(1.9743069,0,0,1.9743069,-125.84144,-864.32392)"><g
-       id="shape-3379d6d5-d382-80fe-8003-52ec4fe37bbb"
-       style="fill:#03a9f4;fill-opacity:0.5"><penpot:shape
+     transform="matrix(1.9743069,0,0,1.9743069,-125.84144,-864.32392)">
+    <g
+       id="shape-3379d6d5-d382-80fe-8003-52ec4fe37bbb">
+      <penpot:shape
          penpot:name="File"
          penpot:type="path"
          penpot:transform="matrix(1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000)"
@@ -54,21 +50,31 @@
          penpot:proportion-lock="false"
          penpot:rotation="0"
          penpot:center-x="267"
-         penpot:center-y="966.4999999999999"><penpot:fills><penpot:fill
+         penpot:center-y="966.4999999999999">
+        <penpot:fills>
+          <penpot:fill
              penpot:fill-color="#ffffff"
-             penpot:fill-opacity="0.5" /></penpot:fills><penpot:layout-item
-           penpot:layout-item-v-sizing="fix" /></penpot:shape><defs
-         id="defs1" /><g
+             penpot:fill-opacity="0.5" />
+        </penpot:fills>
+        <penpot:layout-item
+           penpot:layout-item-v-sizing="fix" />
+      </penpot:shape>
+      <defs
+         id="defs1" />
+      <g
          class="fills"
-         id="fills-3379d6d5-d382-80fe-8003-52ec4fe37bbb"
-         style="fill:#03a9f4;fill-opacity:0.5"><path
+         id="fills-3379d6d5-d382-80fe-8003-52ec4fe37bbb">
+        <path
            rx="0"
            ry="0"
-           style="fill:#03a9f4;fill-opacity:0.5"
+           style="fill:#ffffff;fill-opacity:0.5"
            d="m 216,909 h 77 l 25,20.883 V 1024 H 216 Z"
-           id="path1" /></g></g><g
-       id="shape-63d8ddae-017c-80b2-8003-538bfc9ad436"
-       style="fill:#03a9f4;fill-opacity:0.5"><penpot:shape
+           id="path1" />
+      </g>
+    </g>
+    <g
+       id="shape-63d8ddae-017c-80b2-8003-538bfc9ad436">
+      <penpot:shape
          penpot:name="File"
          penpot:type="path"
          penpot:transform="matrix(1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000)"
@@ -77,39 +83,59 @@
          penpot:proportion-lock="false"
          penpot:rotation="0"
          penpot:center-x="305"
-         penpot:center-y="975"><penpot:fills><penpot:fill
+         penpot:center-y="975">
+        <penpot:fills>
+          <penpot:fill
              penpot:fill-color="#ffffff"
-             penpot:fill-opacity="0.5" /></penpot:fills><penpot:layout-item
+             penpot:fill-opacity="0.5" />
+        </penpot:fills>
+        <penpot:layout-item
            penpot:layout-item-h-sizing="fix"
-           penpot:layout-item-v-sizing="fix" /></penpot:shape><defs
-         id="defs2" /><g
+           penpot:layout-item-v-sizing="fix" />
+      </penpot:shape>
+      <defs
+         id="defs2" />
+      <g
          class="fills"
-         id="fills-63d8ddae-017c-80b2-8003-538bfc9ad436"
-         style="fill:#03a9f4;fill-opacity:0.5"><path
+         id="fills-63d8ddae-017c-80b2-8003-538bfc9ad436">
+        <path
            rx="0"
            ry="0"
-           style="fill:#03a9f4;fill-opacity:0.5"
+           style="fill:#ffffff;fill-opacity:0.5"
            d="m 266,926 h 58.882 L 344,943.796 V 1024 h -78 z"
-           id="path2" /></g></g><g
-       id="shape-63d8ddae-017c-80b2-8003-538c8d85f944"
-       style="fill:#03a9f4;fill-opacity:1"><penpot:shape
+           id="path2" />
+      </g>
+    </g>
+    <g
+       id="shape-63d8ddae-017c-80b2-8003-538c8d85f944">
+      <penpot:shape
          penpot:name="Exclude"
          penpot:type="bool"
          penpot:center-x="281.57605276372016"
          penpot:center-y="1063.2326368678678"
-         penpot:bool-type="exclude"><penpot:fills><penpot:fill
+         penpot:bool-type="exclude">
+        <penpot:fills>
+          <penpot:fill
              penpot:fill-color="#ffffff"
-             penpot:fill-opacity="1" /></penpot:fills></penpot:shape><defs
-         id="defs3" /><g
+             penpot:fill-opacity="1" />
+        </penpot:fills>
+      </penpot:shape>
+      <defs
+         id="defs3" />
+      <g
          class="fills"
-         id="fills-63d8ddae-017c-80b2-8003-538c8d85f944"
-         style="fill:#03a9f4;fill-opacity:1"><path
+         id="fills-63d8ddae-017c-80b2-8003-538c8d85f944">
+        <path
            rx="0"
            ry="0"
-           style="fill:#03a9f4;fill-opacity:1"
+           style="fill:#ffffff;fill-opacity:1"
            d="m 309.391,1032.681 c 5.999,3.532 27.694,41.849 27.685,48.896 -0.009,7.046 -21.807,45.304 -27.815,48.819 -6.008,3.515 -49.501,3.455 -55.5,-0.077 -5.999,-3.532 -27.694,-41.849 -27.685,-48.895 0.009,-7.047 21.807,-45.304 27.815,-48.819 6.008,-3.516 49.502,-3.455 55.5,0.076 z m 0,0 z M 174.076,979.733 v 27.873 h 215 V 993.173 H 268.113 l -13.434,-13.44 z m 0,32.594 v 123.434 c 0,10.342 0.533,10.972 11.696,10.972 h 191.82 c 11.163,0 11.425,-0.63 11.425,-10.972 v -123.434"
-           id="path3" /></g><penpot:bool><g
-           id="shape-3379d6d5-d382-80fe-8003-52dc53a94fc4"><penpot:shape
+           id="path3" />
+      </g>
+      <penpot:bool>
+        <g
+           id="shape-3379d6d5-d382-80fe-8003-52dc53a94fc4">
+          <penpot:shape
              penpot:name="path4162"
              penpot:type="path"
              penpot:transform="matrix(1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000)"
@@ -118,33 +144,48 @@
              penpot:proportion-lock="false"
              penpot:rotation="0"
              penpot:center-x="281.57605276372004"
-             penpot:center-y="1081.5"><penpot:svg-import
+             penpot:center-y="1081.5">
+            <penpot:svg-import
                penpot:svg-viewbox-x="20.999954664172378"
                penpot:svg-viewbox-y="37.8143709651832"
                penpot:svg-viewbox-width="470.00002439592663"
                penpot:svg-attrs="inkscape:export-ydpi,sodipodi:cx,sodipodi:r2,sodipodi:cy,inkscape:export-xdpi,inkscape:randomized,inkscape:flatsided,sodipodi:r1,style,sodipodi:arg2,id,sodipodi:arg1,sodipodi:sides,sodipodi:type,inkscape:rounded"
                penpot:svg-viewbox-height="436.3700955661577"
                penpot:svg-transform="matrix(10.563485, -6.202890, 6.098831, 10.743720, 733.517923, 1406.566265)"
-               penpot:svg-style="stroke-dasharray:none; stroke-dashoffset:0; stroke-miterlimit:4" /><penpot:fills><penpot:fill
+               penpot:svg-style="stroke-dasharray:none; stroke-dashoffset:0; stroke-miterlimit:4" />
+            <penpot:fills>
+              <penpot:fill
                  penpot:fill-color="#2c91f3"
-                 penpot:fill-opacity="1" /></penpot:fills></penpot:shape><defs /><g
+                 penpot:fill-opacity="1" />
+            </penpot:fills>
+          </penpot:shape>
+          <defs />
+          <g
              class="fills"
-             id="fills-3379d6d5-d382-80fe-8003-52dc53a94fc4"><path
+             id="fills-3379d6d5-d382-80fe-8003-52dc53a94fc4">
+            <path
                rx="0"
                ry="0"
                style="stroke-dasharray:none;stroke-dashoffset:0;stroke-miterlimit:4;opacity:1;fill:#2c91f3;fill-opacity:1"
-               d="M309.391,1032.681C315.390,1036.213,337.085,1074.530,337.076,1081.577C337.067,1088.623,315.269,1126.881,309.261,1130.396C303.253,1133.911,259.760,1133.851,253.761,1130.319C247.762,1126.787,226.067,1088.470,226.076,1081.424C226.085,1074.377,247.883,1036.120,253.891,1032.605C259.899,1029.089,303.393,1029.150,309.391,1032.681ZL309.391,1032.681Z" /></g></g><g
+               d="M309.391,1032.681C315.390,1036.213,337.085,1074.530,337.076,1081.577C337.067,1088.623,315.269,1126.881,309.261,1130.396C303.253,1133.911,259.760,1133.851,253.761,1130.319C247.762,1126.787,226.067,1088.470,226.076,1081.424C226.085,1074.377,247.883,1036.120,253.891,1032.605C259.899,1029.089,303.393,1029.150,309.391,1032.681ZL309.391,1032.681Z" />
+          </g>
+        </g>
+        <g
            id="shape-3379d6d5-d382-80fe-8003-52dce9b1dcef"
            rx="0"
-           ry="0"><penpot:shape
+           ry="0">
+          <penpot:shape
              penpot:name="Group"
              penpot:type="group"
              penpot:transform="matrix(1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000)"
              penpot:transform-inverse="matrix(1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000)"
              penpot:rotation="0"
              penpot:center-x="281.57605276372004"
-             penpot:center-y="1063.2326368678669" /><defs /><g
-             id="shape-3379d6d5-d382-80fe-8003-52dc653dcc13"><penpot:shape
+             penpot:center-y="1063.2326368678669" />
+          <defs />
+          <g
+             id="shape-3379d6d5-d382-80fe-8003-52dc653dcc13">
+            <penpot:shape
                penpot:name="path3028"
                penpot:type="path"
                penpot:transform="matrix(1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000)"
@@ -153,23 +194,35 @@
                penpot:proportion-lock="false"
                penpot:rotation="0"
                penpot:center-x="281.57605276372016"
-               penpot:center-y="993.6692471822817"><penpot:svg-import
+               penpot:center-y="993.6692471822817">
+              <penpot:svg-import
                  penpot:svg-viewbox-x="135.40180287754544"
                  penpot:svg-viewbox-y="148.96844666542407"
                  penpot:svg-viewbox-width="241.19641334094166"
                  penpot:svg-attrs="style,id,inkscape:connector-curvature,sodipodi:nodetypes"
                  penpot:svg-viewbox-height="34.4566283105855"
                  penpot:svg-transform="matrix(0.937500, 0.000000, 0.000000, 0.937500, 607.001240, -33.324082)"
-                 penpot:svg-style="display:inline" /><penpot:fills><penpot:fill
+                 penpot:svg-style="display:inline" />
+              <penpot:fills>
+                <penpot:fill
                    penpot:fill-color="#ffffff"
-                   penpot:fill-opacity="1" /></penpot:fills></penpot:shape><defs /><g
+                   penpot:fill-opacity="1" />
+              </penpot:fills>
+            </penpot:shape>
+            <defs />
+            <g
                class="fills"
-               id="fills-3379d6d5-d382-80fe-8003-52dc653dcc13"><path
+               id="fills-3379d6d5-d382-80fe-8003-52dc653dcc13">
+              <path
                  rx="0"
                  ry="0"
                  style="display:inline;fill:#ffffff;fill-opacity:1"
-                 d="M174.076,979.733L174.076,1007.606L389.076,1007.606L389.076,993.173L268.113,993.173L254.679,979.733L174.076,979.733Z" /></g></g><g
-             id="shape-3379d6d5-d382-80fe-8003-52dc653dcc14"><penpot:shape
+                 d="M174.076,979.733L174.076,1007.606L389.076,1007.606L389.076,993.173L268.113,993.173L254.679,979.733L174.076,979.733Z" />
+            </g>
+          </g>
+          <g
+             id="shape-3379d6d5-d382-80fe-8003-52dc653dcc14">
+            <penpot:shape
                penpot:name="path3040"
                penpot:type="path"
                penpot:transform="matrix(1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000)"
@@ -178,36 +231,52 @@
                penpot:proportion-lock="false"
                penpot:rotation="0"
                penpot:center-x="281.54670594203316"
-               penpot:center-y="1079.529826016343"><penpot:svg-import
+               penpot:center-y="1079.529826016343">
+              <penpot:svg-import
                  penpot:svg-viewbox-x="118.17348830854957"
                  penpot:svg-viewbox-y="190.7484118512728"
                  penpot:svg-viewbox-width="275.6530424789334"
                  penpot:svg-attrs="style,id,inkscape:connector-curvature,sodipodi:nodetypes"
                  penpot:svg-viewbox-height="172.28315092792678"
                  penpot:svg-transform="matrix(0.937500, 0.000000, 0.000000, 0.937500, 607.001240, -33.324082)"
-                 penpot:svg-style="display:inline" /><penpot:fills><penpot:fill
+                 penpot:svg-style="display:inline" />
+              <penpot:fills>
+                <penpot:fill
                    penpot:fill-color="#ffffff"
-                   penpot:fill-opacity="1" /></penpot:fills></penpot:shape><defs /><g
+                   penpot:fill-opacity="1" />
+              </penpot:fills>
+            </penpot:shape>
+            <defs />
+            <g
                class="fills"
-               id="fills-3379d6d5-d382-80fe-8003-52dc653dcc14"><path
+               id="fills-3379d6d5-d382-80fe-8003-52dc653dcc14">
+              <path
                  rx="0"
                  ry="0"
                  style="display:inline;fill:#ffffff;fill-opacity:1"
-                 d="M174.076,1012.327L174.076,1135.761C174.076,1146.103,174.609,1146.733,185.772,1146.733L377.592,1146.733C388.755,1146.733,389.017,1146.103,389.017,1135.761L389.017,1012.327" /></g></g></g></penpot:bool></g><g
+                 d="M174.076,1012.327L174.076,1135.761C174.076,1146.103,174.609,1146.733,185.772,1146.733L377.592,1146.733C388.755,1146.733,389.017,1146.103,389.017,1135.761L389.017,1012.327" />
+            </g>
+          </g>
+        </g>
+      </penpot:bool>
+    </g>
+    <g
        id="shape-36bf9bf5-8dd4-80f6-8003-537d33370f37"
        rx="0"
-       ry="0"
-       style="fill:#03a9f4;fill-opacity:1"><penpot:shape
+       ry="0">
+      <penpot:shape
          penpot:name="Share"
          penpot:type="group"
          penpot:transform="matrix(1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000)"
          penpot:transform-inverse="matrix(1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000)"
          penpot:rotation="0"
          penpot:center-x="281.57605276372004"
-         penpot:center-y="1081.5" /><defs
-         id="defs4" /><g
-         id="shape-3379d6d5-d382-80fe-8003-52dc653dcc17"
-         style="fill:#03a9f4;fill-opacity:1"><penpot:shape
+         penpot:center-y="1081.5" />
+      <defs
+         id="defs4" />
+      <g
+         id="shape-3379d6d5-d382-80fe-8003-52dc653dcc17">
+        <penpot:shape
            penpot:name="path8196"
            penpot:type="path"
            penpot:transform="matrix(0.997591, 0.069367, -0.070148, 0.997537, 0.000000, -0.000000)"
@@ -216,26 +285,36 @@
            penpot:proportion-lock="false"
            penpot:rotation="4"
            penpot:center-x="295.8195126995104"
-           penpot:center-y="1067.0372485541916"><penpot:svg-import
+           penpot:center-y="1067.0372485541916">
+          <penpot:svg-import
              penpot:svg-viewbox-x="287.0625"
              penpot:svg-viewbox-y="176.0625"
              penpot:svg-viewbox-width="3.9375"
              penpot:svg-attrs="style,id"
              penpot:svg-viewbox-height="3.9375"
-             penpot:svg-style="fill-rule:nonzero; color:#000000; overflow:visible; marker:none; display:inline; visibility:visible; enable-background:new" /><penpot:fills><penpot:fill
+             penpot:svg-style="fill-rule:nonzero; color:#000000; overflow:visible; marker:none; display:inline; visibility:visible; enable-background:new" />
+          <penpot:fills>
+            <penpot:fill
                penpot:fill-color="#ffffff"
-               penpot:fill-opacity="1" /></penpot:fills></penpot:shape><defs
-           id="defs5" /><g
+               penpot:fill-opacity="1" />
+          </penpot:fills>
+        </penpot:shape>
+        <defs
+           id="defs5" />
+        <g
            class="fills"
-           id="fills-3379d6d5-d382-80fe-8003-52dc653dcc17"
-           style="fill:#03a9f4;fill-opacity:1"><path
+           id="fills-3379d6d5-d382-80fe-8003-52dc653dcc17">
+          <path
              rx="0"
              ry="0"
-             style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#03a9f4;fill-opacity:1;fill-rule:nonzero;marker:none;enable-background:new"
+             style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;marker:none;enable-background:new"
              d="m 296.448,1058.1 c 0.67,0.047 1.316,0.171 1.931,0.364 3.761,1.182 6.367,4.934 6.069,9.173 -0.347,4.933 -4.495,8.669 -9.257,8.338 -4.762,-0.332 -8.346,-4.605 -8,-9.538 0.347,-4.932 4.495,-8.668 9.257,-8.337 z"
-             id="path5" /></g></g><g
-         id="shape-3379d6d5-d382-80fe-8003-52dc653dcc18"
-         style="fill:#03a9f4;fill-opacity:1"><penpot:shape
+             id="path5" />
+        </g>
+      </g>
+      <g
+         id="shape-3379d6d5-d382-80fe-8003-52dc653dcc18">
+        <penpot:shape
            penpot:name="path8198"
            penpot:type="path"
            penpot:transform="matrix(0.997591, 0.069367, -0.070148, 0.997537, 0.000000, 0.000000)"
@@ -244,27 +323,37 @@
            penpot:proportion-lock="false"
            penpot:rotation="4"
            penpot:center-x="277.8607910684232"
-           penpot:center-y="1081.075302396196"><penpot:svg-import
+           penpot:center-y="1081.075302396196">
+          <penpot:svg-import
              penpot:svg-viewbox-x="201.35867196667823"
              penpot:svg-viewbox-y="232.98992716766975"
              penpot:svg-viewbox-width="96.29691511313558"
              penpot:svg-attrs="style,inkscape:connector-curvature,id"
              penpot:svg-viewbox-height="88.74421375756333"
              penpot:svg-transform="matrix(7.552699, 0.000000, 0.000000, 7.552699, -4192.424102, -1263.624593)"
-             penpot:svg-style="text-anchor:start; line-height:normal; font-style:normal; font-stretch:normal; text-transform:none; color:#000000; text-align:start; font-size:medium; font-variant:normal; writing-mode:lr-tb; font-weight:normal; -inkscape-font-specification:Sans; overflow:visible; marker:none; text-decoration-line:none; word-spacing:normal; text-indent:0; baseline-shift:baseline; text-decoration:none; display:inline; letter-spacing:normal; visibility:visible; enable-background:accumulate; direction:ltr; font-family:Sans" /><penpot:fills><penpot:fill
+             penpot:svg-style="text-anchor:start; line-height:normal; font-style:normal; font-stretch:normal; text-transform:none; color:#000000; text-align:start; font-size:medium; font-variant:normal; writing-mode:lr-tb; font-weight:normal; -inkscape-font-specification:Sans; overflow:visible; marker:none; text-decoration-line:none; word-spacing:normal; text-indent:0; baseline-shift:baseline; text-decoration:none; display:inline; letter-spacing:normal; visibility:visible; enable-background:accumulate; direction:ltr; font-family:Sans" />
+          <penpot:fills>
+            <penpot:fill
                penpot:fill-color="#ffffff"
-               penpot:fill-opacity="1" /></penpot:fills></penpot:shape><defs
-           id="defs6" /><g
+               penpot:fill-opacity="1" />
+          </penpot:fills>
+        </penpot:shape>
+        <defs
+           id="defs6" />
+        <g
            class="fills"
-           id="fills-3379d6d5-d382-80fe-8003-52dc653dcc18"
-           style="fill:#03a9f4;fill-opacity:1"><path
+           id="fills-3379d6d5-d382-80fe-8003-52dc653dcc18">
+          <path
              rx="0"
              ry="0"
-             style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:Sans;-inkscape-font-specification:Sans;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:start;display:inline;overflow:visible;visibility:visible;fill:#03a9f4;fill-opacity:1;marker:none;enable-background:accumulate"
+             style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:Sans;-inkscape-font-specification:Sans;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:start;display:inline;overflow:visible;visibility:visible;fill:#ffffff;fill-opacity:1;marker:none;enable-background:accumulate"
              d="m 295.101,1064.503 -30.298,12.639 -5.464,2.362 5.08,3.094 28.104,17.268 3.019,-5.273 -23.024,-14.173 24.75,-10.378 z"
-             id="path6" /></g></g><g
-         id="shape-3379d6d5-d382-80fe-8003-52dc653dcc15"
-         style="fill:#03a9f4;fill-opacity:1"><penpot:shape
+             id="path6" />
+        </g>
+      </g>
+      <g
+         id="shape-3379d6d5-d382-80fe-8003-52dc653dcc15">
+        <penpot:shape
            penpot:name="path8192"
            penpot:type="circle"
            penpot:transform="matrix(0.997591, 0.069367, -0.070148, 0.997537, -0.000000, -0.000000)"
@@ -275,28 +364,38 @@
            penpot:center-x="267.51644017252806"
            penpot:center-y="1080.1205275945729"
            penpot:constraints-h="scale"
-           penpot:constraints-v="scale"><penpot:svg-import
+           penpot:constraints-v="scale">
+          <penpot:svg-import
              penpot:svg-viewbox-x="287.0625"
              penpot:svg-viewbox-y="176.0625"
              penpot:svg-viewbox-width="3.9375"
              penpot:svg-attrs="style,id"
              penpot:svg-viewbox-height="3.9375"
-             penpot:svg-style="fill-rule:nonzero; color:#000000; overflow:visible; marker:none; display:inline; visibility:visible; enable-background:new" /><penpot:fills><penpot:fill
+             penpot:svg-style="fill-rule:nonzero; color:#000000; overflow:visible; marker:none; display:inline; visibility:visible; enable-background:new" />
+          <penpot:fills>
+            <penpot:fill
                penpot:fill-color="#ffffff"
-               penpot:fill-opacity="1" /></penpot:fills></penpot:shape><defs
-           id="defs7" /><g
+               penpot:fill-opacity="1" />
+          </penpot:fills>
+        </penpot:shape>
+        <defs
+           id="defs7" />
+        <g
            class="fills"
-           id="fills-3379d6d5-d382-80fe-8003-52dc653dcc15"
-           style="fill:#03a9f4;fill-opacity:1"><ellipse
+           id="fills-3379d6d5-d382-80fe-8003-52dc653dcc15">
+          <ellipse
              rx="8.2603073"
              ry="8.5458899"
-             style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#03a9f4;fill-opacity:1;fill-rule:nonzero;marker:none;enable-background:new"
+             style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;marker:none;enable-background:new"
              cx="267.51645"
              cy="1080.1205"
              transform="matrix(0.997591,0.069367,-0.070148,0.997537,76.412562,-15.896109)"
-             id="ellipse7" /></g></g><g
-         id="shape-3379d6d5-d382-80fe-8003-52dc653dcc16"
-         style="fill:#03a9f4;fill-opacity:1"><penpot:shape
+             id="ellipse7" />
+        </g>
+      </g>
+      <g
+         id="shape-3379d6d5-d382-80fe-8003-52dc653dcc16">
+        <penpot:shape
            penpot:name="path8194"
            penpot:type="circle"
            penpot:transform="matrix(0.997591, 0.069367, -0.070148, 0.997537, 0.000000, -0.000000)"
@@ -307,23 +406,35 @@
            penpot:center-x="294.1766686048942"
            penpot:center-y="1096.402167075743"
            penpot:constraints-h="scale"
-           penpot:constraints-v="scale"><penpot:svg-import
+           penpot:constraints-v="scale">
+          <penpot:svg-import
              penpot:svg-viewbox-x="287.0625"
              penpot:svg-viewbox-y="176.0625"
              penpot:svg-viewbox-width="3.9375"
              penpot:svg-attrs="style,id"
              penpot:svg-viewbox-height="3.9375"
-             penpot:svg-style="fill-rule:nonzero; color:#000000; overflow:visible; marker:none; display:inline; visibility:visible; enable-background:new" /><penpot:fills><penpot:fill
+             penpot:svg-style="fill-rule:nonzero; color:#000000; overflow:visible; marker:none; display:inline; visibility:visible; enable-background:new" />
+          <penpot:fills>
+            <penpot:fill
                penpot:fill-color="#ffffff"
-               penpot:fill-opacity="1" /></penpot:fills></penpot:shape><defs
-           id="defs8" /><g
+               penpot:fill-opacity="1" />
+          </penpot:fills>
+        </penpot:shape>
+        <defs
+           id="defs8" />
+        <g
            class="fills"
-           id="fills-3379d6d5-d382-80fe-8003-52dc653dcc16"
-           style="fill:#03a9f4;fill-opacity:1"><ellipse
+           id="fills-3379d6d5-d382-80fe-8003-52dc653dcc16">
+          <ellipse
              rx="8.2603073"
              ry="8.5458899"
-             style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#03a9f4;fill-opacity:1;fill-rule:nonzero;marker:none;enable-background:new"
+             style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;marker:none;enable-background:new"
              cx="294.17667"
              cy="1096.4022"
              transform="matrix(0.997591,0.069367,-0.070148,0.997537,77.618904,-17.705347)"
-             id="ellipse8" /></g></g></g></g></svg>
+             id="ellipse8" />
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
