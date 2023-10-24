@@ -30,6 +30,10 @@ DirectoryModelError.prototype.toPlainObject = function () {
     return Object.assign({}, { message: this.message, reason: this.reason }, this.details);
 };
 
+function insertFilenameModifier(filePath, extension, modifier) {
+    return filePath.substring(0, filePath.length-extension.length-1) + modifier + '.' + extension;
+}
+
 export function createDirectoryModel(origin) {
   return {
     name: 'DirectoryModel',
@@ -131,13 +135,16 @@ export function createDirectoryModel(origin) {
       // file may contain a file name or a file path + file name
       const relativefilePath = (file.webkitRelativePath ? file.webkitRelativePath : file.name);
 
+      // does not work with double extensions
+      const extension = relativefilePath.slice(relativefilePath.lastIndexOf('.') + 1)
+
       // find unique path
       let uniqueRelativeFilePath = sanitize(relativefilePath);
       while (true) {
         const exists = await this.exists(resource, uniqueRelativeFilePath);
         if (!exists) break;
 
-        uniqueRelativeFilePath = uniqueRelativeFilePath + '-new';
+        uniqueRelativeFilePath = insertFilenameModifier(uniqueRelativeFilePath, extension, '-new');
       }
 
       await superagent.post(`${origin}/api/v1/files`).withCredentials()
@@ -195,8 +202,10 @@ export function createDirectoryModel(origin) {
     async paste(resource, action, files) {
       // this will not overwrite but tries to find a new unique name to past to
       for (let f in files) {
+        console.log('pasting', files[f])
         let done = false;
         let targetPath = pathJoin(resource.resourcePath, files[f].name);
+        const extension = files[f].extension;
         while (!done) {
           const targetResource = parseResourcePath(targetPath);
           try {
@@ -205,7 +214,7 @@ export function createDirectoryModel(origin) {
             done = true;
           } catch (error) {
             if (error.reason === DirectoryModelError.CONFLICT) {
-              targetPath += '-copy';
+              targetPath = insertFilenameModifier(targetPath, extension, '-copy');
             } else {
               throw error;
             }
