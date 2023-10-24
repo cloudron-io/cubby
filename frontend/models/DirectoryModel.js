@@ -62,7 +62,7 @@ export function createDirectoryModel(origin) {
         child.modified = new Date(child.mtime);
         child.type = child.isDirectory ? 'directory' : 'file',
         child.icon = child.previewUrl;
-        child.resourcePath = `${resource.resourcePath}${child.fileName}`;
+        child.resourcePath = `${resource.resourcePath}/${child.fileName}`;
         child.resource = parseResourcePath(child.resourcePath);
         child.fullFileUrl = `${origin}/api/v1/files?path=${child.resourcePath}&type=raw`;
         child.downloadFileUrl = `${origin}/api/v1/files?path=${child.resourcePath}&type=download`;
