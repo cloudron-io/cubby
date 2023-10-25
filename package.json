@@ -29,7 +29,7 @@
     "safetydance": "^2.4.0",
     "session-file-store": "^1.5.0",
     "superagent": "^8.1.2",
-    "vue": "^3.3.6",
+    "vue": "^3.3.7",
     "webdav-server": "^2.6.2",
     "xmldom": "^0.6.0",
     "xpath": "0.0.33"
