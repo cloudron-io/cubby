@@ -23,7 +23,7 @@
       </div>
     </div>
     <div class="content">
-      <MainToolbar :breadCrumbs="breadCrumbs" :breadCrumbHome="breadCrumbHome" :selectedEntries="selectedEntries" :displayName="profile.displayName" :readonly="isReadonly()" @logout="onLogout" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @directory-up="onUp" @new-folder="onNewFolder" :on-delete="deleteHandler" :on-download="downloadHandler" @login="showLogin=true;" :on-web-dav-settings="onWebDavSettings"/>
+      <MainToolbar :breadCrumbs="breadCrumbs" :breadCrumbHome="breadCrumbHome" :selectedEntries="selectedEntries" :displayName="profile.displayName" :readonly="isReadonly()" @logout="onLogout(true)" @upload-file="onUploadFile" @upload-folder="onUploadFolder" @new-file="onNewFile" @directory-up="onUp" @new-folder="onNewFolder" :on-delete="deleteHandler" :on-download="downloadHandler" @login="showLogin=true;" :on-web-dav-settings="onWebDavSettings"/>
       <div class="container" style="overflow: hidden;">
         <div class="main-container-content">
           <Button class="p-button-rounded p-button-text side-bar-toggle" :icon="'pi ' + (previewPanelVisible ? 'pi-chevron-right' : 'pi-chevron-left')" @click="onTogglePreviewPanel" v-tooltip="previewPanelVisible ? 'Hide Preview' : 'Show Preview'"/>
@@ -378,7 +378,11 @@ export default {
 
         this.refresh();
       },
-      async onLogout() {
+      async onLogout(clearReturnTo = false) {
+        // stash for use later after re-login
+        if (clearReturnTo) localStorage.returnTo = '';
+        else localStorage.returnTo = window.location.hash.slice(1);
+
         await this.mainModel.logout();
 
         this.showLogin = true;
@@ -879,8 +883,9 @@ export default {
 
       this.directoryModel = createDirectoryModel(API_ORIGIN);
 
-      // initial load with hash if present
-      const hash = window.location.hash.slice(1);
+      // initial load with hash if any
+      const hash = localStorage.returnTo || window.location.hash.slice(1);
+      localStorage.returnTo = '';
 
       if (hash.indexOf('files/home/') === 0) await this.loadPath(hash.slice('files'.length));
       else if (hash.indexOf('files/recent/') === 0) await this.loadPath(hash.slice('files'.length));
