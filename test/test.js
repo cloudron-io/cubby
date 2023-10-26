@@ -56,12 +56,21 @@ describe('Application life cycle test', function () {
 
     async function login() {
         await browser.manage().deleteAllCookies();
-        await browser.get('https://' + app.fqdn);
-        await browser.sleep(2000);
-        await waitForElement(By.id('usernameInput'));
-        await browser.findElement(By.id('usernameInput')).sendKeys(USERNAME);
-        await browser.findElement(By.xpath('//div[@id="passwordInput"]/input')).sendKeys(PASSWORD);
+        await browser.get(`https://${app.fqdn}`);
+
+        await waitForElement(By.id('loginButton'));
         await browser.findElement(By.id('loginButton')).click();
+
+        // give some time to let UI settle for session detection
+        await browser.sleep(2000);
+
+        if (await browser.findElements(By.xpath('//input[@name="username"]')).then(found => !!found.length)) {
+            await waitForElement(By.xpath('//input[@name="username"]'));
+            await browser.findElement(By.xpath('//input[@name="username"]')).sendKeys(USERNAME);
+            await browser.findElement(By.xpath('//input[@name="password"]')).sendKeys(PASSWORD);
+            await browser.findElement(By.xpath('//button[@type="submit" and contains(text(), "Sign in")]')).click();
+        }
+
         await waitForElement(By.className('profile-actions'));
     }
 
