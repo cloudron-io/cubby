@@ -340,7 +340,7 @@ export default {
         currentPath: '/',
         currentResourcePath: '',
         currentShare: null,
-        previewPanelVisible: true,
+        previewPanelVisible: localStorage.previewPanelVisible === 'true',
         breadCrumbs: [],
         breadCrumbHome: {
           icon: 'pi pi-home',
@@ -530,6 +530,7 @@ export default {
       },
       onTogglePreviewPanel() {
         this.previewPanelVisible = !this.previewPanelVisible;
+        localStorage.previewPanelVisible = this.previewPanelVisible;
       },
       async onFileSaved(entry, content, done) {
         try {
