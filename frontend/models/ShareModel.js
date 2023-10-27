@@ -34,7 +34,7 @@ export function createShareModel(origin) {
       if (error || result.statusCode !== 200) throw new Error('Failed to delete share', { cause: error || result })
     },
     getLink(shareId) {
-      return `${origin}/api/v1/shares/${shareId}?type=raw`;
+      return `${window.location.origin}/api/v1/shares/${shareId}?type=raw`;
     }
   };
 }
